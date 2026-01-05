@@ -1,6 +1,7 @@
 {
   "name": "vapor-collector",
   "version": "0.0.0",
+  "type": "module",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -8,7 +9,8 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "devStart": "nodemon steam_auth.js",
-    "startFull": "concurrently \"npm run start\" \"npm run devStart\""
+    "startFull": "concurrently \"npm run start\" \"npm run devStart\"",
+    "lint": "ng lint"
   },
   "prettier": {
     "printWidth": 100,
@@ -47,11 +49,18 @@
     "@angular/build": "^21.0.4",
     "@angular/cli": "^21.0.4",
     "@angular/compiler-cli": "^21.0.0",
+    "@eslint/js": "^9.39.2",
+    "@stylistic/eslint-plugin": "^3.1.0",
+    "@stylistic/eslint-plugin-ts": "^4.4.1",
+    "angular-eslint": "21.1.0",
     "concurrently": "^9.2.1",
     "dotenv": "^17.2.3",
+    "eslint": "^9.39.1",
+    "globals": "^17.0.0",
     "jsdom": "^27.1.0",
     "nodemon": "^3.1.11",
     "typescript": "~5.9.2",
+    "typescript-eslint": "8.47.0",
     "vitest": "^4.0.8"
   }
 }

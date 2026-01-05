@@ -1,6 +1,6 @@
-import { Component, inject } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { SteamService } from '../../services/steam/steam-service';
+import { Component, inject } from '@angular/core'
+import { MatButtonModule } from '@angular/material/button'
+import { SteamService } from '../../services/steam/steam-service'
 
 @Component({
   selector: 'app-home',
@@ -8,7 +8,7 @@ import { SteamService } from '../../services/steam/steam-service';
     MatButtonModule
   ],
   templateUrl: './home.html',
-  styleUrl: './home.scss',
+  styleUrl: './home.scss'
 })
 export class Home {
   // Dependency Injections

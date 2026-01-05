@@ -1,13 +1,14 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { LocalStorageService } from '../../services/localStorage/local-storage-service';
-import { IUser } from '../../models/Steam';
-import { SteamService } from '../../services/steam/steam-service';
+import type { OnInit } from '@angular/core'
+import { Component, inject } from '@angular/core'
+import type { IUser } from '../../models/Steam'
+import { LocalStorageService } from '../../services/localStorage/local-storage-service'
+import { SteamService } from '../../services/steam/steam-service'
 
 @Component({
   selector: 'app-dashboard',
   imports: [],
   templateUrl: './dashboard.html',
-  styleUrl: './dashboard.scss',
+  styleUrl: './dashboard.scss'
 })
 export class Dashboard implements OnInit {
   // Dependency Injections
@@ -17,7 +18,7 @@ export class Dashboard implements OnInit {
   protected user: IUser
   protected name: string
 
-  public ngOnInit(): void {
+  public ngOnInit (): void {
     this.user = this.localStorage.getItem('user')
   }
 
