@@ -1,7 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { SteamService } from '../../services/steam/steam-service';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 
 @Component({
   selector: 'app-home',
@@ -17,8 +16,5 @@ export class Home {
 
   protected loginClicked = () => {
     this.steamService.login()
-      // .subscribe(response => {
-      //   console.log(response)
-      // })
   }
 }

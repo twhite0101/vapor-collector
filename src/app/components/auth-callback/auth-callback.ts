@@ -17,21 +17,23 @@ export class AuthCallback implements OnInit {
   private readonly router: Router = inject(Router)
 
   public ngOnInit(): void {
-  this.http.get<IsLoggenIn>('http://localhost:3000/api/user-status', { withCredentials: true }).subscribe(
-    response => {
-      if (response.loggedIn) {
-        // User is logged in, store user data in a shared service
-        // and redirect to the main application dashboard.
-        this.authService.setUser(response.user);
-        this.router.navigate(['/dashboard']);
-      } else {
-        // Not logged in, redirect to login page
+    this.http.get<IsLoggenIn>('http://localhost:3000/api/user-status', { withCredentials: true }).subscribe({
+      next: (response: IsLoggenIn) => {
+        if (response.loggedIn) {
+          // User is logged in, store user data in a shared service
+          // and redirect to the main application dashboard.
+          this.authService.setUser(response.user);
+          this.router.navigate(['/dashboard']);
+        } else {
+          // Not logged in, redirect to login page
+          this.authService.removeUser();
+          this.router.navigate(['/']);
+        }
+      },
+      error: (error) => {
+        console.error('Session check failed', error);
         this.router.navigate(['/']);
       }
-    },
-    error => {
-      console.error('Session check failed', error);
-      this.router.navigate(['/']);
     })
   }
 }

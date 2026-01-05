@@ -14,4 +14,8 @@ export class AuthService {
       this.localStorage.setItem('user', user)
     }
   }
+
+  public removeUser = () => {
+    this.localStorage.removeItem('user')
+  }
 }

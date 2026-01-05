@@ -23,11 +23,6 @@ app.use(session({
     }
 }))
 
-// // configure Express
-// app.set('views', __dirname + '/views');
-// app.set('view engine', 'angular');
-
-
 passport.serializeUser(function(user, done) {
     done(null, user);
 });
@@ -58,7 +53,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.get('/', function(req, res){
-    // res.send({ user: req.user })
     res.render('http://localhost:4200/', { user: res.user });
 });
 
@@ -68,12 +62,6 @@ app.get('/auth/steam',
 app.get('/auth/steam/return',
     passport.authenticate('steam', { failureRedirect: 'http://localhost:4200/' }),
     (req, res) => {
-        // const user = res.user
-        // const token = jwt.sign(user, 'secret_key', { expiresIn: '1h' });
-        // res.statusCode(200).json({
-        //     message: 'Login Successful!',
-        //     token: token
-        // });
         res.redirect('http://localhost:4200/auth-callback');
     }
 );
@@ -86,6 +74,13 @@ app.get('/api/user-status', (req, res) => {
         res.json({ loggedIn: false })
     }
 })
+
+app.get('/logout', function(req, res){
+  req.logout(function(err) {
+    if (err) { return next(err); }
+    res.redirect('http://localhost:4200/auth-callback');
+  });
+});
 
 function ensureAuthenticated(req, res, next) {
     if (req.isAuthenticated()) { return next(); }

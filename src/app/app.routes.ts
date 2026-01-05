@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { Home } from './components/home/home';
-import { AuthCallback } from './auth-callback/auth-callback/auth-callback';
-import { Dashboard } from './dashboard/dashboard/dashboard';
+import { AuthCallback } from './components/auth-callback/auth-callback';
+import { Dashboard } from './components/dashboard/dashboard';
 
 export const routes: Routes = [
     {
