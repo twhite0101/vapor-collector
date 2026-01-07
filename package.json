@@ -9,7 +9,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "devStart": "nodemon steam_auth.js",
-    "startFull": "concurrently \"npm run start\" \"npm run devStart\"",
+    "startFull": "concurrently \"npm run start\" \"cd api && npm run devStart\"",
     "lint": "ng lint"
   },
   "prettier": {
@@ -34,14 +34,7 @@
     "@angular/material": "^21.0.5",
     "@angular/platform-browser": "^21.0.0",
     "@angular/router": "^21.0.0",
-    "cors": "^2.8.5",
-    "ejc": "^1.0.0",
-    "express": "^5.2.1",
-    "express-jwt": "^8.5.1",
-    "express-session": "^1.18.2",
-    "jsonwebtoken": "^9.0.3",
-    "passport": "^0.7.0",
-    "passport-steam": "^1.0.18",
+    "concurrently": "^9.2.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
@@ -53,12 +46,9 @@
     "@stylistic/eslint-plugin": "^3.1.0",
     "@stylistic/eslint-plugin-ts": "^4.4.1",
     "angular-eslint": "21.1.0",
-    "concurrently": "^9.2.1",
-    "dotenv": "^17.2.3",
     "eslint": "^9.39.1",
     "globals": "^17.0.0",
     "jsdom": "^27.1.0",
-    "nodemon": "^3.1.11",
     "typescript": "~5.9.2",
     "typescript-eslint": "8.47.0",
     "vitest": "^4.0.8"

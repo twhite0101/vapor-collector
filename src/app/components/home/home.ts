@@ -1,3 +1,4 @@
+import { NgOptimizedImage } from '@angular/common'
 import { Component, inject } from '@angular/core'
 import { MatButtonModule } from '@angular/material/button'
 import { SteamService } from '../../services/steam/steam-service'
@@ -5,7 +6,8 @@ import { SteamService } from '../../services/steam/steam-service'
 @Component({
   selector: 'app-home',
   imports: [
-    MatButtonModule
+    MatButtonModule,
+    NgOptimizedImage
   ],
   templateUrl: './home.html',
   styleUrl: './home.scss'

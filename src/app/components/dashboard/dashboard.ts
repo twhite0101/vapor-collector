@@ -15,7 +15,7 @@ export class Dashboard implements OnInit {
   private readonly localStorage: LocalStorageService = inject(LocalStorageService)
   private readonly steamService: SteamService = inject(SteamService)
 
-  protected user: IUser
+  protected user: IUser | null
   protected name: string
 
   public ngOnInit (): void {

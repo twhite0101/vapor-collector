@@ -1,12 +1,20 @@
 const express = require('express');
-const app = express();
-const server = require('http').createServer(app);
-const session = require('express-session')
+const session = require('express-session');
+const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const passport = require('passport');
 const SteamStrategy = require('passport-steam').Strategy;
-require('dotenv').config()
+const User = require('./db/User');
+require('dotenv').config();
+
+let database;
+
+const app = express();
+const server = require('http').createServer(app);
+
+app.use(bodyParser.json());
 
 app.use(cors({
     origin: ['http://localhost:4200'],
@@ -14,14 +22,30 @@ app.use(cors({
 }));
 
 app.use(session({
-    secret: 'secret_key',
+    secret: process.env.SECRET_SESSION_KEY,
     resave: true,
     saveUninitialized: true,
     cookie: {
         maxAge: 600000,
         secure: process.env.NODE_ENV === 'production'
     }
-}))
+}));
+
+async function main() {
+    await mongoose.connect(process.env.LOCAL_DATABASE_URL);
+    console.log("Database connection done.");
+}
+
+main().then(() => {
+  database = mongoose.connection.db;
+
+  server.listen(3000, () => {
+      console.log('Backend listening on port 3000');
+  });
+}).catch((error) => {
+  console.log(error);
+  process.exit(1);
+});
 
 passport.serializeUser(function(user, done) {
     done(null, user);
@@ -29,7 +53,7 @@ passport.serializeUser(function(user, done) {
 
 passport.deserializeUser(function(obj, done) {
     done(null, obj)
-})
+});
 
 passport.use(new SteamStrategy({
         returnURL: 'http://localhost:3000/auth/steam/return',
@@ -61,7 +85,9 @@ app.get('/auth/steam',
 
 app.get('/auth/steam/return',
     passport.authenticate('steam', { failureRedirect: 'http://localhost:4200/' }),
-    (req, res) => {
+    async (req, res) => {
+        const user = new User(req.user);
+        await user.save().then(() => console.log('User saved'));
         res.redirect('http://localhost:4200/auth-callback');
     }
 );
@@ -73,7 +99,7 @@ app.get('/api/user-status', (req, res) => {
     else {
         res.json({ loggedIn: false })
     }
-})
+});
 
 app.get('/logout', function(req, res){
   req.logout(function(err) {
@@ -85,8 +111,10 @@ app.get('/logout', function(req, res){
 function ensureAuthenticated(req, res, next) {
     if (req.isAuthenticated()) { return next(); }
     res.redirect('/');
-}
+};
 
-server.listen(3000, () => {
-    console.log('Backend listening on port 3000');
-});
+// Errors handler.
+function manageError(res, reason, message, code) {
+    console.log("Error: " + reason);
+    res.status(code || 500).json({ "error": message });
+}
