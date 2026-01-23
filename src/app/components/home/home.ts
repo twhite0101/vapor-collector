@@ -1,7 +1,7 @@
 import { NgOptimizedImage } from '@angular/common'
 import { Component, inject } from '@angular/core'
 import { MatButtonModule } from '@angular/material/button'
-import { SteamService } from '../../services/steam/steam-service'
+import { AuthService } from '../../services/auth/auth-service'
 
 @Component({
   selector: 'app-home',
@@ -14,9 +14,9 @@ import { SteamService } from '../../services/steam/steam-service'
 })
 export class Home {
   // Dependency Injections
-  private readonly steamService: SteamService = inject(SteamService)
+  private readonly authService: AuthService = inject(AuthService)
 
   protected loginClicked = () => {
-    this.steamService.login()
+    this.authService.login()
   }
 }

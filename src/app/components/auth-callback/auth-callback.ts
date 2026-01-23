@@ -1,8 +1,6 @@
-import { HttpClient } from '@angular/common/http'
 import type { OnInit } from '@angular/core'
 import { Component, inject } from '@angular/core'
-import { Router } from '@angular/router'
-import type { IsLoggedIn } from '../../models/Steam'
+import { ActivatedRoute, Router } from '@angular/router'
 import { AuthService } from '../../services/auth/auth-service'
 
 @Component({
@@ -13,29 +11,42 @@ import { AuthService } from '../../services/auth/auth-service'
 })
 export class AuthCallback implements OnInit {
   // Dependency Injections
-  private readonly http: HttpClient = inject(HttpClient)
-  private readonly authService: AuthService = inject(AuthService)
   private readonly router: Router = inject(Router)
+  private readonly authService: AuthService = inject(AuthService)
+  private activatedRoute: ActivatedRoute = inject(ActivatedRoute)
 
   public ngOnInit (): void {
-    this.http.get<IsLoggedIn>('http://localhost:3000/api/user-status', { withCredentials: true }).subscribe({
-      next: (response: IsLoggedIn) => {
-        if (response.loggedIn) {
-          // User is logged in, store user data in a shared service
-          // and redirect to the main application dashboard.
-          this.authService.setUser(response.user)
-          this.router.navigate(['/dashboard'])
-        }
-        else {
-          // Not logged in, redirect to login page
-          this.authService.removeUser()
-          this.router.navigate(['/'])
-        }
-      },
-      error: (error) => {
-        console.error('Session check failed', error)
-        this.router.navigate(['/'])
+    const lg = this.activatedRoute.snapshot.queryParamMap.get('lg')
+    if (lg !== null) {
+      this.authService.setLoggedInStatus(lg)
+      if (this.authService.getLoggedInStatus()) {
+        this.authService.retrieveUser()
+        this.router.navigate(['/dashboard'])
       }
-    })
+      else {
+        this.authService.setUser(null)
+        this.router.navigate(['/login'])
+      }
+    }
+    else {
+      this.authService.isRefreshTokenValid()
+        .subscribe({
+          next: (response) => {
+            if (!response) {
+              this.router.navigate(['/login'])
+            }
+            else {
+              this.authService.setLoggedInStatus('true')
+              this.authService.retrieveUser()
+              this.router.navigate(['/dashboard'])
+            }
+          },
+          error: (err) => {
+            console.error(err)
+            this.authService.setUser(null)
+            this.router.navigate(['/login'])
+          }
+        })
+    }
   }
 }

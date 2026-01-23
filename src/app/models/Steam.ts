@@ -1,8 +1,3 @@
-export interface IsLoggedIn {
-  loggedIn: boolean;
-  user: IUser;
-}
-
 export interface IUser {
   provider: string;
   _json: {
@@ -37,4 +32,12 @@ export interface IUser {
     }
   ];
   identifier: string;
+}
+
+export interface IStatus {
+  lg: string;
+}
+
+export interface IUserRequestResponse {
+  user: IUser;
 }

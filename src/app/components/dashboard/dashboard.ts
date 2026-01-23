@@ -1,8 +1,7 @@
-import type { OnInit } from '@angular/core'
-import { Component, inject } from '@angular/core'
+import type { OnInit, WritableSignal } from '@angular/core'
+import { Component, inject, signal } from '@angular/core'
 import type { IUser } from '../../models/Steam'
-import { LocalStorageService } from '../../services/localStorage/local-storage-service'
-import { SteamService } from '../../services/steam/steam-service'
+import { AuthService } from '../../services/auth/auth-service'
 
 @Component({
   selector: 'app-dashboard',
@@ -12,17 +11,40 @@ import { SteamService } from '../../services/steam/steam-service'
 })
 export class Dashboard implements OnInit {
   // Dependency Injections
-  private readonly localStorage: LocalStorageService = inject(LocalStorageService)
-  private readonly steamService: SteamService = inject(SteamService)
+  protected readonly authService: AuthService = inject(AuthService)
 
   protected user: IUser | null
   protected name: string
 
+  private _hasUser: WritableSignal<boolean> = signal(false)
+
   public ngOnInit (): void {
-    this.user = this.localStorage.getItem('user')
+    if (!this.authService.user) {
+      this.requestUser()
+    }
+    else {
+      this.user = this.authService.user
+      this._hasUser.set(true)
+    }
   }
 
   protected logOutClicked = () => {
-    this.steamService.logout()
+    this._hasUser.set(false)
+    this.authService.logout()
+  }
+
+  private requestUser = async () => {
+    const requestedUser = await this.authService.retrieveUser()
+    if (requestedUser) {
+      this.authService.setUser(requestedUser.user)
+      if (this.authService.user) {
+        this.user = this.authService.user
+        this._hasUser.set(true)
+      }
+    }
+  }
+
+  protected get hasUser () {
+    return this._hasUser()
   }
 }

@@ -1,2 +1,4 @@
-<div>Welcome, {{this.user?.displayName}}</div>
+@if (hasUser) {
+  <div>Welcome, {{ user?.displayName }}</div>
+}
 <button type="button" (click)="logOutClicked()">Logout</button>
