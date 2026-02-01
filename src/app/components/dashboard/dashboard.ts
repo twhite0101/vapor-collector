@@ -1,7 +1,8 @@
 import type { OnInit, WritableSignal } from '@angular/core'
 import { Component, inject, signal } from '@angular/core'
-import type { IUser } from '../../models/Steam'
+import type { IUser, IUserGameInfo } from '../../models/Steam'
 import { AuthService } from '../../services/auth/auth-service'
+import { SteamService } from '../../services/steam/data/steam-service'
 
 @Component({
   selector: 'app-dashboard',
@@ -12,9 +13,11 @@ import { AuthService } from '../../services/auth/auth-service'
 export class Dashboard implements OnInit {
   // Dependency Injections
   protected readonly authService: AuthService = inject(AuthService)
+  private readonly steamService: SteamService = inject(SteamService)
 
   protected user: IUser | null
   protected name: string
+  private games: IUserGameInfo[]
 
   private _hasUser: WritableSignal<boolean> = signal(false)
 
@@ -24,6 +27,7 @@ export class Dashboard implements OnInit {
     }
     else {
       this.user = this.authService.user
+      this.getGames()
       this._hasUser.set(true)
     }
   }
@@ -39,6 +43,7 @@ export class Dashboard implements OnInit {
       this.authService.setUser(requestedUser.user)
       if (this.authService.user) {
         this.user = this.authService.user
+        this.getGames()
         this._hasUser.set(true)
       }
     }
@@ -46,5 +51,13 @@ export class Dashboard implements OnInit {
 
   protected get hasUser () {
     return this._hasUser()
+  }
+
+  private getGames = async () => {
+    const response = await this.steamService.getOwnedGames()
+    if (response) {
+      this.games = response.games
+      console.log(this.games)
+    }
   }
 }

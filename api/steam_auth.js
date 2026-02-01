@@ -3,7 +3,8 @@ const session = require('express-session');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
-const cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
+const axios = require('axios');
 const cors = require('cors');
 const passport = require('passport');
 const SteamStrategy = require('passport-steam').Strategy;
@@ -111,6 +112,7 @@ function(identifier, profile, done) {
 app.use(passport.initialize());
 app.use(passport.session());
 
+// AUTH
 app.get('/auth/steam',
     passport.authenticate('steam', { failureRedirect: 'http://localhost:4200/' }));
 
@@ -127,19 +129,6 @@ app.get('/auth/steam/return',
       res.cookie('refresh', user.refreshToken, { httpOnly: true });
       res.redirect('http://localhost:4200/?lg=true');
     })(req, res, next)
-  });
-
-app.get('/auth/user', ensureAuthenticated, (req, res) => {
-    const token = req.cookies.access;
-    try {
-        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_KEY);
-        res.json({ user: decoded.user });
-        return;
-    } catch (err) {
-        // Token is invalid or expired
-        res.statusCode(401).json('Unauthorized user');
-        return;
-    }
   });
 
 app.get('/auth/refresh-token-valid', ensureAuthenticated, (req, res) => {
@@ -160,6 +149,38 @@ app.get('/logout', function(req, res){
   });
 });
 
+// GET
+app.get('/auth/user', ensureAuthenticated, (req, res) => {
+    const token = req.cookies.access;
+    try {
+        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_KEY);
+        res.json({ user: decoded.user });
+        return;
+    } catch (err) {
+        // Token is invalid or expired
+        res.statusCode(401).json('Unauthorized user');
+        return;
+    }
+  });
+
+app.get('/user/getGameLibrary', ensureAuthenticated, (req, res) => {
+  const token = req.cookies.access;
+  const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_KEY)
+  if (!decoded) {
+    res.statusCode(401).json('Unauthorized user');
+  }
+  const user = decoded.user
+  axios
+    .get(`https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${process.env.STEAM_API_KEY}&steamid=${user.id}&format=json&include_played_free_games=1&include_appinfo=1`)
+    .then(response => {
+      res.send(response.data.response)
+    })
+    .catch(err => {
+      console.error(err)
+    })
+})
+
+// MIDDLEWARE
 function ensureAuthenticated(req, res, next) {
     if (req.cookies && req.cookies.access && req.cookies.refresh) { return next(); }
     res.redirect('/');
