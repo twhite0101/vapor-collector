@@ -14,6 +14,17 @@ export class SteamService {
 
   public getOwnedGames = async () => {
     const response = await firstValueFrom(this.http.get<IUserGamesLibraryResponse>(this.apiUrl + '/user/getGameLibrary', { withCredentials: true }))
-    return response
+    const library = this.calculateHoursPlayed(response)
+    return library
+  }
+
+  protected calculateHoursPlayed = (library: IUserGamesLibraryResponse): IUserGamesLibraryResponse => {
+    library.games.forEach(game => {
+      game.playtime_forever = isNaN(game.playtime_forever) ? 0 : Math.round(((game.playtime_forever / 60) + Number.EPSILON) * 100) / 100
+      game.playtime_2weeks = isNaN(game.playtime_2weeks) ? 0 : Math.round(((game.playtime_2weeks / 60) + Number.EPSILON) * 100) / 100
+      game.playtime_deck_forever = isNaN(game.playtime_deck_forever) ? 0 : Math.round(((game.playtime_deck_forever / 60) + Number.EPSILON) * 100) / 100
+    })
+
+    return library
   }
 }

@@ -171,7 +171,7 @@ app.get('/user/getGameLibrary', ensureAuthenticated, (req, res) => {
   }
   const user = decoded.user
   axios
-    .get(`https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${process.env.STEAM_API_KEY}&steamid=${user.id}&format=json&include_played_free_games=1&include_appinfo=1`)
+    .get(`https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${process.env.STEAM_API_KEY}&steamid=${user.id}&format=json&include_played_free_games=1&include_appinfo=1&include_extended_appinfo=1`)
     .then(response => {
       res.send(response.data.response)
     })

@@ -49,7 +49,11 @@ export interface IUserGamesLibraryResponse {
 
 export interface IUserGameInfo {
   appid: number;
+  capsule_filename: string;
   content_descriptorids: number[];
+  has_dlc: boolean;
+  has_market: boolean;
+  has_workshop: boolean;
   img_icon_url: string;
   name: string;
   playtime_2weeks: number;
