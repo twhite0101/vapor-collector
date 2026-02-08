@@ -68,7 +68,7 @@ export class AuthService {
     return !!this.getLoggedInStatus()
   }
 
-  public isRefreshTokenValid = (): Observable<boolean> => {
-    return this.http.get<boolean>(this.apiUrl + '/auth/refresh-token-valid', { withCredentials: true })
+  public isTokenValid = (): Observable<boolean> => {
+    return this.http.get<boolean>(this.apiUrl + '/auth/token-valid', { withCredentials: true })
   }
 }

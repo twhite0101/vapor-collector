@@ -23,8 +23,7 @@ const userSchema = new mongoose.Schema({
   id: String,
   displayName: String,
   photos: [{ value: String }],
-  identifier: String,
-  refreshToken: String
+  identifier: String
 });
 
 module.exports = mongoose.model('User', userSchema);

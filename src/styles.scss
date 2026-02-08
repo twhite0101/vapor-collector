@@ -1,3 +1,37 @@
 .mat-expansion-panel-body {
   padding: 0px !important;
 }
+
+.mat-expansion-panel-body
+.mat-mdc-form-field {
+  --mat-mdc-form-field-floating-label-scale: 1;
+}
+
+.games-input-field
+.mat-mdc-text-field-wrapper {
+  max-height: 25px;
+}
+
+.games-input-field
+.mdc-text-field--outlined .mat-mdc-form-field-infix {
+  padding-top: 7px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  font-size: 75%;
+}
+
+.games-input-field
+.mat-mdc-text-field-wrapper
+.mat-mdc-form-field-flex
+.mat-mdc-floating-label {
+  top: calc(var(--mat-form-field-container-height, 25px) / 2);
+  font-size: 75%;
+}
+
+.mat-expansion-panel-body
+.mat-mdc-text-field-wrapper.mdc-text-field--outlined .mdc-notched-outline--upgraded .mdc-floating-label--float-above {
+  --mat-mdc-form-field-label-transform: translateY(calc(calc(6.75px + var(--mat-form-field-container-height, 25px) / 2) * -1)) scale(var(--mat-mdc-form-field-floating-label-scale, 0.75));
+  transform: var(--mat-mdc-form-field-label-transform);
+  font-size: 80%;
+}

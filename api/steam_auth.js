@@ -27,11 +27,7 @@ app.use(cors({
 app.use(session({
     secret: process.env.SECRET_SESSION_KEY,
     resave: true,
-    saveUninitialized: true,
-    cookie: {
-        maxAge: 600000,
-        secure: process.env.NODE_ENV === 'production'
-    }
+    saveUninitialized: true
 }));
 
 async function main() {
@@ -71,39 +67,17 @@ function(identifier, profile, done) {
         }
 
         if (user) {
-          if (user.refreshToken){
-            return done(null, user);
-          }
-          else {
-            const payload = {
-              user: user
-            };
-            const secretKey = process.env.REFRESH_TOKEN_SECRET;
-            const options = { expiresIn: process.env.REFRESH_TOKEN_EXP };
-
-            const refreshToken = jwt.sign(payload, secretKey, options);
-            user.refreshToken = refreshToken;
-            return done(null, user);
-          }
+          console.log('User found in DB');
+          return done(null, user);
         }
         else {
-          console.log('New User recorded to DB');
           const payload = {
             user: profile
           };
-          const secretKey = process.env.REFRESH_TOKEN_SECRET;
-          const options = { expiresIn: process.env.REFRESH_TOKEN_EXP };
-
-          const refreshToken = jwt.sign(payload, secretKey, options);
           let newUser = new User(profile);
-          newUser.refreshToken = refreshToken;
           newUser.save()
-            .then(err => {
-              if (err) {
-                return done(err);
-              }
-              return done(null, newUser);
-            })
+          console.log('New User recorded to DB');
+          return done(null, newUser);
         }
       })
     }
@@ -123,16 +97,15 @@ app.get('/auth/steam/return',
         user: user
       };
       const secretKey = process.env.ACCESS_TOKEN_KEY;
-      const options = { expiresIn: process.env.ACCESS_KEY_EXP };
+      const options = { expiresIn: 2 * 60 * 60 * 1000 };
       const accessToken = jwt.sign(payload, secretKey, options);
-      res.cookie('access', accessToken, { httpOnly: true });
-      res.cookie('refresh', user.refreshToken, { httpOnly: true });
+      res.cookie('access', accessToken, { maxAge: 2 * 60 * 60 * 1000, httpOnly: true });
       res.redirect('http://localhost:4200/?lg=true');
     })(req, res, next)
   });
 
-app.get('/auth/refresh-token-valid', ensureAuthenticated, (req, res) => {
-    if (req.cookies.refresh){
+app.get('/auth/token-valid', ensureAuthenticated, (req, res) => {
+    if (req.cookies.access){
       res.json(true)
     }
     else {
@@ -182,6 +155,6 @@ app.get('/user/getGameLibrary', ensureAuthenticated, (req, res) => {
 
 // MIDDLEWARE
 function ensureAuthenticated(req, res, next) {
-    if (req.cookies && req.cookies.access && req.cookies.refresh) { return next(); }
+    if (req.cookies && req.cookies.access) { return next(); }
     res.redirect('/');
 };

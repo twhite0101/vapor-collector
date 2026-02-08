@@ -1,0 +1,83 @@
+.login-btn-cont {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  height: 40px;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.library-panel {
+  width: 250px;
+  position: absolute;
+  left: 50%;
+}
+
+.games-scroll {
+  width: 250px;
+  height: 40vh;
+  border: 1px solid black;
+}
+
+.panel-body {
+  padding: 0px;
+}
+
+.game-cards-cont {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.game-card {
+  display: flex;
+  flex-direction: row;
+  width: 230px;
+  height: 53.75px;
+}
+
+.mat-mdc-card-content:first-child {
+  padding: 0px;
+}
+
+.mat-mdc-card-content:last-child {
+  padding: 0px;
+}
+
+.details-header {
+  font-size: 12px;
+}
+
+.details-text {
+  font-size: 10px;
+}
+
+.games-input-field {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.games-header-desc {
+  font-size: medium;
+}

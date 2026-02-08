@@ -16,6 +16,7 @@ export class AuthCallback implements OnInit {
   private activatedRoute: ActivatedRoute = inject(ActivatedRoute)
 
   public ngOnInit (): void {
+    // debugger
     const lg = this.activatedRoute.snapshot.queryParamMap.get('lg')
     if (lg !== null) {
       this.authService.setLoggedInStatus(lg)
@@ -29,7 +30,7 @@ export class AuthCallback implements OnInit {
       }
     }
     else {
-      this.authService.isRefreshTokenValid()
+      this.authService.isTokenValid()
         .subscribe({
           next: (response) => {
             if (!response) {
