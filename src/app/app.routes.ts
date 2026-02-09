@@ -1,7 +1,7 @@
 import type { Routes } from '@angular/router'
 import { AuthCallback } from './components/auth-callback/auth-callback'
 import { Dashboard } from './components/dashboard/dashboard'
-import { Home } from './components/home/home'
+import { Login } from './components/login/login'
 import { authGuard } from './guards/auth/auth-guard'
 
 export const routes: Routes = [
@@ -11,7 +11,7 @@ export const routes: Routes = [
   },
   {
     path: 'login',
-    component: Home
+    component: Login
   },
   {
     path: 'dashboard',
