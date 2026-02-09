@@ -6,5 +6,6 @@
       <div [ngClass]="`fi fi-${countryCode}`"></div>
     </div>
     <div>Last Login: {{ user.lastLogoff | date: 'medium' }}</div>
+    <app-steam-level [level]="user.playerLevel.playerLevel" [size]="64" />
   </div>
 }

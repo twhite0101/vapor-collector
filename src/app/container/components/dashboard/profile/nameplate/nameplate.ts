@@ -3,13 +3,15 @@ import type { OnInit } from '@angular/core'
 import { Component, inject, Input } from '@angular/core'
 import type { IUser } from '../../../../../models/Steam'
 import { AuthService } from '../../../../../services/auth/auth-service'
+import { SteamLevel } from '../../../shared/steam-level/steam-level'
 
 @Component({
   selector: 'app-nameplate',
   imports: [
     NgOptimizedImage,
     DatePipe,
-    NgClass
+    NgClass,
+    SteamLevel
   ],
   templateUrl: './nameplate.html',
   styleUrl: './nameplate.scss'

@@ -146,3 +146,14 @@ export interface IUserGameInfo {
   playtimeWindowsForever: number;
   rTimeLastPlayed: number;
 }
+
+export interface ISteamLevelIcon {
+  level: number;
+  size?: number;
+  fontSize: string;
+  height: string;
+  width: string;
+  lineHeight: string;
+  backgroundSize: string;
+  backgroundPosition: string;
+}
