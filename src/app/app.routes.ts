@@ -1,7 +1,8 @@
 import type { Routes } from '@angular/router'
-import { AuthCallback } from './components/auth-callback/auth-callback'
-import { Dashboard } from './components/dashboard/dashboard'
-import { Login } from './components/login/login'
+import { AuthCallback } from './auth-callback/auth-callback'
+import { AppContainer } from './container/components/app-container/app-container'
+import { Dashboard } from './container/components/dashboard/dashboard'
+import { Login } from './container/components/login/login'
 import { authGuard } from './guards/auth/auth-guard'
 
 export const routes: Routes = [
@@ -10,12 +11,18 @@ export const routes: Routes = [
     component: AuthCallback
   },
   {
-    path: 'login',
-    component: Login
-  },
-  {
-    path: 'dashboard',
-    component: Dashboard,
-    canActivate: [authGuard]
+    path: 'home',
+    component: AppContainer,
+    children: [
+      {
+        path: 'login',
+        component: Login
+      },
+      {
+        path: 'dashboard',
+        component: Dashboard,
+        canActivate: [authGuard]
+      }
+    ]
   }
 ]

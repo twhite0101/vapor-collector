@@ -1,7 +1,7 @@
 import { ScrollingModule } from '@angular/cdk/scrolling'
 import { NgOptimizedImage } from '@angular/common'
-import type { OnInit, WritableSignal } from '@angular/core'
-import { Component, inject, signal } from '@angular/core'
+import type { OnInit } from '@angular/core'
+import { Component, inject } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import type { FormControl } from '@angular/forms'
 import { NonNullableFormBuilder, ReactiveFormsModule } from '@angular/forms'
@@ -10,9 +10,9 @@ import { MatCardModule } from '@angular/material/card'
 import { MatExpansionModule } from '@angular/material/expansion'
 import { MatFormFieldModule } from '@angular/material/form-field'
 import { MatInputModule } from '@angular/material/input'
-import type { IUser, IUserGameInfo, IUserGamesLibraryResponse } from '../../../models/Steam'
-import { AuthService } from '../../../services/auth/auth-service'
-import { SteamService } from '../../../services/steam/data/steam-service'
+import type { IUser, IUserGameInfo } from '../../../../models/Steam'
+import { AuthService } from '../../../../services/auth/auth-service'
+import { SteamService } from '../../../../services/steam/data/steam-service'
 
 @Component({
   selector: 'app-header',
@@ -37,13 +37,10 @@ export class Header implements OnInit {
 
   protected user: IUser | null
   protected name: string
-  protected library: IUserGamesLibraryResponse
+  protected _allGames: IUserGameInfo[]
   protected filteredLibrary: IUserGameInfo[] = []
 
   protected filterLibraryControl: FormControl<string> = this.fb.control<string>('')
-
-  private _hasUser: WritableSignal<boolean> = signal(false)
-  private _hasLibrary: WritableSignal<boolean> = signal(false)
 
   public constructor () {
     this.filterLibraryControl.valueChanges
@@ -54,13 +51,11 @@ export class Header implements OnInit {
   }
 
   public ngOnInit (): void {
-    if (!this.authService.user) {
-      this.requestUser()
-    }
-    else {
+    if (this.authService.hasUser) {
       this.user = this.authService.user
-      this.getGames()
-      this._hasUser.set(true)
+      if (this.user) {
+        this.filteredLibrary.push(...this.user.gameLibrary)
+      }
     }
   }
 
@@ -69,55 +64,16 @@ export class Header implements OnInit {
   }
 
   protected logOutClicked = () => {
-    this._hasUser.set(false)
-    this._hasLibrary.set(false)
     this.authService.logout()
-  }
-
-  private requestUser = async () => {
-    const requestedUser = await this.authService.retrieveUser()
-    if (requestedUser) {
-      this.authService.setUser(requestedUser.user)
-      if (this.authService.user) {
-        this.user = this.authService.user
-        this.getGames()
-        this._hasUser.set(true)
-      }
-    }
-  }
-
-  protected get hasUser () {
-    return this._hasUser()
-  }
-
-  protected get hasLibrary () {
-    return this._hasLibrary()
-  }
-
-  private getGames = async () => {
-    const response = await this.steamService.getOwnedGames()
-    if (response) {
-      this.library = response
-      this.filteredLibrary.push(...this.library.games)
-      this._hasLibrary.set(true)
-    }
-  }
-
-  protected calculateHoursPlayed = (minutesPlayed: number): number => {
-    if (minutesPlayed === 0) {
-      return 0
-    }
-
-    return minutesPlayed / 60
   }
 
   protected filterGames = (value: string): IUserGameInfo[] => {
     const filterValue = value.toLowerCase()
 
     if (value?.length) {
-      return this.library.games.filter(game => game.name.toLowerCase().includes(filterValue))
+      return (this.user as IUser).gameLibrary.filter(game => game.name.toLowerCase().includes(filterValue))
     }
 
-    return this.library.games
+    return (this.user as IUser).gameLibrary
   }
 }

@@ -104,7 +104,7 @@ app.get('/auth/steam/return',
     })(req, res, next)
   });
 
-app.get('/auth/token-valid', ensureAuthenticated, (req, res) => {
+app.get('/auth/token-valid', (req, res) => {
     if (req.cookies.access){
       res.json(true)
     }
@@ -127,7 +127,7 @@ app.get('/auth/user', ensureAuthenticated, (req, res) => {
     const token = req.cookies.access;
     try {
         const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_KEY);
-        res.json({ user: decoded.user });
+        res.json({ response: decoded.user });
         return;
     } catch (err) {
         // Token is invalid or expired
@@ -145,6 +145,23 @@ app.get('/user/getGameLibrary', ensureAuthenticated, (req, res) => {
   const user = decoded.user
   axios
     .get(`https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${process.env.STEAM_API_KEY}&steamid=${user.id}&format=json&include_played_free_games=1&include_appinfo=1&include_extended_appinfo=1`)
+    .then(response => {
+      res.send(response.data.response)
+    })
+    .catch(err => {
+      console.error(err)
+    })
+})
+
+app.get('/user/getUserBadges', ensureAuthenticated, (req, res) => {
+  const token = req.cookies.access;
+  const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_KEY)
+  if (!decoded) {
+    res.statusCode(401).json('Unauthorized user');
+  }
+  const user = decoded.user
+  axios
+    .get(`https://api.steampowered.com/IPlayerService/GetBadges/v1/?key=${process.env.STEAM_API_KEY}&steamid=${user.id}`)
     .then(response => {
       res.send(response.data.response)
     })

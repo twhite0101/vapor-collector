@@ -1,7 +1,7 @@
 import type { OnInit } from '@angular/core'
 import { Component, inject } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
-import { AuthService } from '../../services/auth/auth-service'
+import { AuthService } from '../services/auth/auth-service'
 
 @Component({
   selector: 'app-auth-callback',
@@ -16,17 +16,17 @@ export class AuthCallback implements OnInit {
   private activatedRoute: ActivatedRoute = inject(ActivatedRoute)
 
   public ngOnInit (): void {
-    // debugger
     const lg = this.activatedRoute.snapshot.queryParamMap.get('lg')
     if (lg !== null) {
       this.authService.setLoggedInStatus(lg)
       if (this.authService.getLoggedInStatus()) {
-        this.authService.retrieveUser()
-        this.router.navigate(['/dashboard'])
+        this.authService.initializeUser()
       }
       else {
         this.authService.setUser(null)
-        this.router.navigate(['/login'])
+        this.authService.setHasLibrary(false)
+        this.authService.setHasBadges(false)
+        this.router.navigate(['/home/login'])
       }
     }
     else {
@@ -34,18 +34,19 @@ export class AuthCallback implements OnInit {
         .subscribe({
           next: (response) => {
             if (!response) {
-              this.router.navigate(['/login'])
+              this.router.navigate(['/home/login'])
             }
             else {
               this.authService.setLoggedInStatus('true')
-              this.authService.retrieveUser()
-              this.router.navigate(['/dashboard'])
+              this.authService.initializeUser()
             }
           },
           error: (err) => {
             console.error(err)
             this.authService.setUser(null)
-            this.router.navigate(['/login'])
+            this.authService.setHasLibrary(false)
+            this.authService.setHasBadges(false)
+            this.router.navigate(['/home/login'])
           }
         })
     }

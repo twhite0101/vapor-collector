@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http'
 import { inject, Injectable } from '@angular/core'
 import { firstValueFrom } from 'rxjs'
-import type { IUserGamesLibraryResponse } from '../../../models/Steam'
+import type { IGetBadgesResponse, IUserGamesLibraryResponse } from '../../../models/Steam'
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +16,11 @@ export class SteamService {
     const response = await firstValueFrom(this.http.get<IUserGamesLibraryResponse>(this.apiUrl + '/user/getGameLibrary', { withCredentials: true }))
     const library = this.calculateHoursPlayed(response)
     return library
+  }
+
+  public getUserBadges = async () => {
+    const response = await firstValueFrom(this.http.get<IGetBadgesResponse>(this.apiUrl + '/user/getUserBadges', { withCredentials: true }))
+    return response
   }
 
   protected calculateHoursPlayed = (library: IUserGamesLibraryResponse): IUserGamesLibraryResponse => {
