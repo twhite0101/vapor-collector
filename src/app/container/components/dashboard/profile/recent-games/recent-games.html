@@ -1,0 +1,31 @@
+<div class="recent-games-cont">
+  <h4>Recently Played Games</h4>
+  <div class="game-cards-cont">
+    @for (game of recentlyPlayedGames; track game.name) {
+      <mat-card class="recent-game-card" appearance="outlined">
+        <mat-card-content class="recent-game-card-content">
+          <div>
+            <img mat-card-image height="150" width="100" sizes="(max-width: 900px) 7vw, 14vw" [alt]="`Steam library photo for ${game.name}`" [ngSrc]="`https://steamcdn-a.akamaihd.net/steam/apps/${game.appId}/library_600x900_2x.jpg`">
+          </div>
+          <div class="game-info">
+            <h4>{{ game.name }}</h4>
+            <div class="game-hours">
+              <div class="hour-cont">
+                <h4 class="hour-title">Total: </h4>
+                <h4 class="hour-value">{{ game.playtimeForever }} hrs on record</h4>
+              </div>
+              <div class="hour-cont">
+                <h4 class="hour-title">Two Weeks: </h4>
+                <h4 class="hour-value">{{ game.playtime2Weeks }} hrs on record</h4>
+              </div>
+              <div class="hour-cont">
+                <h4 class="hour-title">Steam Deck: </h4>
+                <h4 class="hour-value">{{ game.playtimeDeckForever }} hrs on record</h4>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+</div>

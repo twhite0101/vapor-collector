@@ -5,7 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { Router } from '@angular/router'
 import type { Observable } from 'rxjs'
 import { firstValueFrom, forkJoin } from 'rxjs'
-import type { IBadge, IGetBadgesResponse, IGetBadgesResponseArray, ILoginResponse, ILoginResponseUser, IUser, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse } from '../../models/Steam'
+import type { IBadge, IGetBadgesResponse, IGetBadgesResponseArray, IGetRecentlyPlayedGamesResponse, IGetRecentlyPlayedGamesResponseInfo, ILoginResponse, ILoginResponseUser, IRecentlyPlayedGame, IUser, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse } from '../../models/Steam'
 import { SteamService } from '../steam/data/steam-service'
 
 @Injectable({
@@ -65,7 +65,7 @@ export class AuthService {
     return response
   }
 
-  public getUserInfo = (): Observable<[ILoginResponse, IUserGamesLibraryResponse, IGetBadgesResponse]> => {
+  public getUserInfo = (): Observable<[ILoginResponse, IUserGamesLibraryResponse, IGetBadgesResponse, IGetRecentlyPlayedGamesResponse]> => {
     // Get user info
     const user = this.retrieveUser()
 
@@ -75,16 +75,19 @@ export class AuthService {
     // Get user's badge and account level info
     const badges = this.steamService.getUserBadges()
 
+    // Get user's recently played games info
+    const recentlyPlayedGames = this.steamService.getRecentlyPlayedGames()
+
     // Return array of observables of requests as a fork join
-    return forkJoin([user, library, badges])
+    return forkJoin([user, library, badges, recentlyPlayedGames])
   }
 
   public initializeUser = () => {
     this.getUserInfo()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: ([user, library, badges]) => {
-          const returnedData = this.mapAuthResponseToUser(user.response, library, badges)
+        next: ([user, library, badges, recentlyPlayedGames]) => {
+          const returnedData = this.mapAuthResponseToUser(user.response, library, badges, recentlyPlayedGames)
           this._user.set(returnedData)
           this._hasUser.set(true)
           this._hasLibrary.set(true)
@@ -141,7 +144,7 @@ export class AuthService {
     return !!this.getLoggedInStatus()
   }
 
-  public mapAuthResponseToUser = (user: ILoginResponseUser, library: IUserGamesLibraryResponse, badges: IGetBadgesResponse): IUser => {
+  public mapAuthResponseToUser = (user: ILoginResponseUser, library: IUserGamesLibraryResponse, badges: IGetBadgesResponse, recentlyPlayedGames: IGetRecentlyPlayedGamesResponse): IUser => {
     const returnedUser: IUser = {
       identifier: user.identifier,
       steamId: user._json.steamid,
@@ -171,7 +174,8 @@ export class AuthService {
         playerXpNeededCurrentLevel: badges.player_xp_needed_current_level
       },
       gameLibrary: this.mapGameLibraryResponse(library.games),
-      gameCount: library.game_count
+      gameCount: library.game_count,
+      recentlyPlayedGames: this.mapRecentlyPlayedGamesResponse(recentlyPlayedGames.games)
     }
 
     return returnedUser
@@ -209,6 +213,23 @@ export class AuthService {
         playtimeMacForever: response.playtime_mac_forever,
         playtimeWindowsForever: response.playtime_windows_forever,
         rTimeLastPlayed: response.rtime_last_played
+      }
+    })
+    return games
+  }
+
+  private mapRecentlyPlayedGamesResponse = (responses: IGetRecentlyPlayedGamesResponseInfo[]): IRecentlyPlayedGame[] => {
+    const games: IRecentlyPlayedGame[] = responses.map(response => {
+      return {
+        appId: response.appid,
+        name: response.name,
+        playtime2Weeks: response.playtime_2weeks,
+        playtimeForever: response.playtime_forever,
+        imgIconUrl: response.img_icon_url,
+        playtimeWindowsForever: response.playtime_windows_forever,
+        playtimeMacForever: response.playtime_mac_forever,
+        playtimeLinuxForever: response.playtime_linux_forever,
+        playtimeDeckForever: response.playtime_deck_forever
       }
     })
     return games

@@ -3,11 +3,13 @@ import { Component, inject } from '@angular/core'
 import type { IUser } from '../../../models/Steam'
 import { AuthService } from '../../../services/auth/auth-service'
 import { Nameplate } from './profile/nameplate/nameplate'
+import { RecentGames } from './profile/recent-games/recent-games'
 
 @Component({
   selector: 'app-dashboard',
   imports: [
-    Nameplate
+    Nameplate,
+    RecentGames
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'

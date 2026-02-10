@@ -63,6 +63,7 @@ export interface IUser {
   playerLevel: IPlayerLevel;
   gameLibrary: IUserGameInfo[];
   gameCount: number;
+  recentlyPlayedGames: IRecentlyPlayedGame[];
 }
 
 export interface IGetBadgesResponse {
@@ -156,4 +157,33 @@ export interface ISteamLevelIcon {
   lineHeight: string;
   backgroundSize: string;
   backgroundPosition: string;
+}
+
+export interface IGetRecentlyPlayedGamesResponse {
+  total_count: number;
+  games: IGetRecentlyPlayedGamesResponseInfo[];
+}
+
+export interface IGetRecentlyPlayedGamesResponseInfo {
+  appid: number;
+  name: string;
+  playtime_2weeks: number;
+  playtime_forever: number;
+  img_icon_url: string;
+  playtime_windows_forever: number;
+  playtime_mac_forever: number;
+  playtime_linux_forever: number;
+  playtime_deck_forever: number;
+}
+
+export interface IRecentlyPlayedGame {
+  appId: number;
+  name: string;
+  playtime2Weeks: number;
+  playtimeForever: number;
+  imgIconUrl: string;
+  playtimeWindowsForever: number;
+  playtimeMacForever: number;
+  playtimeLinuxForever: number;
+  playtimeDeckForever: number;
 }

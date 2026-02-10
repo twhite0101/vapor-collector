@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http'
 import { inject, Injectable } from '@angular/core'
 import { firstValueFrom } from 'rxjs'
-import type { IGetBadgesResponse, IUserGamesLibraryResponse } from '../../../models/Steam'
+import type { IGetBadgesResponse, IGetRecentlyPlayedGamesResponse, IUserGamesLibraryResponse } from '../../../models/Steam'
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +14,7 @@ export class SteamService {
 
   public getOwnedGames = async () => {
     const response = await firstValueFrom(this.http.get<IUserGamesLibraryResponse>(this.apiUrl + '/user/getGameLibrary', { withCredentials: true }))
-    const library = this.calculateHoursPlayed(response)
+    const library = this.calculateGameLibraryHoursPlayed(response)
     return library
   }
 
@@ -23,7 +23,23 @@ export class SteamService {
     return response
   }
 
-  protected calculateHoursPlayed = (library: IUserGamesLibraryResponse): IUserGamesLibraryResponse => {
+  public getRecentlyPlayedGames = async () => {
+    const response = await firstValueFrom(this.http.get<IGetRecentlyPlayedGamesResponse>(this.apiUrl + '/user/getRecentlyPlayedGames', { withCredentials: true }))
+    const recentGames = this.calculateRecentGamesHoursPlayed(response)
+    return recentGames
+  }
+
+  protected calculateGameLibraryHoursPlayed = (library: IUserGamesLibraryResponse): IUserGamesLibraryResponse => {
+    library.games.forEach(game => {
+      game.playtime_forever = isNaN(game.playtime_forever) ? 0 : Math.round(((game.playtime_forever / 60) + Number.EPSILON) * 100) / 100
+      game.playtime_2weeks = isNaN(game.playtime_2weeks) ? 0 : Math.round(((game.playtime_2weeks / 60) + Number.EPSILON) * 100) / 100
+      game.playtime_deck_forever = isNaN(game.playtime_deck_forever) ? 0 : Math.round(((game.playtime_deck_forever / 60) + Number.EPSILON) * 100) / 100
+    })
+
+    return library
+  }
+
+  protected calculateRecentGamesHoursPlayed = (library: IGetRecentlyPlayedGamesResponse): IGetRecentlyPlayedGamesResponse => {
     library.games.forEach(game => {
       game.playtime_forever = isNaN(game.playtime_forever) ? 0 : Math.round(((game.playtime_forever / 60) + Number.EPSILON) * 100) / 100
       game.playtime_2weeks = isNaN(game.playtime_2weeks) ? 0 : Math.round(((game.playtime_2weeks / 60) + Number.EPSILON) * 100) / 100
