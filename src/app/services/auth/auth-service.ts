@@ -141,10 +141,6 @@ export class AuthService {
     return !!this.getLoggedInStatus()
   }
 
-  public isTokenValid = (): Observable<boolean> => {
-    return this.http.get<boolean>(this.apiUrl + '/auth/token-valid')
-  }
-
   public mapAuthResponseToUser = (user: ILoginResponseUser, library: IUserGamesLibraryResponse, badges: IGetBadgesResponse): IUser => {
     const returnedUser: IUser = {
       identifier: user.identifier,
@@ -216,5 +212,9 @@ export class AuthService {
       }
     })
     return games
+  }
+
+  public isTokenValid = (): Observable<boolean> => {
+    return this.http.get<boolean>(this.apiUrl + '/auth/token-valid', { withCredentials: true })
   }
 }

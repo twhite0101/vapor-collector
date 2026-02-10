@@ -1,14 +1,16 @@
 import type { Routes } from '@angular/router'
 import { AuthCallback } from './auth-callback/auth-callback'
 import { AppContainer } from './container/components/app-container/app-container'
-import { Dashboard } from './container/components/dashboard/dashboard'
-import { Login } from './container/components/login/login'
 import { authGuard } from './guards/auth/auth-guard'
+import { tokenResolver } from './resolvers/token.resolver'
 
 export const routes: Routes = [
   {
     path: '',
-    component: AuthCallback
+    component: AuthCallback,
+    resolve: {
+      isTokenValid: tokenResolver
+    }
   },
   {
     path: 'home',
@@ -16,11 +18,11 @@ export const routes: Routes = [
     children: [
       {
         path: 'login',
-        component: Login
+        loadComponent: () => import('./container/components/login/login').then(c => c.Login)
       },
       {
         path: 'dashboard',
-        component: Dashboard,
+        loadComponent: () => import('./container/components/dashboard/dashboard').then(c => c.Dashboard),
         canActivate: [authGuard]
       }
     ]
