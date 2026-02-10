@@ -52,7 +52,7 @@ export interface IUser {
     avatarFull: string;
     avatarHash: string;
   };
-  lastLogoff: number;
+  lastLogoff: string;
   personaState: number;
   primaryClanId: string;
   timeCreated: number;

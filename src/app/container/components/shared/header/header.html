@@ -4,8 +4,12 @@
       <div class="user-info">
           <div>Welcome, {{ user?.displayName }}</div>
       </div>
+      <div>
+        <button type="button" (click)="logOutClicked()">Logout</button>
+      </div>
     </div>
-    @if (this.authService.hasLibrary) {
+  }
+  @if (this.authService.hasLibrary) {
       <div class="library-panel">
         <mat-expansion-panel>
           <mat-expansion-panel-header collapsedHeight="40px" expandedHeight="40px">
@@ -39,10 +43,6 @@
         </mat-expansion-panel>
       </div>
     }
-    <div>
-      <button type="button" (click)="logOutClicked()">Logout</button>
-    </div>
-  }
   @if (!this.authService.hasUser) {
     <div class="login-btn-cont">
       <button type="button" class="login-btn" (click)="loginClicked()" >

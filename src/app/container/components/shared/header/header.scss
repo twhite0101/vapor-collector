@@ -18,12 +18,17 @@
   flex-direction: row;
   justify-content: space-between;
   height: 40px;
+  border: 5px solid black;
 }
 
 .user-details {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 .library-panel {

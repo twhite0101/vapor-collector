@@ -3,10 +3,45 @@
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
+  height: 25vh;
+  border: 5px solid black;
 }
 
 .nameplate-av-name-cont {
  display: flex;
  flex-direction: row;
  align-items: center;
+ margin-left: 10px;
+}
+
+.name-cont {
+  display: flex;
+  flex-direction: row;
+  height: 15vh;
+  align-items: end;
+  padding-left: 15px;
+}
+
+.name-cont {
+  h1 {
+    margin: 0px;
+    padding-right: 10px;
+  }
+  .fi {
+    padding-bottom: 15px;
+  }
+}
+
+.level-cont {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 20vh;
+  justify-content: space-between;
+  margin-right: 10px;
+}
+
+.last-login {
+  font-size: small;
 }

@@ -1,11 +1,15 @@
 @if (user) {
   <div class="nameplate-cont">
     <div class="nameplate-av-name-cont">
-      <img alt="Steam user avatar" height="184" width="184" priority [ngSrc]="avatars[0]">
-      <div>{{ user.displayName }}</div>
-      <div [ngClass]="`fi fi-${countryCode}`"></div>
+      <img class="steam-avi-full" alt="Steam user avatar" height="184" width="184" priority [ngSrc]="avatars[0]">
+      <div class="name-cont">
+        <h1 class="display-name">{{ user.displayName }}</h1>
+        <div [ngClass]="`fi fi-${countryCode}`"></div>
+      </div>
     </div>
-    <div>Last Login: {{ user.lastLogoff | date: 'medium' }}</div>
-    <app-steam-level [level]="user.playerLevel.playerLevel" [size]="64" />
+    <div class="level-cont">
+      <app-steam-level [level]="user.playerLevel.playerLevel" [size]="64" />
+      <p class="last-login">Last Login: {{ user.lastLogoff | date: 'mediumDate' }}</p>
+    </div>
   </div>
 }

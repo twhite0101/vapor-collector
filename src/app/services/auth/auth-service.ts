@@ -156,7 +156,7 @@ export class AuthService {
         avatarFull: user._json.avatarfull,
         avatarHash: user._json.avatarhash
       },
-      lastLogoff: user._json.lastlogoff,
+      lastLogoff: this.convertUnixTimeToCurrentTime(user._json.lastlogoff),
       personaState: user._json.personastate,
       primaryClanId: user._json.primaryclanid,
       timeCreated: user._json.timecreated,
@@ -212,6 +212,10 @@ export class AuthService {
       }
     })
     return games
+  }
+
+  private convertUnixTimeToCurrentTime = (unix: number): string => {
+    return new Date(unix * 1000).toISOString().slice(0, new Date(unix * 1000).toISOString().indexOf('T'))
   }
 
   public isTokenValid = (): Observable<boolean> => {
