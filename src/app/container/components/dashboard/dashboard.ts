@@ -2,6 +2,7 @@ import type { OnInit } from '@angular/core'
 import { Component, inject } from '@angular/core'
 import type { IUser } from '../../../models/Steam'
 import { AuthService } from '../../../services/auth/auth-service'
+import { FriendList } from './profile/friend-list/friend-list'
 import { Nameplate } from './profile/nameplate/nameplate'
 import { RecentGames } from './profile/recent-games/recent-games'
 
@@ -9,7 +10,8 @@ import { RecentGames } from './profile/recent-games/recent-games'
   selector: 'app-dashboard',
   imports: [
     Nameplate,
-    RecentGames
+    RecentGames,
+    FriendList
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'

@@ -1,0 +1,41 @@
+<div class="friend-list-cont">
+  <div class="friend-list-search">
+    <form>
+      <mat-form-field>
+        <mat-label>Search friends...</mat-label>
+        <input type="text" aria-label="Search friends..." matInput [formControl]="filterFriendListControl" [matAutocomplete]="auto">
+        <mat-autocomplete #auto="matAutocomplete">
+          @for (friend of filteredFriends; track friend.displayName) {
+            <mat-option [value]="friend">{{ friend.displayName }}</mat-option>
+          }
+        </mat-autocomplete>
+      </mat-form-field>
+    </form>
+    <button type="button" mat-raised-button>See all friend</button>
+  </div>
+  <cdk-virtual-scroll-viewport class="friend-list-scroll" [itemSize]="friendList.length">
+    <div class="friend-cards-cont">
+      @for (friend of filteredFriends; track friend.displayName) {
+        <mat-card class="friend-card" appearance="outlined">
+          <mat-card-content class="friend-card-content">
+            <div>
+              <img class="friend-avi" alt="Steam user avatar" height="32" width="32" [ngSrc]="friend.avatars.avatar">
+            </div>
+            <div class="friend-details">
+              <h5 class="friend-name">{{ friend.displayName }}</h5>
+              @if (friend.currentGameName) {
+                <h6 class="friend-online">{{ friend.currentGameName }}</h6>
+              }
+              @else {
+                <h6 class="friend-online">Online</h6>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+      @if (showNoFriends) {
+        <p>No friends, eh?</p>
+      }
+    </div>
+  </cdk-virtual-scroll-viewport>
+</div>

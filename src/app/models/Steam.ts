@@ -64,6 +64,7 @@ export interface IUser {
   gameLibrary: IUserGameInfo[];
   gameCount: number;
   recentlyPlayedGames: IRecentlyPlayedGame[];
+  friendList: ISteamFriend[];
 }
 
 export interface IGetBadgesResponse {
@@ -186,4 +187,69 @@ export interface IRecentlyPlayedGame {
   playtimeMacForever: number;
   playtimeLinuxForever: number;
   playtimeDeckForever: number;
+}
+
+export interface IFriendListResponseFriend {
+  steamid: string;
+  relationship: string;
+  friend_since: number;
+}
+
+export interface IFriendListDetailsResponseFriend {
+  steamid: string;
+  communityvisibilitystate: number;
+  profilestate: number;
+  personaname: string;
+  profileurl: string;
+  avatar: string;
+  avatarmedium: string;
+  avatarfull: string;
+  avatarhash: string;
+  lastlogoff: number;
+  personastate: number;
+  realname: string;
+  primaryclanid: string;
+  timecreated: number;
+  personastateflags: number;
+  loccountrycode: string;
+  locstatecode: string;
+  loccityid?: string;
+  gameid?: string;
+  gameserverip?: string;
+  gameextrainfo?: string;
+}
+
+export interface IFriendListFullResponse {
+  friendList: IFriendListResponseFriend[];
+  details: IFriendListDetailsResponseFriend[];
+}
+
+export interface IFriendAvatars {
+  avatar: string;
+  avatarMedium: string;
+  avatarFull: string;
+  avatarHash: string;
+}
+
+export interface ISteamFriend {
+  steamId: string;
+  relationship: string;
+  friendSince: string;
+  communityVisibilityState: string;
+  profileState: number;
+  displayName: string;
+  profileUrl: string;
+  avatars: IFriendAvatars;
+  lastLogoff: string;
+  personaState: number;
+  realName: string;
+  primaryClanId: string;
+  timeCreated: number;
+  personaStateFlags: number;
+  locCountryCode: string;
+  locStateCode: string;
+  locCityId?: string;
+  currentGameId?: string;
+  gameServerIp?: string;
+  currentGameName?: string;
 }

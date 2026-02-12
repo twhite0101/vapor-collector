@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http'
 import { inject, Injectable } from '@angular/core'
 import { firstValueFrom } from 'rxjs'
-import type { IGetBadgesResponse, IGetRecentlyPlayedGamesResponse, IUserGamesLibraryResponse } from '../../../models/Steam'
+import type { IFriendListDetailsResponseFriend, IFriendListFullResponse, IFriendListResponseFriend, IGetBadgesResponse, IGetRecentlyPlayedGamesResponse, IUserGamesLibraryResponse } from '../../../models/Steam'
 
 @Injectable({
   providedIn: 'root'
@@ -27,6 +27,33 @@ export class SteamService {
     const response = await firstValueFrom(this.http.get<IGetRecentlyPlayedGamesResponse>(this.apiUrl + '/user/getRecentlyPlayedGames', { withCredentials: true }))
     const recentGames = this.calculateRecentGamesHoursPlayed(response)
     return recentGames
+  }
+
+  public getFriendList = async () => {
+    const response = await firstValueFrom(this.http.get<IFriendListResponseFriend[]>(this.apiUrl + '/user/getFriendList', { withCredentials: true }))
+    return response
+  }
+
+  public getFriendListDetails = async (ids: string[]) => {
+    const steamIdsParams = ids.join('%2C')
+    const response = await firstValueFrom(this.http.get<IFriendListDetailsResponseFriend[]>(this.apiUrl + `/user/getFriendListDetails?steamIds=${steamIdsParams}`, { withCredentials: true }))
+    return response
+  }
+
+  public initializeFriendList = async () => {
+    const friendList = await this.getFriendList()
+
+    const steamIds = friendList.map(friend => {
+      return friend.steamid
+    })
+
+    const friendListDetails = await this.getFriendListDetails(steamIds)
+
+    const friendListFull: IFriendListFullResponse = {
+      friendList: friendList,
+      details: friendListDetails
+    }
+    return friendListFull
   }
 
   protected calculateGameLibraryHoursPlayed = (library: IUserGamesLibraryResponse): IUserGamesLibraryResponse => {

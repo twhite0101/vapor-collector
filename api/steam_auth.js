@@ -59,7 +59,7 @@ passport.use(new SteamStrategy({
         realm: 'http://localhost:3000',
         apiKey: process.env.STEAM_API_KEY
     },
-function(identifier, profile, done) {
+function (identifier, profile, done) {
     User.findOne({ id: profile.id })
       .then((user, err) => {
         if (err) {
@@ -68,12 +68,18 @@ function(identifier, profile, done) {
 
         if (user) {
           console.log('User found in DB');
-          return done(null, user);
+          User.findOneAndUpdate(user, profile)
+            .then((user, err) => {
+                if (err) {
+                  console.error(err)
+                }
+                else {
+                  console.log('User updated');
+                  return done(null, user)
+                }
+              })
         }
         else {
-          const payload = {
-            user: profile
-          };
           let newUser = new User(profile);
           newUser.save()
           console.log('New User recorded to DB');
@@ -181,6 +187,44 @@ app.get('/user/getRecentlyPlayedGames', ensureAuthenticated, (req, res) => {
     .get(`https://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v1/?key=${process.env.STEAM_API_KEY}&steamid=${user.id}&count=3`)
     .then(response => {
       res.send(response.data.response)
+    })
+    .catch(err => {
+      console.error(err)
+    })
+})
+
+app.get('/user/getFriendList', ensureAuthenticated, (req, res) => {
+  const token = req.cookies.access;
+  const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_KEY)
+  if (!decoded) {
+    res.statusCode(401).json('Unauthorized user');
+  }
+  const user = decoded.user
+  axios
+    .get(`https://api.steampowered.com/ISteamUser/GetFriendList/v1/?key=${process.env.STEAM_API_KEY}&steamid=${user.id}&relationship=friend`)
+    .then(response => {
+      res.send(response.data.friendslist.friends)
+    })
+    .catch(err => {
+      console.error(err)
+    })
+})
+
+app.get('/user/getFriendListDetails', ensureAuthenticated, (req, res) => {
+  const token = req.cookies.access;
+  const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_KEY)
+  if (!decoded) {
+    res.statusCode(401).json('Unauthorized user');
+  }
+  const user = decoded.user
+  const friendIds = req.query.steamIds
+  if (!friendIds) {
+    res.statusCode(400).json('Steam ID for friend was not provided.');
+  }
+  axios
+    .get(`https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=${process.env.STEAM_API_KEY}&steamids=${friendIds}`)
+    .then(response => {
+      res.send(response.data.response.players)
     })
     .catch(err => {
       console.error(err)

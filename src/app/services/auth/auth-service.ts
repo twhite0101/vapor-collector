@@ -5,7 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { Router } from '@angular/router'
 import type { Observable } from 'rxjs'
 import { firstValueFrom, forkJoin } from 'rxjs'
-import type { IBadge, IGetBadgesResponse, IGetBadgesResponseArray, IGetRecentlyPlayedGamesResponse, IGetRecentlyPlayedGamesResponseInfo, ILoginResponse, ILoginResponseUser, IRecentlyPlayedGame, IUser, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse } from '../../models/Steam'
+import type { IBadge, IFriendListFullResponse, IGetBadgesResponse, IGetBadgesResponseArray, IGetRecentlyPlayedGamesResponse, IGetRecentlyPlayedGamesResponseInfo, ILoginResponse, ILoginResponseUser, IRecentlyPlayedGame, ISteamFriend, IUser, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse } from '../../models/Steam'
 import { SteamService } from '../steam/data/steam-service'
 
 @Injectable({
@@ -65,7 +65,7 @@ export class AuthService {
     return response
   }
 
-  public getUserInfo = (): Observable<[ILoginResponse, IUserGamesLibraryResponse, IGetBadgesResponse, IGetRecentlyPlayedGamesResponse]> => {
+  public getUserInfo = (): Observable<[ILoginResponse, IUserGamesLibraryResponse, IGetBadgesResponse, IGetRecentlyPlayedGamesResponse, IFriendListFullResponse]> => {
     // Get user info
     const user = this.retrieveUser()
 
@@ -78,16 +78,19 @@ export class AuthService {
     // Get user's recently played games info
     const recentlyPlayedGames = this.steamService.getRecentlyPlayedGames()
 
+    // Get user's friend list
+    const friendList = this.steamService.initializeFriendList()
+
     // Return array of observables of requests as a fork join
-    return forkJoin([user, library, badges, recentlyPlayedGames])
+    return forkJoin([user, library, badges, recentlyPlayedGames, friendList])
   }
 
   public initializeUser = () => {
     this.getUserInfo()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: ([user, library, badges, recentlyPlayedGames]) => {
-          const returnedData = this.mapAuthResponseToUser(user.response, library, badges, recentlyPlayedGames)
+        next: ([user, library, badges, recentlyPlayedGames, friendList]) => {
+          const returnedData = this.mapAuthResponseToUser(user.response, library, badges, recentlyPlayedGames, friendList)
           this._user.set(returnedData)
           this._hasUser.set(true)
           this._hasLibrary.set(true)
@@ -144,7 +147,7 @@ export class AuthService {
     return !!this.getLoggedInStatus()
   }
 
-  public mapAuthResponseToUser = (user: ILoginResponseUser, library: IUserGamesLibraryResponse, badges: IGetBadgesResponse, recentlyPlayedGames: IGetRecentlyPlayedGamesResponse): IUser => {
+  public mapAuthResponseToUser = (user: ILoginResponseUser, library: IUserGamesLibraryResponse, badges: IGetBadgesResponse, recentlyPlayedGames: IGetRecentlyPlayedGamesResponse, friendList: IFriendListFullResponse): IUser => {
     const returnedUser: IUser = {
       identifier: user.identifier,
       steamId: user._json.steamid,
@@ -175,7 +178,8 @@ export class AuthService {
       },
       gameLibrary: this.mapGameLibraryResponse(library.games),
       gameCount: library.game_count,
-      recentlyPlayedGames: this.mapRecentlyPlayedGamesResponse(recentlyPlayedGames.games)
+      recentlyPlayedGames: this.mapRecentlyPlayedGamesResponse(recentlyPlayedGames.games),
+      friendList: this.mapFriendListResponse(friendList)
     }
 
     return returnedUser
@@ -233,6 +237,67 @@ export class AuthService {
       }
     })
     return games
+  }
+
+  private mapFriendListResponse = (responses: IFriendListFullResponse): ISteamFriend[] => {
+    const friends: ISteamFriend[] = responses.friendList.map(response => {
+      const matchingDetails = responses.details.find(detail => detail.steamid === response.steamid)
+      if (matchingDetails === undefined) {
+        return {
+          steamId: '',
+          relationship: '',
+          friendSince: '',
+          communityVisibilityState: '',
+          profileState: 0,
+          displayName: '',
+          profileUrl: '',
+          avatars: {
+            avatar: '',
+            avatarMedium: '',
+            avatarFull: '',
+            avatarHash: ''
+          },
+          lastLogoff: '',
+          personaState: 0,
+          realName: '',
+          primaryClanId: '',
+          timeCreated: 0,
+          personaStateFlags: 0,
+          locCountryCode: '',
+          locStateCode: ''
+        }
+      }
+      else {
+        return {
+          steamId: response.steamid,
+          relationship: response.relationship,
+          friendSince: this.convertUnixTimeToCurrentTime(response.friend_since),
+          communityVisibilityState: matchingDetails?.communityvisibilitystate.toString(),
+          profileState: matchingDetails?.profilestate,
+          displayName: matchingDetails?.personaname,
+          profileUrl: matchingDetails?.profileurl,
+          avatars: {
+            avatar: matchingDetails?.avatar,
+            avatarMedium: matchingDetails?.avatarmedium,
+            avatarFull: matchingDetails?.avatarfull,
+            avatarHash: matchingDetails?.avatarhash
+          },
+          lastLogoff: this.convertUnixTimeToCurrentTime(matchingDetails?.lastlogoff),
+          personaState: matchingDetails?.personastate,
+          realName: matchingDetails?.realname,
+          primaryClanId: matchingDetails?.primaryclanid,
+          timeCreated: matchingDetails?.timecreated,
+          personaStateFlags: matchingDetails?.personastateflags,
+          locCountryCode: matchingDetails?.loccountrycode,
+          locStateCode: matchingDetails?.locstatecode,
+          locCityId: matchingDetails?.loccityid !== undefined ? matchingDetails?.loccityid : '',
+          currentGameId: matchingDetails?.gameid !== undefined ? matchingDetails?.gameid : '',
+          gameServerIp: matchingDetails?.gameserverip !== undefined ? matchingDetails?.gameserverip : '',
+          currentGameName: matchingDetails?.gameextrainfo !== undefined ? matchingDetails?.gameextrainfo : ''
+        }
+      }
+    })
+    return friends
   }
 
   private convertUnixTimeToCurrentTime = (unix: number): string => {
