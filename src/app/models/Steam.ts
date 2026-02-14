@@ -187,6 +187,7 @@ export interface IRecentlyPlayedGame {
   playtimeMacForever: number;
   playtimeLinuxForever: number;
   playtimeDeckForever: number;
+  dateLastPlayed: Date;
 }
 
 export interface IFriendListResponseFriend {

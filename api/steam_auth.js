@@ -184,7 +184,7 @@ app.get('/user/getRecentlyPlayedGames', ensureAuthenticated, (req, res) => {
   }
   const user = decoded.user
   axios
-    .get(`https://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v1/?key=${process.env.STEAM_API_KEY}&steamid=${user.id}&count=3`)
+    .get(`https://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v1/?key=${process.env.STEAM_API_KEY}&steamid=${user.id}`)
     .then(response => {
       res.send(response.data.response)
     })

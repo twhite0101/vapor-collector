@@ -61,6 +61,7 @@ export class FriendList implements OnInit {
   public ngOnInit (): void {
     this.onlineFriends = this.friendList.filter(friend => friend.personaState === 1 || friend.personaState === 2 || friend.personaState === 3 || friend.personaState === 4)
     this.filteredFriends.push(...this.onlineFriends)
+    this.friendListLength.set(this.filteredFriends.length)
   }
 
   protected filterFriends = (value: string): ISteamFriend[] => {

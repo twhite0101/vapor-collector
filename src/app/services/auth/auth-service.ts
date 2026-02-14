@@ -178,7 +178,7 @@ export class AuthService {
       },
       gameLibrary: this.mapGameLibraryResponse(library.games),
       gameCount: library.game_count,
-      recentlyPlayedGames: this.mapRecentlyPlayedGamesResponse(recentlyPlayedGames.games),
+      recentlyPlayedGames: this.sortRecentlyPlayedGame(this.mapRecentlyPlayedGamesResponse(recentlyPlayedGames.games, library.games)),
       friendList: this.mapFriendListResponse(friendList)
     }
 
@@ -222,7 +222,7 @@ export class AuthService {
     return games
   }
 
-  private mapRecentlyPlayedGamesResponse = (responses: IGetRecentlyPlayedGamesResponseInfo[]): IRecentlyPlayedGame[] => {
+  private mapRecentlyPlayedGamesResponse = (responses: IGetRecentlyPlayedGamesResponseInfo[], library: IUserGameInfoResponse[]): IRecentlyPlayedGame[] => {
     const games: IRecentlyPlayedGame[] = responses.map(response => {
       return {
         appId: response.appid,
@@ -233,7 +233,8 @@ export class AuthService {
         playtimeWindowsForever: response.playtime_windows_forever,
         playtimeMacForever: response.playtime_mac_forever,
         playtimeLinuxForever: response.playtime_linux_forever,
-        playtimeDeckForever: response.playtime_deck_forever
+        playtimeDeckForever: response.playtime_deck_forever,
+        dateLastPlayed: this.setLastTimePlayed(response.appid, library)
       }
     })
     return games
@@ -302,6 +303,30 @@ export class AuthService {
 
   private convertUnixTimeToCurrentTime = (unix: number): string => {
     return new Date(unix * 1000).toISOString().slice(0, new Date(unix * 1000).toISOString().indexOf('T'))
+  }
+
+  private setLastTimePlayed = (gameId: number, library: IUserGameInfoResponse[]): Date => {
+    const matchingGame = library.find(game => game.appid === gameId)
+    if (matchingGame === undefined) {
+      return new Date()
+    }
+    return new Date(matchingGame.rtime_last_played * 1000)
+  }
+
+  private sortRecentlyPlayedGame = (recentGames: IRecentlyPlayedGame[]): IRecentlyPlayedGame[] => {
+    const currentDate = new Date()
+
+    recentGames.sort((gameA, gameB) => {
+      const dateGameA = new Date(gameA.dateLastPlayed).getTime()
+      const dateGameB = new Date(gameB.dateLastPlayed).getTime()
+
+      const diffGameA = Math.abs(dateGameA - currentDate.getTime())
+      const diffGameB = Math.abs(dateGameB - currentDate.getTime())
+
+      return diffGameA - diffGameB
+    })
+
+    return recentGames
   }
 
   public isTokenValid = (): Observable<boolean> => {
