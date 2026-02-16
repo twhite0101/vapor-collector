@@ -12,7 +12,7 @@ import { MatFormFieldModule } from '@angular/material/form-field'
 import { MatInputModule } from '@angular/material/input'
 import type { IUser, IUserGameInfo } from '../../../../models/Steam'
 import { AuthService } from '../../../../services/auth/auth-service'
-import { SteamService } from '../../../../services/steam/data/steam-service'
+import { StateService } from '../../../../services/state/state-service'
 
 @Component({
   selector: 'app-header',
@@ -32,8 +32,8 @@ import { SteamService } from '../../../../services/steam/data/steam-service'
 export class Header implements OnInit {
   // Dependency Injections
   protected readonly authService: AuthService = inject(AuthService)
-  private readonly steamService: SteamService = inject(SteamService)
   private readonly fb: NonNullableFormBuilder = inject(NonNullableFormBuilder)
+  private readonly state: StateService = inject(StateService)
 
   protected user: IUser | null
   protected name: string
@@ -57,6 +57,7 @@ export class Header implements OnInit {
         this.filteredLibrary.push(...this.user.gameLibrary)
       }
     }
+    this.state.setHeaderStatus(true)
   }
 
   protected loginClicked = () => {

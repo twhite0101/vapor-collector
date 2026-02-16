@@ -6,6 +6,8 @@ import { Router } from '@angular/router'
 import type { Observable } from 'rxjs'
 import { firstValueFrom, forkJoin } from 'rxjs'
 import type { IBadge, IFriendListFullResponse, IGetBadgesResponse, IGetBadgesResponseArray, IGetRecentlyPlayedGamesResponse, IGetRecentlyPlayedGamesResponseInfo, ILoginResponse, ILoginResponseUser, INewsItems, IRecentlyPlayedGame, ISteamFriend, IUser, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse } from '../../models/Steam'
+import { LoadingService } from '../loading/loading-service'
+import { StateService } from '../state/state-service'
 import { SteamService } from '../steam/data/steam-service'
 
 @Injectable({
@@ -15,6 +17,8 @@ export class AuthService {
   // Dependency Injections
   private readonly http: HttpClient = inject(HttpClient)
   private readonly steamService: SteamService = inject(SteamService)
+  private readonly loadingService: LoadingService = inject(LoadingService)
+  private readonly state: StateService = inject(StateService)
   private readonly router: Router = inject(Router)
   private destroyRef = inject(DestroyRef)
 
@@ -38,6 +42,7 @@ export class AuthService {
     this._hasUser.set(false)
     this._hasLibrary.set(false)
     this._hasUser.set(false)
+    this.state.userLoggedOut()
     window.location.href = this.apiUrl + '/logout'
   }
 
@@ -70,7 +75,7 @@ export class AuthService {
     const user = this.retrieveUser()
 
     // Get user's game library
-    const library = this.steamService.initializeLibrary()
+    const library = this.steamService.getOwnedGames()
 
     // Get user's badge and account level info
     const badges = this.steamService.getUserBadges()
@@ -86,6 +91,7 @@ export class AuthService {
   }
 
   public initializeUser = () => {
+    this.loadingService.loadingOn()
     this.getUserInfo()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -216,8 +222,7 @@ export class AuthService {
         playtimeLinuxForever: response.playtime_linux_forever,
         playtimeMacForever: response.playtime_mac_forever,
         playtimeWindowsForever: response.playtime_windows_forever,
-        rTimeLastPlayed: response.rtime_last_played,
-        news: this.mapGameNewsResponse(response)
+        rTimeLastPlayed: response.rtime_last_played
       }
     })
     return games

@@ -11,6 +11,7 @@ import { MatCardModule } from '@angular/material/card'
 import { MatFormFieldModule } from '@angular/material/form-field'
 import { MatInputModule } from '@angular/material/input'
 import type { ISteamFriend } from '../../../../../models/Steam'
+import { StateService } from '../../../../../services/state/state-service'
 
 @Component({
   selector: 'app-friends-list',
@@ -30,6 +31,7 @@ import type { ISteamFriend } from '../../../../../models/Steam'
 export class FriendList implements OnInit {
   // Dependency Injections
   private readonly fb: NonNullableFormBuilder = inject(NonNullableFormBuilder)
+  private readonly state: StateService = inject(StateService)
 
   @Input({ required: true }) public friendList: ISteamFriend[]
 
@@ -62,6 +64,7 @@ export class FriendList implements OnInit {
     this.onlineFriends = this.friendList.filter(friend => friend.personaState === 1 || friend.personaState === 2 || friend.personaState === 3 || friend.personaState === 4)
     this.filteredFriends.push(...this.onlineFriends)
     this.friendListLength.set(this.filteredFriends.length)
+    this.state.setFriendListStatus(true)
   }
 
   protected filterFriends = (value: string): ISteamFriend[] => {
