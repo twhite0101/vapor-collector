@@ -231,6 +231,27 @@ app.get('/user/getFriendListDetails', ensureAuthenticated, (req, res) => {
     })
 })
 
+app.get('/user/getNewsForGame', ensureAuthenticated, (req, res) => {
+  const token = req.cookies.access;
+  const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_KEY)
+  if (!decoded) {
+    res.statusCode(401).json('Unauthorized user');
+  }
+  const appId = req.query.appId
+  if (!appId) {
+    res.statusCode(400).json('App ID for game was not provided.');
+  }
+  axios
+    .get(`https://api.steampowered.com/ISteamNews/GetNewsForApp/v2/?key=${process.env.STEAM_API_KEY}&appid=${appId}`)
+    .then(response => {
+      res.send(response.data.appnews)
+    })
+    .catch(err => {
+      console.error(err)
+      res.send(err)
+    })
+})
+
 // MIDDLEWARE
 function ensureAuthenticated(req, res, next) {
     if (req.cookies && req.cookies.access) { return next(); }

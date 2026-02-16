@@ -5,7 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { Router } from '@angular/router'
 import type { Observable } from 'rxjs'
 import { firstValueFrom, forkJoin } from 'rxjs'
-import type { IBadge, IFriendListFullResponse, IGetBadgesResponse, IGetBadgesResponseArray, IGetRecentlyPlayedGamesResponse, IGetRecentlyPlayedGamesResponseInfo, ILoginResponse, ILoginResponseUser, IRecentlyPlayedGame, ISteamFriend, IUser, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse } from '../../models/Steam'
+import type { IBadge, IFriendListFullResponse, IGetBadgesResponse, IGetBadgesResponseArray, IGetRecentlyPlayedGamesResponse, IGetRecentlyPlayedGamesResponseInfo, ILoginResponse, ILoginResponseUser, INewsItems, IRecentlyPlayedGame, ISteamFriend, IUser, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse } from '../../models/Steam'
 import { SteamService } from '../steam/data/steam-service'
 
 @Injectable({
@@ -70,7 +70,7 @@ export class AuthService {
     const user = this.retrieveUser()
 
     // Get user's game library
-    const library = this.steamService.getOwnedGames()
+    const library = this.steamService.initializeLibrary()
 
     // Get user's badge and account level info
     const badges = this.steamService.getUserBadges()
@@ -216,7 +216,8 @@ export class AuthService {
         playtimeLinuxForever: response.playtime_linux_forever,
         playtimeMacForever: response.playtime_mac_forever,
         playtimeWindowsForever: response.playtime_windows_forever,
-        rTimeLastPlayed: response.rtime_last_played
+        rTimeLastPlayed: response.rtime_last_played,
+        news: this.mapGameNewsResponse(response)
       }
     })
     return games
@@ -299,6 +300,39 @@ export class AuthService {
       }
     })
     return friends
+  }
+
+  private mapGameNewsResponse = (user: IUserGameInfoResponse): INewsItems[] => {
+    if (user.news === undefined) {
+      const noNews: INewsItems[] = [{
+        globalId: '',
+        title: '',
+        url: '',
+        isExternalUrl: false,
+        author: '',
+        contents: '',
+        feedLabel: '',
+        date: new Date(),
+        feedName: '',
+        feedType: 0
+      }]
+      return noNews
+    }
+    const newsItems: INewsItems[] = user.news.map(news => {
+      return {
+        globalId: news.gid,
+        title: news.title,
+        url: news.url,
+        isExternalUrl: news.is_external_url,
+        author: news.author,
+        contents: news.contents,
+        feedLabel: news.feedlabel,
+        date: new Date(news.date * 1000),
+        feedName: news.feedname,
+        feedType: news.feed_type
+      }
+    })
+    return newsItems
   }
 
   private convertUnixTimeToCurrentTime = (unix: number): string => {

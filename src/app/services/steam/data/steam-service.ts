@@ -1,7 +1,8 @@
 import { HttpClient } from '@angular/common/http'
 import { inject, Injectable } from '@angular/core'
-import { firstValueFrom } from 'rxjs'
-import type { IFriendListDetailsResponseFriend, IFriendListFullResponse, IFriendListResponseFriend, IGetBadgesResponse, IGetRecentlyPlayedGamesResponse, IUserGamesLibraryResponse } from '../../../models/Steam'
+import type { Observable } from 'rxjs'
+import { firstValueFrom, forkJoin } from 'rxjs'
+import type { IFriendListDetailsResponseFriend, IFriendListFullResponse, IFriendListResponseFriend, IGetBadgesResponse, IGetGameNewsResponse, IGetRecentlyPlayedGamesResponse, IUserGamesLibraryResponse } from '../../../models/Steam'
 
 @Injectable({
   providedIn: 'root'
@@ -54,6 +55,32 @@ export class SteamService {
       details: friendListDetails
     }
     return friendListFull
+  }
+
+  public initializeLibrary = async () => {
+    const ownedGames = await this.getOwnedGames()
+
+    const appIds = ownedGames.games.map(game => {
+      return game.appid
+    })
+
+    const ownedGamesNews$: Observable<IGetGameNewsResponse>[] = appIds.map(id => this.http.get<IGetGameNewsResponse>(this.apiUrl + `/user/getNewsForGame?appId=${id}`, { withCredentials: true }))
+
+    const returnedNewsResults = await firstValueFrom(forkJoin(ownedGamesNews$))
+
+    const finalizedLibrary = ownedGames.games.map(game => {
+      const gameNewsMatch = returnedNewsResults.find(newsGame => newsGame.appid === game.appid)
+
+      if (gameNewsMatch) {
+        game.news = gameNewsMatch.newsitems
+      }
+
+      return game
+    })
+
+    ownedGames.games = finalizedLibrary
+
+    return ownedGames
   }
 
   protected calculateGameLibraryHoursPlayed = (library: IUserGamesLibraryResponse): IUserGamesLibraryResponse => {

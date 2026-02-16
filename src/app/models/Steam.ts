@@ -128,6 +128,7 @@ export interface IUserGameInfoResponse {
   playtime_mac_forever: number;
   playtime_windows_forever: number;
   rtime_last_played: number;
+  news?: INewsItemsResponse[];
 }
 
 export interface IUserGameInfo {
@@ -147,6 +148,7 @@ export interface IUserGameInfo {
   playtimeMacForever: number;
   playtimeWindowsForever: number;
   rTimeLastPlayed: number;
+  news?: INewsItems[];
 }
 
 export interface ISteamLevelIcon {
@@ -253,4 +255,36 @@ export interface ISteamFriend {
   currentGameId?: string;
   gameServerIp?: string;
   currentGameName?: string;
+}
+
+export interface IGetGameNewsResponse {
+  appid: number;
+  newsitems: INewsItemsResponse[];
+}
+
+export interface INewsItemsResponse {
+  gid: string;
+  title: string;
+  url: string;
+  is_external_url: boolean;
+  author: string;
+  contents: string;
+  feedlabel: string;
+  date: number;
+  feedname: string;
+  feed_type: number;
+  appid: number;
+}
+
+export interface INewsItems {
+  globalId: string;
+  title: string;
+  url: string;
+  isExternalUrl: boolean;
+  author: string;
+  contents: string;
+  feedLabel: string;
+  date: Date;
+  feedName: string;
+  feedType: number;
 }
