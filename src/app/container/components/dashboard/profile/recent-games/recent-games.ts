@@ -21,6 +21,7 @@ export class RecentGames implements OnInit {
   private readonly state: StateService = inject(StateService)
 
   @Input({ required: true }) public recentlyPlayedGames: IRecentlyPlayedGame[]
+  @Input({ required: true }) public recentPlayTime: number
 
   protected displayedRecentGames: IRecentlyPlayedGame[] = []
 

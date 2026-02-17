@@ -185,6 +185,7 @@ export class AuthService {
         avatarHash: userFull.user._json.avatarhash
       },
       lastLogoff: this.convertUnixTimeToCurrentTime(userFull.user._json.lastlogoff),
+      playTime2Weeks: this.calculateRecentPlayTime(recentlyPlayedGames.games),
       personaState: userFull.user._json.personastate,
       status: this.setUserStatus(userFull.user._json.personastate),
       primaryClanId: userFull.user._json.primaryclanid,
@@ -416,6 +417,14 @@ export class AuthService {
     })
 
     return recentGames
+  }
+
+  private calculateRecentPlayTime = (recentGames: IGetRecentlyPlayedGamesResponseInfo[]): number => {
+    let recentPlayTime = 0
+    recentGames.forEach(game => {
+      recentPlayTime += game.playtime_2weeks
+    })
+    return Math.ceil(recentPlayTime * 10) / 10
   }
 
   public isTokenValid = (): Observable<boolean> => {

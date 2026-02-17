@@ -4,11 +4,27 @@
   align-items: center;
   width: 100%;
   border: 5px solid black;
-  padding-top: 10px;
   padding-bottom: 10px;
   h4 {
     margin: 0px;
   }
+}
+
+.recent-title-status-cont {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  background-color: grey;
+}
+
+.recent-title {
+  padding-left: 10px;
+}
+
+.recent-time {
+  padding-right: 10px;
 }
 
 .game-cards-cont {

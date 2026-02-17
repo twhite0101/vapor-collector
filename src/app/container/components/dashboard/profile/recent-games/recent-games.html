@@ -1,5 +1,8 @@
 <div class="recent-games-cont">
-  <h4>Recently Played Games</h4>
+  <div class="recent-title-status-cont">
+    <h3 class="recent-title">Recently Activity</h3>
+    <h3 class="recent-time">{{ recentPlayTime }} hours past 2 weeks</h3>
+  </div>
   <div class="game-cards-cont">
     @for (game of displayedRecentGames; track game.name) {
       <mat-card class="recent-game-card" appearance="outlined">

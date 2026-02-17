@@ -52,6 +52,7 @@ export interface IUser {
     avatarHash: string;
   };
   lastLogoff: string;
+  playTime2Weeks: number;
   personaState: number;
   status: string;
   primaryClanId: string;
