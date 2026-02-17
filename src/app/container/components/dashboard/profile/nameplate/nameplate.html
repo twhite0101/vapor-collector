@@ -1,14 +1,25 @@
 <div class="nameplate-cont">
   <div class="nameplate-av-name-cont">
     <img class="steam-avi-full" alt="Steam user avatar" height="184" width="184" priority [ngSrc]="avatars[0]">
-    <div class="name-cont">
-      <h1 class="display-name">{{ user.displayName }}</h1>
-      <div [ngClass]="`fi fi-${countryCode}`"></div>
+    <div class="name-details-cont">
+      <div class="name-cont">
+        <h1 class="display-name">{{ user.displayName }}</h1>
+        <div [ngClass]="`fi fi-${countryCode}`"></div>
+      </div>
+      <p class="last-login">Last Login: {{ user.lastLogoff | date: 'mediumDate' }}</p>
     </div>
   </div>
-  <div class="level-cont">
-    <app-steam-level [level]="user.playerLevel.playerLevel" [size]="64" />
-    <h5>Steam Level World Percentile: {{ levelPercentile }}%</h5>
-    <p class="last-login">Last Login: {{ user.lastLogoff | date: 'mediumDate' }}</p>
+  <div class="nameplate-details-cont">
+    <div class="level-cont">
+      <div class="level-details-cont">
+        <h3>Level</h3>
+        <app-steam-level [level]="user.playerLevel.playerLevel" [size]="64" />
+      </div>
+      <h4>Steam Level World Percentile: {{ levelPercentile }}%</h4>
+    </div>
+    <div class="created-cont">
+      <img height="60" width="60" [ngSrc]="`https://community.fastly.steamstatic.com/public/images/badges/02_years/steamyears${user.profileAgeYears}_80.png`" [alt]="`Steam Profile Age Badge for ${user.displayName}`">
+      <h4>Account Created: {{ user.timeCreated | date: 'mediumDate' }}</h4>
+    </div>
   </div>
 </div>

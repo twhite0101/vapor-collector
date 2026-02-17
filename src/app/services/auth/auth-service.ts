@@ -189,7 +189,8 @@ export class AuthService {
       personaState: userFull.user._json.personastate,
       status: this.setUserStatus(userFull.user._json.personastate),
       primaryClanId: userFull.user._json.primaryclanid,
-      timeCreated: userFull.user._json.timecreated,
+      timeCreated: this.convertUnixTimeToCurrentTime(userFull.user._json.timecreated),
+      profileAgeYears: this.calculateProfileAgeYears(userFull.user._json.timecreated),
       personaStateFlags: userFull.user._json.personastateflags,
       locCountryCode: userFull.user._json.loccountrycode,
       displayName: userFull.user.displayName,
@@ -426,6 +427,22 @@ export class AuthService {
       recentPlayTime += game.playtime_2weeks
     })
     return Math.ceil(recentPlayTime * 10) / 10
+  }
+
+  private calculateProfileAgeYears = (timeCreate: number): number => {
+    const createdDate = new Date(timeCreate * 1000)
+    const currentDate = new Date()
+
+    let years = currentDate.getFullYear() - createdDate.getFullYear()
+
+    const monthDiff = currentDate.getMonth() - createdDate.getMonth()
+    const daysDiff = currentDate.getDate() - createdDate.getMonth()
+
+    if (monthDiff < 0 || (monthDiff === 0 && daysDiff < 0)) {
+      years--
+    }
+
+    return Math.abs(years)
   }
 
   public isTokenValid = (): Observable<boolean> => {

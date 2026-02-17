@@ -56,7 +56,8 @@ export interface IUser {
   personaState: number;
   status: string;
   primaryClanId: string;
-  timeCreated: number;
+  timeCreated: string;
+  profileAgeYears: number;
   personaStateFlags: number;
   locCountryCode: string;
   displayName: string;
