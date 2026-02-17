@@ -39,7 +39,6 @@ export interface ILoginResponseUser {
 }
 
 export interface IUser {
-  identifier: string;
   steamId: string;
   communityVisibilityState: number;
   profileState: number;
@@ -54,6 +53,7 @@ export interface IUser {
   };
   lastLogoff: string;
   personaState: number;
+  status: string;
   primaryClanId: string;
   timeCreated: number;
   personaStateFlags: number;
@@ -65,6 +65,14 @@ export interface IUser {
   gameCount: number;
   recentlyPlayedGames: IRecentlyPlayedGame[];
   friendList: ISteamFriend[];
+  currentGameId?: string;
+  gameServerIp?: string;
+  currentGameName?: string;
+}
+
+export interface IUserFullResponse {
+  user: ILoginResponseUser;
+  additionalDetails: IFriendListDetailsResponseFriend[];
 }
 
 export interface IGetBadgesResponse {

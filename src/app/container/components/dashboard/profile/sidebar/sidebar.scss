@@ -1,0 +1,39 @@
+.sidebar-cont {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sidebar-user-status {
+  display: flex;
+  flex-direction: column;
+  width: 15vw;
+  height: 5vh;
+}
+
+.ingame-header {
+  color: greenyellow;
+  margin-top: 0;
+  margin-bottom: 5px;
+}
+
+.ingame-details {
+  color: greenyellow;
+  margin-top: 5px;
+  margin-bottom: 0;
+}
+
+.offline-text {
+  color: grey;
+}
+
+.online-text,
+.busy-text,
+.away-text,
+.snooze-text,
+.looking-for-trade-text,
+.looking-to-play-text {
+  color: #50b2c4;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}

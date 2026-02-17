@@ -1,5 +1,7 @@
 <div class="page-cont">
-  <app-nameplate class="nameplate" [user]="user" />
-  <app-recent-games class="recent-games" [recentlyPlayedGames]="user.recentlyPlayedGames" />
-  <app-friends-list class="friend-list" [friendList]="user.friendList" />
+  <div class="profile-cont">
+    <app-nameplate class="nameplate" [user]="user" />
+    <app-recent-games class="recent-games" [recentlyPlayedGames]="user.recentlyPlayedGames" />
+  </div>
+  <app-sidebar class="sidebar" [user]="user" />
 </div>

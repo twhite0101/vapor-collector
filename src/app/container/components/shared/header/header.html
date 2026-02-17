@@ -9,40 +9,6 @@
       </div>
     </div>
   }
-  @if (this.authService.hasLibrary) {
-      <div class="library-panel">
-        <mat-expansion-panel>
-          <mat-expansion-panel-header collapsedHeight="40px" expandedHeight="40px">
-            <mat-panel-description class="games-header-desc">Number of Games: {{ user?.gameCount }}</mat-panel-description>
-          </mat-expansion-panel-header>
-          <div class="mat-expansion-panel-body">
-            <mat-form-field class="games-input-field" appearance="outline" subscriptSizing="dynamic">
-              <mat-label>Search Games</mat-label>
-              <input matInput type="text" [formControl]="filterLibraryControl">
-            </mat-form-field>
-            <cdk-virtual-scroll-viewport class="games-scroll" [itemSize]="user?.gameCount">
-              <div class="game-cards-cont">
-                @for (game of filteredLibrary; track game.name) {
-                  <mat-card appearance="outlined">
-                    <mat-card-content class="game-card">
-                      <div>
-                        <img height="53.75" width="115" mat-card-image [alt]="`Steam library photo for ${game.name}`" [ngSrc]="`https://steamcdn-a.akamaihd.net/steam/apps/${game.appId}/header.jpg`">
-                      </div>
-                      <div>
-                        <div class="details-header">Hours Played</div>
-                        <div class="details-text">Total: {{ game.playtimeForever }}</div>
-                        <div class="details-text">Two Weeks: {{ game.playtime2Weeks }}</div>
-                        <div class="details-text">Steam Deck: {{ game.playtimeDeckForever }}</div>
-                      </div>
-                    </mat-card-content>
-                  </mat-card>
-                }
-              </div>
-            </cdk-virtual-scroll-viewport>
-          </div>
-        </mat-expansion-panel>
-      </div>
-    }
   @if (!this.authService.hasUser) {
     <div class="login-btn-cont">
       <button type="button" class="login-btn" (click)="loginClicked()" >

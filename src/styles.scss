@@ -51,7 +51,7 @@ mat-card {
 
 .games-input-field
 .mat-mdc-text-field-wrapper {
-  max-height: 25px;
+  max-height: 35px;
 }
 
 .games-input-field
@@ -89,7 +89,7 @@ mat-card {
 
   .search-field {
     @include mat.all-component-densities(-5);
-    width: 125px;
+    width: 100%;
     .mat-mdc-form-field-flex{
       align-items: center;
       height: 100% !important;

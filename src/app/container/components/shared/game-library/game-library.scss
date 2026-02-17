@@ -1,0 +1,74 @@
+.library-panel {
+  width: 15vw;
+}
+
+.games-header-desc {
+  font-size: smaller;
+}
+
+.games-scroll {
+  width: 15vw;
+  height: 40vh;
+  border: 1px solid black;
+}
+
+.game-cards-cont {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  width: 15vw;
+}
+
+.game-card {
+  display: flex;
+  flex-direction: row;
+  width: 15vw;
+  height: 53.75px;
+}
+
+.mat-mdc-card-content:first-child {
+  padding: 0px;
+}
+
+.mat-mdc-card-content:last-child {
+  padding: 0px;
+}
+
+.details-cont {
+  display: flex;
+  flex-direction: column;
+  container-type: inline-size;
+}
+
+.details-cont h6 {
+  height: 10px;
+  font-size: 0.7em;
+  white-space: nowrap;
+}
+
+.details-cont small {
+  height: 10px;
+  font-size: 0.5em;
+  white-space: nowrap;
+}
+
+.details-header,
+.details-text {
+  margin: 0;
+}
+
+.games-input-field {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+@media screen and (max-width: 900px) {
+  .library-panel,
+  .game-cards-cont,
+  .game-card,
+  .games-scroll {
+    width: 23vw;
+  }
+}

@@ -1,0 +1,82 @@
+@use '@angular/material' as mat;
+
+.friend-list-cont {
+  width: 15vw;
+}
+
+.friend-list-header-desc {
+  font-size: smaller;
+}
+
+.friend-list-scroll {
+  width: 15vw;
+  height: 40vh;
+  border: 1px solid black;
+}
+
+.friend-list-search {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 15vw;
+  border: 1px solid black;
+}
+
+.search-form-cont {
+  display: flex;
+  align-items: center;
+  width: 75%;
+}
+
+.search-form-cont mat-form-field {
+  width: 100%;
+}
+
+.all-friends-btn-cont {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.friend-cards-cont {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  width: 15vw;
+}
+
+.friend-card-content {
+  display: flex;
+  flex-direction: row;
+  width: 15vw;
+  height: 53.75px;
+}
+
+.friend-details {
+  width: 100%;
+}
+
+.friend-name,
+.friend-online {
+  margin: 0 0 0 10px;
+}
+
+.friend-avi {
+  border: 2px solid greenyellow;
+}
+
+@media screen and (max-width: 900px) {
+  .friend-list-cont,
+  .friend-list-search,
+  .friend-card,
+  .friend-list-scroll,
+  .friend-cards-cont {
+    width: 23vw;
+  }
+}
+
+@media screen and (max-width: 900px) {
+  .search-form-cont {
+    width: 50%;
+  }
+}

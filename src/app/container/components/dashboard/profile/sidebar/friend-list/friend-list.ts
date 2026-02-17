@@ -8,14 +8,16 @@ import { NonNullableFormBuilder, ReactiveFormsModule } from '@angular/forms'
 import { MatAutocompleteModule } from '@angular/material/autocomplete'
 import { MatButtonModule } from '@angular/material/button'
 import { MatCardModule } from '@angular/material/card'
+import { MatExpansionModule } from '@angular/material/expansion'
 import { MatFormFieldModule } from '@angular/material/form-field'
 import { MatInputModule } from '@angular/material/input'
-import type { ISteamFriend } from '../../../../../models/Steam'
-import { StateService } from '../../../../../services/state/state-service'
+import type { ISteamFriend } from '../../../../../../models/Steam'
+import { StateService } from '../../../../../../services/state/state-service'
 
 @Component({
   selector: 'app-friends-list',
   imports: [
+    MatExpansionModule,
     MatCardModule,
     MatAutocompleteModule,
     MatInputModule,

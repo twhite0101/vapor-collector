@@ -1,0 +1,13 @@
+<div class="sidebar-cont">
+  <div class="sidebar-user-status">
+    @if (showCurrentGame) {
+      <h3 class="ingame-header">Currently In-Game</h3>
+      <h4 class="ingame-details">{{ currentGame }}</h4>
+    }
+    @else {
+      <h3 [ngClass]="statusClass">Currently {{ user.status }}</h3>
+    }
+  </div>
+  <app-game-library class="games" [library]="user.gameLibrary" />
+  <app-friends-list class="friend-list" [friendList]="user.friendList" />
+</div>

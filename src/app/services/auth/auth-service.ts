@@ -5,7 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { Router } from '@angular/router'
 import type { Observable } from 'rxjs'
 import { firstValueFrom, forkJoin } from 'rxjs'
-import type { IBadge, IFriendListFullResponse, IGetBadgesResponse, IGetBadgesResponseArray, IGetRecentlyPlayedGamesResponse, IGetRecentlyPlayedGamesResponseInfo, ILoginResponse, ILoginResponseUser, INewsItems, IRecentlyPlayedGame, ISteamFriend, IUser, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse } from '../../models/Steam'
+import type { IBadge, IFriendListDetailsResponseFriend, IFriendListFullResponse, IGetBadgesResponse, IGetBadgesResponseArray, IGetRecentlyPlayedGamesResponse, IGetRecentlyPlayedGamesResponseInfo, ILoginResponse, INewsItems, IRecentlyPlayedGame, ISteamFriend, IUser, IUserFullResponse, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse } from '../../models/Steam'
 import { LoadingService } from '../loading/loading-service'
 import { StateService } from '../state/state-service'
 import { SteamService } from '../steam/data/steam-service'
@@ -70,9 +70,26 @@ export class AuthService {
     return response
   }
 
-  public getUserInfo = (): Observable<[ILoginResponse, IUserGamesLibraryResponse, IGetBadgesResponse, IGetRecentlyPlayedGamesResponse, IFriendListFullResponse]> => {
+  public getUserAdditionalDetails = async (id: string) => {
+    const response = await firstValueFrom(this.http.get<IFriendListDetailsResponseFriend[]>(this.apiUrl + `/user/getFriendListDetails?steamIds=${id}`, { withCredentials: true }))
+    return response
+  }
+
+  public initializeUserDetails = async () => {
+    const user = await this.retrieveUser()
+
+    const userAdditionalDetails = await this.getUserAdditionalDetails(user.response._json.steamid)
+
+    const userFull: IUserFullResponse = {
+      user: user.response,
+      additionalDetails: userAdditionalDetails
+    }
+    return userFull
+  }
+
+  public getUserInfo = (): Observable<[IUserFullResponse, IUserGamesLibraryResponse, IGetBadgesResponse, IGetRecentlyPlayedGamesResponse, IFriendListFullResponse]> => {
     // Get user info
-    const user = this.retrieveUser()
+    const user = this.initializeUserDetails()
 
     // Get user's game library
     const library = this.steamService.getOwnedGames()
@@ -96,7 +113,7 @@ export class AuthService {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: ([user, library, badges, recentlyPlayedGames, friendList]) => {
-          const returnedData = this.mapAuthResponseToUser(user.response, library, badges, recentlyPlayedGames, friendList)
+          const returnedData = this.mapAuthResponseToUser(user, library, badges, recentlyPlayedGames, friendList)
           this._user.set(returnedData)
           this._hasUser.set(true)
           this._hasLibrary.set(true)
@@ -153,28 +170,28 @@ export class AuthService {
     return !!this.getLoggedInStatus()
   }
 
-  public mapAuthResponseToUser = (user: ILoginResponseUser, library: IUserGamesLibraryResponse, badges: IGetBadgesResponse, recentlyPlayedGames: IGetRecentlyPlayedGamesResponse, friendList: IFriendListFullResponse): IUser => {
+  public mapAuthResponseToUser = (userFull: IUserFullResponse, library: IUserGamesLibraryResponse, badges: IGetBadgesResponse, recentlyPlayedGames: IGetRecentlyPlayedGamesResponse, friendList: IFriendListFullResponse): IUser => {
     const returnedUser: IUser = {
-      identifier: user.identifier,
-      steamId: user._json.steamid,
-      communityVisibilityState: user._json.communityvisibilitystate,
-      profileState: user._json.profilestate,
-      personaName: user._json.personaname,
-      commentPermission: user._json.commentpermission,
-      profileUrl: user._json.profileurl,
+      steamId: userFull.user._json.steamid,
+      communityVisibilityState: userFull.user._json.communityvisibilitystate,
+      profileState: userFull.user._json.profilestate,
+      personaName: userFull.user._json.personaname,
+      commentPermission: userFull.user._json.commentpermission,
+      profileUrl: userFull.user._json.profileurl,
       avatars: {
-        avatar: user._json.avatar,
-        avatarMedium: user._json.avatarmedium,
-        avatarFull: user._json.avatarfull,
-        avatarHash: user._json.avatarhash
+        avatar: userFull.user._json.avatar,
+        avatarMedium: userFull.user._json.avatarmedium,
+        avatarFull: userFull.user._json.avatarfull,
+        avatarHash: userFull.user._json.avatarhash
       },
-      lastLogoff: this.convertUnixTimeToCurrentTime(user._json.lastlogoff),
-      personaState: user._json.personastate,
-      primaryClanId: user._json.primaryclanid,
-      timeCreated: user._json.timecreated,
-      personaStateFlags: user._json.personastateflags,
-      locCountryCode: user._json.loccountrycode,
-      displayName: user.displayName,
+      lastLogoff: this.convertUnixTimeToCurrentTime(userFull.user._json.lastlogoff),
+      personaState: userFull.user._json.personastate,
+      status: this.setUserStatus(userFull.user._json.personastate),
+      primaryClanId: userFull.user._json.primaryclanid,
+      timeCreated: userFull.user._json.timecreated,
+      personaStateFlags: userFull.user._json.personastateflags,
+      locCountryCode: userFull.user._json.loccountrycode,
+      displayName: userFull.user.displayName,
       badges: this.mapBadgesResponse(badges.badges),
       playerLevel: {
         playerXp: badges.player_xp,
@@ -185,10 +202,43 @@ export class AuthService {
       gameLibrary: this.mapGameLibraryResponse(library.games),
       gameCount: library.game_count,
       recentlyPlayedGames: this.sortRecentlyPlayedGame(this.mapRecentlyPlayedGamesResponse(recentlyPlayedGames.games, library.games)),
-      friendList: this.mapFriendListResponse(friendList)
+      friendList: this.mapFriendListResponse(friendList),
+      currentGameId: userFull.additionalDetails[0].gameid !== undefined ? userFull.additionalDetails[0].gameid: '',
+      gameServerIp: userFull.additionalDetails[0].gameserverip !== undefined ? userFull.additionalDetails[0].gameserverip : '',
+      currentGameName: userFull.additionalDetails[0].gameextrainfo !== undefined ? userFull.additionalDetails[0].gameextrainfo : ''
     }
 
     return returnedUser
+  }
+
+  private setUserStatus = (personaState: number): string => {
+    let status: string
+    switch (personaState) {
+      case 0:
+        status = 'Offline'
+        break
+      case 1:
+        status = 'Online'
+        break
+      case 2:
+        status = 'Busy'
+        break
+      case 3:
+        status = 'Away'
+        break
+      case 4:
+        status = 'Snooze'
+        break
+      case 5:
+        status = 'looking for trade'
+        break
+      case 6:
+        status = 'looking to play'
+        break
+      default:
+        status = ''
+    }
+    return status
   }
 
   private mapBadgesResponse = (responses: IGetBadgesResponseArray[]): IBadge[] => {

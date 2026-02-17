@@ -1,18 +1,37 @@
 .page-cont {
   display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+
+.profile-cont {
+  display: flex;
   flex-direction: column;
   height: 100%;
-  width: 100%;
-  align-items: center;
+  width: 80%;
+  margin-left: 25px;
   padding-top: 10px;
 }
 
-.nameplate {
-  width: 90%;
+@media screen and (max-width: 900px) {
+  .profile-cont {
+    width: 70%;
+  }
+}
+
+.sidebar {
+  width: 20%;
+  padding-left: 25px;
+  padding-right: 25px;
+}
+
+@media screen and (max-width: 900px) {
+  .sidebar {
+    width: 30%;
+  }
 }
 
 .recent-games {
-  width: 90%;
   margin-top: 10px;
   margin-bottom: 10px;
 }
