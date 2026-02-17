@@ -1,15 +1,14 @@
-@if (user) {
-  <div class="nameplate-cont">
-    <div class="nameplate-av-name-cont">
-      <img class="steam-avi-full" alt="Steam user avatar" height="184" width="184" priority [ngSrc]="avatars[0]">
-      <div class="name-cont">
-        <h1 class="display-name">{{ user.displayName }}</h1>
-        <div [ngClass]="`fi fi-${countryCode}`"></div>
-      </div>
-    </div>
-    <div class="level-cont">
-      <app-steam-level [level]="user.playerLevel.playerLevel" [size]="64" />
-      <p class="last-login">Last Login: {{ user.lastLogoff | date: 'mediumDate' }}</p>
+<div class="nameplate-cont">
+  <div class="nameplate-av-name-cont">
+    <img class="steam-avi-full" alt="Steam user avatar" height="184" width="184" priority [ngSrc]="avatars[0]">
+    <div class="name-cont">
+      <h1 class="display-name">{{ user.displayName }}</h1>
+      <div [ngClass]="`fi fi-${countryCode}`"></div>
     </div>
   </div>
-}
+  <div class="level-cont">
+    <app-steam-level [level]="user.playerLevel.playerLevel" [size]="64" />
+    <h5>Steam Level World Percentile: {{ levelPercentile }}%</h5>
+    <p class="last-login">Last Login: {{ user.lastLogoff | date: 'mediumDate' }}</p>
+  </div>
+</div>

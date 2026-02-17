@@ -84,6 +84,15 @@ export interface IGetBadgesResponse {
   player_xp_needed_current_level: number;
 }
 
+export interface IPlayLevelPercentileResponse {
+  player_level_percentile: number;
+}
+
+export interface IGetBadgesFullResponse {
+  badges: IGetBadgesResponse;
+  levelPercentile: IPlayLevelPercentileResponse;
+}
+
 export interface IGetBadgesResponseArray {
   badgeid: number;
   level: number;
@@ -105,6 +114,7 @@ export interface IPlayerLevel {
   playerLevel: number;
   playerXpNeededToLevelUp: number;
   playerXpNeededCurrentLevel: number;
+  levelPercentile: number;
 }
 
 export interface IStatus {

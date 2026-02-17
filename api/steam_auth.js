@@ -142,6 +142,23 @@ app.get('/auth/user', ensureAuthenticated, (req, res) => {
     }
   });
 
+  app.get('/user/levelPercent', ensureAuthenticated, (req, res) => {
+  const token = req.cookies.access;
+  const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_KEY)
+  if (!decoded) {
+    res.statusCode(401).json('Unauthorized user');
+  }
+  const level = req.query.level
+  axios
+    .get(`https://api.steampowered.com/IPlayerService/GetSteamLevelDistribution/v1/?key=${process.env.STEAM_API_KEY}&player_level=${level}`)
+    .then(response => {
+      res.send(response.data.response)
+    })
+    .catch(err => {
+      console.error(err)
+    })
+  });
+
 app.get('/user/getGameLibrary', ensureAuthenticated, (req, res) => {
   const token = req.cookies.access;
   const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_KEY)

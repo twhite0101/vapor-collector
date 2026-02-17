@@ -5,7 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { Router } from '@angular/router'
 import type { Observable } from 'rxjs'
 import { firstValueFrom, forkJoin } from 'rxjs'
-import type { IBadge, IFriendListDetailsResponseFriend, IFriendListFullResponse, IGetBadgesResponse, IGetBadgesResponseArray, IGetRecentlyPlayedGamesResponse, IGetRecentlyPlayedGamesResponseInfo, ILoginResponse, INewsItems, IRecentlyPlayedGame, ISteamFriend, IUser, IUserFullResponse, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse } from '../../models/Steam'
+import type { IBadge, IFriendListDetailsResponseFriend, IFriendListFullResponse, IGetBadgesFullResponse, IGetBadgesResponseArray, IGetRecentlyPlayedGamesResponse, IGetRecentlyPlayedGamesResponseInfo, ILoginResponse, INewsItems, IRecentlyPlayedGame, ISteamFriend, IUser, IUserFullResponse, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse } from '../../models/Steam'
 import { LoadingService } from '../loading/loading-service'
 import { StateService } from '../state/state-service'
 import { SteamService } from '../steam/data/steam-service'
@@ -87,7 +87,7 @@ export class AuthService {
     return userFull
   }
 
-  public getUserInfo = (): Observable<[IUserFullResponse, IUserGamesLibraryResponse, IGetBadgesResponse, IGetRecentlyPlayedGamesResponse, IFriendListFullResponse]> => {
+  public getUserInfo = (): Observable<[IUserFullResponse, IUserGamesLibraryResponse, IGetBadgesFullResponse, IGetRecentlyPlayedGamesResponse, IFriendListFullResponse]> => {
     // Get user info
     const user = this.initializeUserDetails()
 
@@ -170,7 +170,7 @@ export class AuthService {
     return !!this.getLoggedInStatus()
   }
 
-  public mapAuthResponseToUser = (userFull: IUserFullResponse, library: IUserGamesLibraryResponse, badges: IGetBadgesResponse, recentlyPlayedGames: IGetRecentlyPlayedGamesResponse, friendList: IFriendListFullResponse): IUser => {
+  public mapAuthResponseToUser = (userFull: IUserFullResponse, library: IUserGamesLibraryResponse, badgesFull: IGetBadgesFullResponse, recentlyPlayedGames: IGetRecentlyPlayedGamesResponse, friendList: IFriendListFullResponse): IUser => {
     const returnedUser: IUser = {
       steamId: userFull.user._json.steamid,
       communityVisibilityState: userFull.user._json.communityvisibilitystate,
@@ -193,12 +193,13 @@ export class AuthService {
       personaStateFlags: userFull.user._json.personastateflags,
       locCountryCode: userFull.user._json.loccountrycode,
       displayName: userFull.user.displayName,
-      badges: this.mapBadgesResponse(badges.badges),
+      badges: this.mapBadgesResponse(badgesFull.badges.badges),
       playerLevel: {
-        playerXp: badges.player_xp,
-        playerLevel: badges.player_level,
-        playerXpNeededToLevelUp: badges.player_xp_needed_to_level_up,
-        playerXpNeededCurrentLevel: badges.player_xp_needed_current_level
+        playerXp: badgesFull.badges.player_xp,
+        playerLevel: badgesFull.badges.player_level,
+        playerXpNeededToLevelUp: badgesFull.badges.player_xp_needed_to_level_up,
+        playerXpNeededCurrentLevel: badgesFull.badges.player_xp_needed_current_level,
+        levelPercentile: Math.ceil(badgesFull.levelPercentile.player_level_percentile * 100 ) / 100
       },
       gameLibrary: this.mapGameLibraryResponse(library.games),
       gameCount: library.game_count,

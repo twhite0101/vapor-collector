@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http'
 import { inject, Injectable } from '@angular/core'
 import type { Observable } from 'rxjs'
 import { firstValueFrom, forkJoin } from 'rxjs'
-import type { IFriendListDetailsResponseFriend, IFriendListFullResponse, IFriendListResponseFriend, IGetBadgesResponse, IGetGameNewsResponse, IGetRecentlyPlayedGamesResponse, IUserGamesLibraryResponse } from '../../../models/Steam'
+import type { IFriendListDetailsResponseFriend, IFriendListFullResponse, IFriendListResponseFriend, IGetBadgesFullResponse, IGetBadgesResponse, IGetGameNewsResponse, IGetRecentlyPlayedGamesResponse, IPlayLevelPercentileResponse, IUserGamesLibraryResponse } from '../../../models/Steam'
 
 @Injectable({
   providedIn: 'root'
@@ -20,8 +20,16 @@ export class SteamService {
   }
 
   public getUserBadges = async () => {
-    const response = await firstValueFrom(this.http.get<IGetBadgesResponse>(this.apiUrl + '/user/getUserBadges', { withCredentials: true }))
-    return response
+    const badgesDetails = await firstValueFrom(this.http.get<IGetBadgesResponse>(this.apiUrl + '/user/getUserBadges', { withCredentials: true }))
+
+    const levelPercentile = await firstValueFrom(this.http.get<IPlayLevelPercentileResponse>(this.apiUrl + `/user/levelPercent?level=${badgesDetails.player_level}`, { withCredentials: true }))
+
+    const badges: IGetBadgesFullResponse = {
+      badges: badgesDetails,
+      levelPercentile: levelPercentile
+    }
+
+    return badges
   }
 
   public getRecentlyPlayedGames = async () => {

@@ -22,21 +22,21 @@ export class Nameplate implements OnInit {
   protected readonly authService: AuthService = inject(AuthService)
   private readonly state: StateService = inject(StateService)
 
-  @Input() public user: IUser
+  @Input({ required: true }) public user: IUser
 
   // User
   protected avatars: string[]
   protected countryCode: string
+  protected levelPercentile: number
 
   public ngOnInit (): void {
-    if (this.user) {
-      this.avatars = [
-        this.user.avatars.avatarFull,
-        this.user.avatars.avatar,
-        this.user.avatars.avatarMedium
-      ]
-      this.countryCode = this.user.locCountryCode.toLowerCase()
-    }
+    this.avatars = [
+      this.user.avatars.avatarFull,
+      this.user.avatars.avatar,
+      this.user.avatars.avatarMedium
+    ]
+    this.countryCode = this.user.locCountryCode.toLowerCase()
+    this.levelPercentile = this.user.playerLevel.levelPercentile
     this.state.setNamePlateStatus(true)
   }
 }
