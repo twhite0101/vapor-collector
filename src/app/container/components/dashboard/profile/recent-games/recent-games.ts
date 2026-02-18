@@ -1,7 +1,8 @@
-import { NgOptimizedImage } from '@angular/common'
+import { DatePipe, NgOptimizedImage } from '@angular/common'
 import type { OnInit } from '@angular/core'
 import { Component, inject, Input } from '@angular/core'
 import { MatCardModule } from '@angular/material/card'
+import { CarouselModule } from 'primeng/carousel'
 import { ImageFallback } from '../../../../../directives/image-fallback/image-fallback'
 import type { IRecentlyPlayedGame } from '../../../../../models/Steam'
 import { StateService } from '../../../../../services/state/state-service'
@@ -11,7 +12,9 @@ import { StateService } from '../../../../../services/state/state-service'
   imports: [
     MatCardModule,
     NgOptimizedImage,
-    ImageFallback
+    ImageFallback,
+    DatePipe,
+    CarouselModule
   ],
   templateUrl: './recent-games.html',
   styleUrl: './recent-games.scss'

@@ -99,3 +99,20 @@ mat-card {
     }
   }
 }
+
+.recent-games-cont {
+  .p-carousel {
+    width: 75vw;
+  }
+  .p-carousel-content{
+    width: 75vw;
+  }
+  .p-carousel-item {
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 0.5rem;
+  }
+  .p-carousel-content h4, p {
+    margin: 0px;
+  }
+}

@@ -1,34 +1,42 @@
 <div class="recent-games-cont">
-  <div class="recent-title-status-cont">
-    <h3 class="recent-title">Recently Activity</h3>
-    <h3 class="recent-time">{{ recentPlayTime }} hours past 2 weeks</h3>
-  </div>
-  <div class="game-cards-cont">
-    @for (game of displayedRecentGames; track game.name) {
-      <mat-card class="recent-game-card" appearance="outlined">
-        <mat-card-content class="recent-game-card-content">
-          <div>
-            <img mat-card-image height="150" width="100" sizes="(max-width: 900px) 7vw, 14vw" appImageFallback="assets/cover_not_available.png" [alt]="`Steam library photo for ${game.name}`" [ngSrc]="`https://steamcdn-a.akamaihd.net/steam/apps/${game.appId}/library_600x900_2x.jpg`">
-          </div>
-          <div class="game-info">
-            <h4>{{ game.name }}</h4>
-            <div class="game-hours">
-              <div class="hour-cont">
-                <h4 class="hour-title">Total </h4>
-                <p class="hour-value">{{ game.playtimeForever }} hrs</p>
+  <div class="card">
+    <p-carousel [value]="recentlyPlayedGames" [numVisible]="3" [numScroll]="3" [circular]="true">
+      <ng-template #header>
+        <div class="header-cont">
+          <h4>Recent Activity</h4>
+          <h4>{{ recentPlayTime }} hours past 2 weeks</h4>
+        </div>
+      </ng-template>
+      <ng-template #item let-recent>
+        @for (game of [recent]; track game.name) {
+          <div class="game-cont">
+            <div class="img-hour-cont">
+              <img class="game-img" height="107.5" width="230" appImageFallback="assets/cover_not_available.png" [ngSrc]="`https://steamcdn-a.akamaihd.net/steam/apps/${game.appId}/header.jpg`" [alt]="game.name"/>
+              <div class="game-hours-overlay">
+                <div class="hours-cont">
+                  <h4 class="hour-title">Total</h4>
+                  <p class="hour-value">{{ game.playtimeForever }} hours</p>
+                </div>
+                <div class="hours-cont">
+                  <h4 class="hour-title">Two Weeks</h4>
+                  <p class="hour-value">{{ game.playtime2Weeks }} hours</p>
+                </div>
+                <div class="hours-cont">
+                  <h4 class="hour-title">Steam Deck</h4>
+                  <p class="hour-value">{{ game.playtimeDeckForever }} hours</p>
+                </div>
               </div>
-              <div class="hour-cont">
-                <h4 class="hour-title">Two Weeks </h4>
-                <p class="hour-value">{{ game.playtime2Weeks }} hrs</p>
-              </div>
-              <div class="hour-cont">
-                <h4 class="hour-title">Steam Deck </h4>
-                <p class="hour-value">{{ game.playtimeDeckForever }} hrs</p>
+            </div>
+            <div class="game-details">
+              <h3>{{ game.name }}</h3>
+              <div class="game-last-played">
+                <h4>Last Played On</h4>
+                <p>{{ game.dateLastPlayed | date: 'mediumDate' }}</p>
               </div>
             </div>
           </div>
-        </mat-card-content>
-      </mat-card>
-    }
+        }
+      </ng-template>
+    </p-carousel>
   </div>
 </div>
