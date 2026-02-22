@@ -1,0 +1,264 @@
+.game-dialog-cont {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.spinner-cont {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.game-dialog-details-cont {
+  height: 445px;
+}
+
+.header-cont {
+  width: 100%;
+}
+
+.header-title-overlay h2 {
+  margin: 10px;
+}
+
+.news-cont {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  width: 100%;
+}
+
+.game-dialog-tabs {
+  display: flex;
+  flex-direction: column;
+}
+
+.mat-tab-body-wrapper {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.mat-tab-body,
+.mat-tab-body-content {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.game-dialog-tabs .mat-mdc-tab-header {
+  overflow: hidden;
+}
+
+.game-dialog-tabs .mat-mdc-tab-list {
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.game-dialog-tabs .mat-mdc-tab-list {
+  flex: 0 0 200px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.player-details-cont {
+  display: flex;
+  flex-direction: row;
+  margin-top: 5px;
+}
+
+.game-hours-cont {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 350px;
+  width: 50%;
+  border: 1px solid #ccc;
+  margin-left: 5px;
+  margin-right: 2.5px;
+  padding-left: 50px;
+  padding-right: 50px;
+}
+
+.game-hours-cont h3 {
+  margin: 0px;
+}
+
+.hours-cont {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  height: fit-content;
+}
+
+.hours-cont h4 {
+  margin: 0px 5px 0px 0px;
+}
+
+.hours-cont p {
+  margin: 0px 0px 0px 5px;
+}
+
+.friends-who-play-cont h3 {
+  margin: 0px;
+  text-align: center;
+}
+
+.friends-who-play-cont {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 50%;
+  border: 1px solid #ccc;
+  height: 350px;
+  margin-right: 5px;
+  margin-left: 2.5px;
+}
+
+.fwp-details-cont {
+  width: 260px;
+  height: 210px;
+  text-align: center;
+  padding: 20px;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-left: 45px;
+}
+
+.fwp-img-cont {
+  position: relative;
+  height: 200px;
+  aspect-ratio: 1;
+}
+
+.news-cont {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.news-cont p-carousel {
+  height: 100%;
+  width: 100%;
+}
+
+.piece-cont {
+  width: 260px;
+  height: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid black;
+  margin-top: 5px;
+}
+
+.piece-cont img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.article-title-cont {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 100%;
+}
+
+.media-cont {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.news-img-cont {
+  position: relative;
+  width: 100%;
+  height: 150px;
+  aspect-ratio: 1.5/1;
+}
+
+.details-cont {
+  display: flex;
+  flex-direction: column;
+}
+
+.piece-site-text,
+.piece-author-text {
+  font-size: small;
+  margin: 0;
+}
+
+.achievements-cont {
+  margin-top: 50px;
+}
+
+.article-title-cont h4 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.achieve-img-cont {
+  position: relative;
+  height: 80px;
+  aspect-ratio: 1;
+}
+
+.achieve-cont {
+  width: 260px;
+  height: 210px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid black;
+  margin-top: 5px;
+}
+
+.achieve-title-cont h3 {
+  margin: 0px;
+}
+
+.achieve-details-cont {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.achieve-details-cont h5 {
+  width: 200px;
+  text-align: center;
+}
+
+.achieve-description-text {
+  font-style: italic;
+}
+
+.unlock-cont {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.unlock-cont p {
+  margin: 0px;
+}

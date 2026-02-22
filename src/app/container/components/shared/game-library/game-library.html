@@ -13,8 +13,10 @@
           @for (game of filteredLibrary; track game.name) {
             <mat-card appearance="outlined">
               <mat-card-content class="game-card">
-                <div>
-                  <img height="53.75" width="115" mat-card-image [alt]="`Steam library photo for ${game.name}`" [ngSrc]="`https://steamcdn-a.akamaihd.net/steam/apps/${game.appId}/header.jpg`">
+                <div class="game-btn-cont">
+                  <button type="button" class="game-btn" (click)="openGameDialog(game)">
+                    <img height="53.75" width="115" mat-card-image [alt]="`Steam library photo for ${game.name}`" [ngSrc]="`https://steamcdn-a.akamaihd.net/steam/apps/${game.appId}/header.jpg`">
+                  </button>
                 </div>
                 <div class="details-cont">
                   <h6 class="details-header">Hours Played</h6>

@@ -1,0 +1,153 @@
+@if (loading) {
+  <div class="spinner-cont">
+    <mat-progress-bar mode="indeterminate" />
+  </div>
+}
+@else {
+  <div class="game-dialog-cont">
+    <div class="header-cont">
+      <img class="header-img" height="430" width="920" [ngSrc]="`https://steamcdn-a.akamaihd.net/steam/apps/${gameDetails.game.appId}/header.jpg`" [alt]="gameDetails.game.name"/>
+    </div>
+    <div class="game-dialog-details-cont">
+      <div class="header-title-overlay">
+        <h2>{{ gameDetails.game.name }}</h2>
+      </div>
+      <mat-tab-group class="game-dialog-tabs">
+        <mat-tab class="player-details-tab" label="Player Details">
+          <div class="player-details-cont">
+            <div class="game-hours-cont">
+              <h3>Hours Played</h3>
+              <div class="hours-cont">
+                <h4 class="hour-title">Total: </h4>
+                <p class="hour-value">{{ gameDetails.game.playtimeForever }} hours</p>
+              </div>
+              <div class="hours-cont">
+                <h4 class="hour-title">Last 2 Weeks: </h4>
+                <p class="hour-value">{{ gameDetails.game.playtime2Weeks }} hours</p>
+              </div>
+              <div class="hours-cont">
+                <h4 class="hour-title">Steam Deck: </h4>
+                <p class="hour-value">{{ gameDetails.game.playtimeDeckForever }} hours</p>
+              </div>
+              <div class="hours-cont">
+                <h4 class="hour-title">Windows: </h4>
+                <p class="hour-value">{{ gameDetails.game.playtimeWindowsForever }} hours</p>
+              </div>
+              <div class="hours-cont">
+                <h4 class="hour-title">Mac: </h4>
+                <p class="hour-value">{{ gameDetails.game.playtimeMacForever }} hours</p>
+              </div>
+              <div class="hours-cont">
+                <h4 class="hour-title">Linux: </h4>
+                <p class="hour-value">{{ gameDetails.game.playtimeLinuxForever }} hours</p>
+              </div>
+              <div class="hours-cont">
+                <h4 class="hour-title">Disconnected: </h4>
+                <p class="hour-value">{{ gameDetails.game.playtimeDisconnected }} hours</p>
+              </div>
+            </div>
+            <div class="friends-who-play-cont">
+              <h3>Friends Who Play: {{ gameDetails.friendsWhoPlay.length }}</h3>
+              <p-carousel [value]="gameDetails.friendsWhoPlay" [numVisible]="1" [numScroll]="1" [circular]="true">
+                <ng-template #item let-friendPlay>
+                  @for (friend of [friendPlay]; track friend) {
+                    <div class="fwp-details-cont">
+                      <div class="fwp-name-cont">
+                        <h4>{{ friend.displayName }}</h4>
+                      </div>
+                      <div class="fwp-img-cont">
+                        <img fill [ngSrc]="friend.avatars.avatarFull" [alt]="friend.displayName"/>
+                      </div>
+                      <div class="fwp-hour-cont">
+                        <div class="hours-cont">
+                          <h4 class="hour-title">Total: </h4>
+                          <p class="hour-value">{{ friend.selectedGame.playtimeForever }} hours</p>
+                        </div>
+                        <div class="hours-cont">
+                          <h4 class="hour-title">Last 2 Weeks: </h4>
+                          <p class="hour-value">{{ friend.selectedGame.playtime2Weeks }} hours</p>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </ng-template>
+              </p-carousel>
+            </div>
+          </div>
+        </mat-tab>
+        <mat-tab label="News">
+          <div class="news-cont">
+            <p-carousel [value]="gameDetails.news" [numVisible]="3" [numScroll]="1" [circular]="true" [responsiveOptions]="responsiveOptions">
+              <ng-template #item let-article>
+                @for (piece of [article]; track piece) {
+                  <div class="piece-cont">
+                    <div class="article-title-cont">
+                      <h4>{{ piece.title }}</h4>
+                    </div>
+                    <div class="media-cont">
+                      @if (piece.previewImg && !piece.videoLink) {
+                        <a target="_blank" [href]="piece.url">
+                          <div class="news-img-cont">
+                            <img fill [ngSrc]="piece.previewImg"  [alt]="piece.title"/>
+                          </div>
+                        </a>
+                      }
+                      @if (piece.videoLink) {
+                        <iframe frameborder="0" height="115" width="230" [src]="piece.videoLink"></iframe>
+                      }
+                    </div>
+                    <div class="details-cont">
+                      <h5 class="piece-site-text">{{ piece.feedName }}</h5>
+                      <h6 class="piece-author-text">{{ piece.author }}</h6>
+                    </div>
+                  </div>
+                }
+              </ng-template>
+            </p-carousel>
+          </div>
+        </mat-tab>
+        <mat-tab label="Achievements">
+          <div class="achievements-cont">
+            <p-carousel [value]="gameDetails.achievements" [numVisible]="3" [numScroll]="1" [circular]="true">
+              <ng-template #item let-achievement>
+                @for (achieve of [achievement]; track achieve) {
+                  <div class="achieve-cont">
+                    <div class="achieve-title-cont">
+                      <h3>{{ achieve.displayName }}</h3>
+                    </div>
+                    <div class="media-cont">
+                      <div class="achieve-img-cont">
+                        @if (achievement.achieved) {
+                          <img fill [ngSrc]="achieve.icon" [alt]="achieve.displayName"/>
+                        }
+                        @else {
+                          <img fill [ngSrc]="achieve.iconGray" [alt]="achieve.displayName"/>
+                        }
+                      </div>
+                    </div>
+                    <div class="achieve-details-cont">
+                      <h5 class="achieve-description-text">{{ achieve.description }}</h5>
+                      <div class="unlock-cont">
+                        @if (achieve.achieved) {
+                          <h4 class="unlock-date-title">Date Unlocked: </h4>
+                          <p class="unlock-date-value">{{ achieve.unlockTime | date: 'mediumDate' }}</p>
+                        }
+                        @else if (!achieve.hidden) {
+                          <h4 class="unlock-date-title">Date Unlocked: </h4>
+                          <p class="unlock-date-value">Locked</p>
+                        }
+                        @else {
+                          <h4 class="unlock-date-title">Hidden</h4>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                }
+              </ng-template>
+            </p-carousel>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </div>
+  </div>
+}
