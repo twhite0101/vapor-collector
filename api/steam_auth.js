@@ -166,8 +166,15 @@ app.get('/user/getGameLibrary', ensureAuthenticated, (req, res) => {
     res.statusCode(401).json('Unauthorized user');
   }
   const user = decoded.user
+  let steamId
+  if (req.query.steamId) {
+    steamId = req.query.steamId
+  }
+  else {
+    steamId = user.id
+  }
   axios
-    .get(`https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${process.env.STEAM_API_KEY}&steamid=${user.id}&format=json&include_played_free_games=1&include_appinfo=1&include_extended_appinfo=1`)
+    .get(`https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${process.env.STEAM_API_KEY}&steamid=${steamId}&format=json&include_played_free_games=1&include_appinfo=1&include_extended_appinfo=1`)
     .then(response => {
       res.send(response.data.response)
     })
@@ -248,7 +255,7 @@ app.get('/user/getFriendListDetails', ensureAuthenticated, (req, res) => {
     })
 })
 
-app.get('/user/getNewsForGame', ensureAuthenticated, (req, res) => {
+app.get('/game/getNewsForGame', ensureAuthenticated, (req, res) => {
   const token = req.cookies.access;
   const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_KEY)
   if (!decoded) {
@@ -262,6 +269,94 @@ app.get('/user/getNewsForGame', ensureAuthenticated, (req, res) => {
     .get(`https://api.steampowered.com/ISteamNews/GetNewsForApp/v2/?key=${process.env.STEAM_API_KEY}&appid=${appId}`)
     .then(response => {
       res.send(response.data.appnews)
+    })
+    .catch(err => {
+      console.error(err)
+      res.send(err)
+    })
+})
+
+app.get('/game/getConcurrentPlayers', ensureAuthenticated, (req, res) => {
+  const token = req.cookies.access;
+  const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_KEY)
+  if (!decoded) {
+    res.statusCode(401).json('Unauthorized user');
+  }
+  const appId = req.query.appId
+  if (!appId) {
+    res.statusCode(400).json('App ID for game was not provided.');
+  }
+  axios
+    .get(`https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?key=${process.env.STEAM_API_KEY}&appid=${appId}`)
+    .then(response => {
+      res.send(response.data.response.player_count)
+    })
+    .catch(err => {
+      console.error(err)
+      res.send(err)
+    })
+})
+
+app.get('/game/getUserStatsForGame', ensureAuthenticated, (req, res) => {
+  const token = req.cookies.access;
+  const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_KEY)
+  if (!decoded) {
+    res.statusCode(401).json('Unauthorized user');
+  }
+  const user = decoded.user
+  const appId = req.query.appId
+  if (!appId) {
+    res.statusCode(400).json('App ID for game was not provided.');
+  }
+  axios
+    .get(`https://api.steampowered.com/ISteamUserStats/GetUserStatsForGame/v2/?key=${process.env.STEAM_API_KEY}&steamid=${user.id}&appid=${appId}`)
+    .then(response => {
+      res.send(response.data)
+    })
+    .catch(err => {
+      console.error(err)
+      res.send(err)
+    })
+})
+
+app.get('/game/getSchemaForGame', ensureAuthenticated, (req, res) => {
+  const token = req.cookies.access;
+  const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_KEY)
+  if (!decoded) {
+    res.statusCode(401).json('Unauthorized user');
+  }
+  const user = decoded.user
+  const appId = req.query.appId
+  if (!appId) {
+    res.statusCode(400).json('App ID for game was not provided.');
+  }
+  axios
+    .get(`https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?key=${process.env.STEAM_API_KEY}&appid=${appId}`)
+    .then(response => {
+      res.send(response.data.game)
+    })
+    .catch(err => {
+      console.error(err)
+      res.send(err)
+    })
+})
+
+app.get('/game/getUserAchievements', ensureAuthenticated, (req, res) => {
+  const token = req.cookies.access;
+  const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_KEY)
+  if (!decoded) {
+    res.statusCode(401).json('Unauthorized user');
+  }
+  const user = decoded.user
+  const steamId = req.query.steamId !== undefined ? req.query.steamId : user.id
+  const appId = req.query.appId
+  if (!appId) {
+    res.statusCode(400).json('App ID for game was not provided.');
+  }
+  axios
+    .get(`https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key=${process.env.STEAM_API_KEY}&steamid=${steamId}&appid=${appId}`)
+    .then(response => {
+      res.send(response.data.playerstats)
     })
     .catch(err => {
       console.error(err)

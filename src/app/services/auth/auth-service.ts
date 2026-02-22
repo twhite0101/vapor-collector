@@ -5,7 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { Router } from '@angular/router'
 import type { Observable } from 'rxjs'
 import { firstValueFrom, forkJoin } from 'rxjs'
-import type { IBadge, IFriendListDetailsResponseFriend, IFriendListFullResponse, IGetBadgesFullResponse, IGetBadgesResponseArray, IGetRecentlyPlayedGamesResponse, IGetRecentlyPlayedGamesResponseInfo, ILoginResponse, INewsItems, IRecentlyPlayedGame, ISteamFriend, IUser, IUserFullResponse, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse } from '../../models/Steam'
+import type { IBadge, IFriendGameResponse, IFriendListDetailsResponseFriend, IFriendListFullResponse, IGetBadgesFullResponse, IGetBadgesResponseArray, ILoginResponse, ISteamFriend, IUser, IUserFullResponse, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse } from '../../models/Steam'
 import { LoadingService } from '../loading/loading-service'
 import { StateService } from '../state/state-service'
 import { SteamService } from '../steam/data/steam-service'
@@ -87,7 +87,7 @@ export class AuthService {
     return userFull
   }
 
-  public getUserInfo = (): Observable<[IUserFullResponse, IUserGamesLibraryResponse, IGetBadgesFullResponse, IGetRecentlyPlayedGamesResponse, IFriendListFullResponse]> => {
+  public getUserInfo = (): Observable<[IUserFullResponse, IUserGamesLibraryResponse, IGetBadgesFullResponse, IFriendListFullResponse]> => {
     // Get user info
     const user = this.initializeUserDetails()
 
@@ -97,14 +97,11 @@ export class AuthService {
     // Get user's badge and account level info
     const badges = this.steamService.getUserBadges()
 
-    // Get user's recently played games info
-    const recentlyPlayedGames = this.steamService.getRecentlyPlayedGames()
-
     // Get user's friend list
     const friendList = this.steamService.initializeFriendList()
 
     // Return array of observables of requests as a fork join
-    return forkJoin([user, library, badges, recentlyPlayedGames, friendList])
+    return forkJoin([user, library, badges, friendList])
   }
 
   public initializeUser = () => {
@@ -112,8 +109,8 @@ export class AuthService {
     this.getUserInfo()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: ([user, library, badges, recentlyPlayedGames, friendList]) => {
-          const returnedData = this.mapAuthResponseToUser(user, library, badges, recentlyPlayedGames, friendList)
+        next: ([user, library, badges, friendList]) => {
+          const returnedData = this.mapAuthResponseToUser(user, library, badges, friendList)
           this._user.set(returnedData)
           this._hasUser.set(true)
           this._hasLibrary.set(true)
@@ -170,7 +167,7 @@ export class AuthService {
     return !!this.getLoggedInStatus()
   }
 
-  public mapAuthResponseToUser = (userFull: IUserFullResponse, library: IUserGamesLibraryResponse, badgesFull: IGetBadgesFullResponse, recentlyPlayedGames: IGetRecentlyPlayedGamesResponse, friendList: IFriendListFullResponse): IUser => {
+  public mapAuthResponseToUser = (userFull: IUserFullResponse, library: IUserGamesLibraryResponse, badgesFull: IGetBadgesFullResponse, friendList: IFriendListFullResponse): IUser => {
     const returnedUser: IUser = {
       steamId: userFull.user._json.steamid,
       communityVisibilityState: userFull.user._json.communityvisibilitystate,
@@ -185,7 +182,6 @@ export class AuthService {
         avatarHash: userFull.user._json.avatarhash
       },
       lastLogoff: this.convertUnixTimeToCurrentTime(userFull.user._json.lastlogoff),
-      playTime2Weeks: this.calculateRecentPlayTime(recentlyPlayedGames.games),
       personaState: userFull.user._json.personastate,
       status: this.setUserStatus(userFull.user._json.personastate),
       primaryClanId: userFull.user._json.primaryclanid,
@@ -202,10 +198,9 @@ export class AuthService {
         playerXpNeededCurrentLevel: badgesFull.badges.player_xp_needed_current_level,
         levelPercentile: Math.ceil(badgesFull.levelPercentile.player_level_percentile * 100 ) / 100
       },
-      gameLibrary: this.mapGameLibraryResponse(library.games),
-      gameCount: library.game_count,
-      recentlyPlayedGames: this.sortRecentlyPlayedGame(this.mapRecentlyPlayedGamesResponse(recentlyPlayedGames.games, library.games)),
       friendList: this.mapFriendListResponse(friendList),
+      gameLibrary: this.sortGamesByRecentlyPlayed(this.mapGameLibraryResponse(library.games, true)),
+      gameCount: library.game_count,
       currentGameId: userFull.additionalDetails[0].gameid !== undefined ? userFull.additionalDetails[0].gameid: '',
       gameServerIp: userFull.additionalDetails[0].gameserverip !== undefined ? userFull.additionalDetails[0].gameserverip : '',
       currentGameName: userFull.additionalDetails[0].gameextrainfo !== undefined ? userFull.additionalDetails[0].gameextrainfo : ''
@@ -257,7 +252,7 @@ export class AuthService {
     return badges
   }
 
-  private mapGameLibraryResponse = (responses: IUserGameInfoResponse[]): IUserGameInfo[] => {
+  private mapGameLibraryResponse = (responses: IUserGameInfoResponse[], isAuthUser: boolean): IUserGameInfo[] => {
     const games: IUserGameInfo[] = responses.map(response => {
       return {
         appId: response.appid,
@@ -268,35 +263,21 @@ export class AuthService {
         hasWorkshop: response.has_workshop,
         imgIconUrl: response.img_icon_url,
         name: response.name,
-        playtime2Weeks: response.playtime_2weeks,
-        playtimeDeckForever: response.playtime_deck_forever,
-        playtimeDisconnected: response.playtime_disconnected,
-        playtimeForever: response.playtime_forever,
-        playtimeLinuxForever: response.playtime_linux_forever,
-        playtimeMacForever: response.playtime_mac_forever,
-        playtimeWindowsForever: response.playtime_windows_forever,
-        rTimeLastPlayed: response.rtime_last_played
+        playtime2Weeks: isAuthUser ? response.playtime_2weeks : this.formatFriendPlayTime(response.playtime_2weeks),
+        playtimeDeckForever: isAuthUser ? response.playtime_deck_forever : this.formatFriendPlayTime(response.playtime_deck_forever),
+        playtimeDisconnected: isAuthUser ? response.playtime_disconnected : this.formatFriendPlayTime(response.playtime_disconnected),
+        playtimeForever: isAuthUser ? response.playtime_forever : this.formatFriendPlayTime(response.playtime_forever),
+        playtimeLinuxForever: isAuthUser ? response.playtime_linux_forever : this.formatFriendPlayTime(response.playtime_linux_forever),
+        playtimeMacForever: isAuthUser ? response.playtime_mac_forever : this.formatFriendPlayTime(response.playtime_mac_forever),
+        playtimeWindowsForever: isAuthUser ? response.playtime_windows_forever : this.formatFriendPlayTime(response.playtime_windows_forever),
+        dateLastPlayed: new Date(response.rtime_last_played * 1000)
       }
     })
     return games
   }
 
-  private mapRecentlyPlayedGamesResponse = (responses: IGetRecentlyPlayedGamesResponseInfo[], library: IUserGameInfoResponse[]): IRecentlyPlayedGame[] => {
-    const games: IRecentlyPlayedGame[] = responses.map(response => {
-      return {
-        appId: response.appid,
-        name: response.name,
-        playtime2Weeks: response.playtime_2weeks,
-        playtimeForever: response.playtime_forever,
-        imgIconUrl: response.img_icon_url,
-        playtimeWindowsForever: response.playtime_windows_forever,
-        playtimeMacForever: response.playtime_mac_forever,
-        playtimeLinuxForever: response.playtime_linux_forever,
-        playtimeDeckForever: response.playtime_deck_forever,
-        dateLastPlayed: this.setLastTimePlayed(response.appid, library)
-      }
-    })
-    return games
+  private formatFriendPlayTime = (time: number): number => {
+    return time !== undefined ? Number((time / 60).toFixed(1)) : 0
   }
 
   private mapFriendListResponse = (responses: IFriendListFullResponse): ISteamFriend[] => {
@@ -324,7 +305,8 @@ export class AuthService {
           timeCreated: 0,
           personaStateFlags: 0,
           locCountryCode: '',
-          locStateCode: ''
+          locStateCode: '',
+          gameLibrary: []
         }
       }
       else {
@@ -353,62 +335,34 @@ export class AuthService {
           locCityId: matchingDetails?.loccityid !== undefined ? matchingDetails?.loccityid : '',
           currentGameId: matchingDetails?.gameid !== undefined ? matchingDetails?.gameid : '',
           gameServerIp: matchingDetails?.gameserverip !== undefined ? matchingDetails?.gameserverip : '',
-          currentGameName: matchingDetails?.gameextrainfo !== undefined ? matchingDetails?.gameextrainfo : ''
+          currentGameName: matchingDetails?.gameextrainfo !== undefined ? matchingDetails?.gameextrainfo : '',
+          gameLibrary: this.findFriendGameLibrary(Number(response.steamid), responses.gameLibraries)
         }
       }
     })
     return friends
   }
 
-  private mapGameNewsResponse = (user: IUserGameInfoResponse): INewsItems[] => {
-    if (user.news === undefined) {
-      const noNews: INewsItems[] = [{
-        globalId: '',
-        title: '',
-        url: '',
-        isExternalUrl: false,
-        author: '',
-        contents: '',
-        feedLabel: '',
-        date: new Date(),
-        feedName: '',
-        feedType: 0
-      }]
-      return noNews
+  private findFriendGameLibrary = (steamId: number, gameLibraries: IFriendGameResponse[]): IUserGameInfo[] => {
+    const matchingUser = gameLibraries.find(library => Number(library.steamId) === steamId)
+
+    if (!matchingUser || matchingUser.libraryResponse.games === undefined) {
+      return []
     }
-    const newsItems: INewsItems[] = user.news.map(news => {
-      return {
-        globalId: news.gid,
-        title: news.title,
-        url: news.url,
-        isExternalUrl: news.is_external_url,
-        author: news.author,
-        contents: news.contents,
-        feedLabel: news.feedlabel,
-        date: new Date(news.date * 1000),
-        feedName: news.feedname,
-        feedType: news.feed_type
-      }
-    })
-    return newsItems
+    else {
+      const mappedGames = this.mapGameLibraryResponse(matchingUser.libraryResponse.games, false)
+      return mappedGames
+    }
   }
 
   private convertUnixTimeToCurrentTime = (unix: number): string => {
     return new Date(unix * 1000).toISOString().slice(0, new Date(unix * 1000).toISOString().indexOf('T'))
   }
 
-  private setLastTimePlayed = (gameId: number, library: IUserGameInfoResponse[]): Date => {
-    const matchingGame = library.find(game => game.appid === gameId)
-    if (matchingGame === undefined) {
-      return new Date()
-    }
-    return new Date(matchingGame.rtime_last_played * 1000)
-  }
-
-  private sortRecentlyPlayedGame = (recentGames: IRecentlyPlayedGame[]): IRecentlyPlayedGame[] => {
+  private sortGamesByRecentlyPlayed = (games: IUserGameInfo[]): IUserGameInfo[] => {
     const currentDate = new Date()
 
-    recentGames.sort((gameA, gameB) => {
+    games.sort((gameA, gameB) => {
       const dateGameA = new Date(gameA.dateLastPlayed).getTime()
       const dateGameB = new Date(gameB.dateLastPlayed).getTime()
 
@@ -418,13 +372,13 @@ export class AuthService {
       return diffGameA - diffGameB
     })
 
-    return recentGames
+    return games
   }
 
-  private calculateRecentPlayTime = (recentGames: IGetRecentlyPlayedGamesResponseInfo[]): number => {
+  public calculateRecentPlayTime = (recentGames: IUserGameInfo[]): number => {
     let recentPlayTime = 0
     recentGames.forEach(game => {
-      recentPlayTime += game.playtime_2weeks
+      recentPlayTime += game.playtime2Weeks
     })
     return Math.ceil(recentPlayTime * 10) / 10
   }

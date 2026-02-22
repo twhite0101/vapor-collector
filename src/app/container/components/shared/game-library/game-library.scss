@@ -34,6 +34,20 @@
   padding: 0px;
 }
 
+.game-btn-cont {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.game-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
 .details-cont {
   display: flex;
   flex-direction: column;

@@ -1,3 +1,5 @@
+import type { SafeResourceUrl } from '@angular/platform-browser'
+
 export interface ILoginResponse {
   response: ILoginResponseUser;
 }
@@ -52,7 +54,7 @@ export interface IUser {
     avatarHash: string;
   };
   lastLogoff: string;
-  playTime2Weeks: number;
+  playTime2Weeks?: number;
   personaState: number;
   status: string;
   primaryClanId: string;
@@ -65,7 +67,6 @@ export interface IUser {
   playerLevel: IPlayerLevel;
   gameLibrary: IUserGameInfo[];
   gameCount: number;
-  recentlyPlayedGames: IRecentlyPlayedGame[];
   friendList: ISteamFriend[];
   currentGameId?: string;
   gameServerIp?: string;
@@ -167,8 +168,11 @@ export interface IUserGameInfo {
   playtimeLinuxForever: number;
   playtimeMacForever: number;
   playtimeWindowsForever: number;
-  rTimeLastPlayed: number;
+  dateLastPlayed: Date;
   news?: INewsItems[];
+  friendsWhoPlay?: ISteamFriend[];
+  gameVersion?: number;
+  achievements?: IAchievement[];
 }
 
 export interface ISteamLevelIcon {
@@ -245,6 +249,7 @@ export interface IFriendListDetailsResponseFriend {
 export interface IFriendListFullResponse {
   friendList: IFriendListResponseFriend[];
   details: IFriendListDetailsResponseFriend[];
+  gameLibraries: IFriendGameResponse[];
 }
 
 export interface IFriendAvatars {
@@ -252,6 +257,11 @@ export interface IFriendAvatars {
   avatarMedium: string;
   avatarFull: string;
   avatarHash: string;
+}
+
+export interface IFriendGameResponse {
+  steamId: string;
+  libraryResponse: IUserGamesLibraryResponse;
 }
 
 export interface ISteamFriend {
@@ -275,10 +285,12 @@ export interface ISteamFriend {
   currentGameId?: string;
   gameServerIp?: string;
   currentGameName?: string;
+  gameLibrary: IUserGameInfo[];
 }
 
 export interface IGetGameNewsResponse {
   appid: number;
+  count: number;
   newsitems: INewsItemsResponse[];
 }
 
@@ -307,4 +319,77 @@ export interface INewsItems {
   date: Date;
   feedName: string;
   feedType: number;
+  previewImg: string;
+  videoLink: SafeResourceUrl;
+}
+
+export interface IGameDialogPassedData {
+  game: IUserGameInfo;
+  user: IUser;
+}
+
+export interface IGameDialogInfo {
+  user: IUser;
+  game: IUserGameInfo;
+  news: INewsItems[];
+  friendsWhoPlay: IFriendsWhoPlay[];
+  concurrentPlayers: number;
+  achievements: IAchievement[];
+}
+
+export interface IFriendsWhoPlay extends ISteamFriend {
+  selectedGame: IUserGameInfo;
+}
+
+export interface IGameSchemaResponse {
+  gameName: string;
+  gameVersion: string;
+  availableGameStats: IAchievementSchemaResponseFull;
+}
+
+export interface IAchievementSchemaResponseFull {
+  achievements: IAchievementSchemaResponse[];
+}
+
+export interface IAchievementSchemaResponse {
+  name: string;
+  defaultvalue: number;
+  displayName: string;
+  hidden: number;
+  description: string;
+  icon: string;
+  icongray: string;
+}
+
+export interface IAchievementSchema {
+  name: string;
+  defaultValue: number;
+  displayName: string;
+  hidden: number;
+  description: string;
+  icon: string;
+  icongray: string;
+}
+
+export interface IUserAchievementsResponse {
+  steamID: string;
+  gameName: string;
+  achievements: IUserAchievementsInfoResponse[];
+}
+
+export interface IUserAchievementsInfoResponse {
+  apiname: string;
+  achieved: number;
+  unlocktime: number;
+}
+
+export interface IAchievement {
+  name: string;
+  achieved: boolean;
+  displayName: string;
+  hidden: boolean;
+  description: string;
+  icon: string;
+  iconGray: string;
+  unlockTime: Date;
 }

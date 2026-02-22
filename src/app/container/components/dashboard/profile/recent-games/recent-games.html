@@ -33,6 +33,7 @@
                 <h4>Last Played On</h4>
                 <p>{{ game.dateLastPlayed | date: 'mediumDate' }}</p>
               </div>
+              <button class="see-details-btn" type="button" (click)="openGameDialog(game)">See Details</button>
             </div>
           </div>
         }
