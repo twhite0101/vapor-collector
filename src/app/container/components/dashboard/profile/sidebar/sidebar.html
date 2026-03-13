@@ -9,5 +9,5 @@
     }
   </div>
   <app-game-library class="games" [user]="user" />
-  <app-friends-list class="friend-list" [friendList]="user.friendList" />
+  <app-friends-list class="friend-list" [user]="this.user" />
 </div>

@@ -77,7 +77,7 @@
         </mat-tab>
         <mat-tab label="News">
           <div class="news-cont">
-            <p-carousel [value]="gameDetails.news" [numVisible]="3" [numScroll]="1" [circular]="true" [responsiveOptions]="responsiveOptions">
+            <p-carousel [value]="gameDetails.news" [numVisible]="3" [numScroll]="1" [circular]="true">
               <ng-template #item let-article>
                 @for (piece of [article]; track piece) {
                   <div class="piece-cont">

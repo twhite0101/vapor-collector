@@ -8,11 +8,14 @@ import { NonNullableFormBuilder, ReactiveFormsModule } from '@angular/forms'
 import { MatAutocompleteModule } from '@angular/material/autocomplete'
 import { MatButtonModule } from '@angular/material/button'
 import { MatCardModule } from '@angular/material/card'
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog'
 import { MatExpansionModule } from '@angular/material/expansion'
 import { MatFormFieldModule } from '@angular/material/form-field'
 import { MatInputModule } from '@angular/material/input'
-import type { ISteamFriend } from '../../../../../../models/Steam'
+import type { ISteamFriend, IUser } from '../../../../../../models/Steam'
+import { AuthService } from '../../../../../../services/auth/auth-service'
 import { StateService } from '../../../../../../services/state/state-service'
+import { FriendDialog } from '../../../../shared/friend-dialog/friend-dialog'
 
 @Component({
   selector: 'app-friends-list',
@@ -34,10 +37,13 @@ export class FriendList implements OnInit {
   // Dependency Injections
   private readonly fb: NonNullableFormBuilder = inject(NonNullableFormBuilder)
   private readonly state: StateService = inject(StateService)
+  private readonly dialog: MatDialog = inject(MatDialog)
+  protected readonly authService: AuthService = inject(AuthService)
 
-  @Input({ required: true }) public friendList: ISteamFriend[]
+  @Input({ required: true }) public user: IUser
 
-  protected onlineFriends: ISteamFriend[]
+  protected _allFriends: ISteamFriend[] = []
+  protected onlineFriends: ISteamFriend[] = []
   protected filteredFriends: ISteamFriend[] = []
 
   protected filterFriendListControl: FormControl<string> = this.fb.control<string>('')
@@ -63,7 +69,8 @@ export class FriendList implements OnInit {
   }
 
   public ngOnInit (): void {
-    this.onlineFriends = this.friendList.filter(friend => friend.personaState === 1 || friend.personaState === 2 || friend.personaState === 3 || friend.personaState === 4)
+    this._allFriends = this.user.friendList
+    this.onlineFriends = this._allFriends.filter(friend => friend.personaState === 1 || friend.personaState === 2 || friend.personaState === 3 || friend.personaState === 4)
     this.filteredFriends.push(...this.onlineFriends)
     this.friendListLength.set(this.filteredFriends.length)
     this.state.setFriendListStatus(true)
@@ -81,5 +88,20 @@ export class FriendList implements OnInit {
 
   protected get showNoFriends () {
     return this._showNoFriends()
+  }
+
+  protected openGameDialog = (friend: ISteamFriend) => {
+    const dialogConfig = new MatDialogConfig()
+    const friendUser = this.authService.mapSteamFriendToUser(friend)
+    const recentlyPlayedGames = friendUser.gameLibrary.filter(game => game.playtime2Weeks > 0)
+    dialogConfig.data = {
+      friend: friend,
+      user: this.user,
+      friendUser: friendUser,
+      recentlyPlayedGames: recentlyPlayedGames,
+      recentPlayTime: this.authService.calculateRecentPlayTime(recentlyPlayedGames)
+    }
+    dialogConfig.panelClass = 'friend-dialog'
+    this.dialog.open(FriendDialog, dialogConfig)
   }
 }

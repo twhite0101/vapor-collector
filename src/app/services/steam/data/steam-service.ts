@@ -4,7 +4,7 @@ import type { SafeResourceUrl } from '@angular/platform-browser'
 import { DomSanitizer } from '@angular/platform-browser'
 import type { Observable } from 'rxjs'
 import { firstValueFrom, forkJoin, map } from 'rxjs'
-import type { IAchievement, IFriendGameResponse, IFriendListDetailsResponseFriend, IFriendListFullResponse, IFriendListResponseFriend, IFriendsWhoPlay, IGameSchemaResponse, IGetBadgesFullResponse, IGetBadgesResponse, IGetGameNewsResponse, IGetRecentlyPlayedGamesResponse, INewsItems, INewsItemsResponse, IPlayLevelPercentileResponse, ISteamFriend, IUserAchievementsResponse, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse } from '../../../models/Steam'
+import type { IAccountValueDetails, IAchievement, IFriendGameFullResponse, IFriendGameResponse, IFriendListDetailsResponseFriend, IFriendListFullResponse, IFriendListResponseFriend, IFriendsWhoPlay, IGamePrice, IGamePriceOverviewResponse, IGamePriceResponseDetails, IGamePriceResponseFormat, IGameSchemaResponse, IGetBadgesFullResponse, IGetBadgesResponse, IGetGameNewsResponse, IGetRecentlyPlayedGamesResponse, INewsItems, INewsItemsResponse, IPlayLevelPercentileResponse, ISteamFriend, IUserAchievementsResponse, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse } from '../../../models/Steam'
 
 const STEAM_IMAGE_CLAN = 'https://cdn.cloudflare.steamstatic.com/steamcommunity/public/images/clans'
 const YT_WATCH_LINK = 'https://www.youtube.com/embed/'
@@ -28,8 +28,10 @@ export class SteamService {
     return library
   }
 
-  public getUserBadges = async () => {
-    const badgesDetails = await firstValueFrom(this.http.get<IGetBadgesResponse>(this.apiUrl + '/user/getUserBadges', { withCredentials: true }))
+  public getUserBadges = async (steamId?: number) => {
+    const endpoint = steamId !== undefined ? `/user/getUserBadges?steamId=${steamId}` : '/user/getUserBadges'
+
+    const badgesDetails = await firstValueFrom(this.http.get<IGetBadgesResponse>(this.apiUrl + endpoint, { withCredentials: true }))
 
     const levelPercentile = await firstValueFrom(this.http.get<IPlayLevelPercentileResponse>(this.apiUrl + `/user/levelPercent?level=${badgesDetails.player_level}`, { withCredentials: true }))
 
@@ -84,6 +86,62 @@ export class SteamService {
     return response
   }
 
+  public getGamePrices = async (gameIds: string) => {
+    const response = firstValueFrom(this.http.get<IGamePriceResponseDetails[]>(this.apiUrl + `/game/getGamePrices?appId=${gameIds}`, { withCredentials: true }))
+    return response
+  }
+
+  public initializeGameLibrary = async () => {
+    const gameLibrary = await this.getOwnedGames()
+
+    let gamePrices: IGamePriceResponseDetails[] = []
+    const appIds = gameLibrary.games.map(game => {
+      return game.appid
+    })
+    if (appIds.length >= 300) {
+      const multipleReqArrays: number[][] = []
+      const appIdChunkSize = 300
+      for (let i = 0; i < appIds.length; i += appIdChunkSize) {
+        const chunk = appIds.slice(i, i + appIdChunkSize)
+        multipleReqArrays.push(chunk)
+      }
+
+      const gamePrices$: Observable<IGamePriceResponseDetails[]>[] = multipleReqArrays.map(chunk => this.http.get<IGamePriceResponseDetails[]>(this.apiUrl + `/game/getGamePrices?appId=${chunk.join(',')}`, { withCredentials: true }))
+
+      const gamePricesResponse = await firstValueFrom(forkJoin(gamePrices$)
+        .pipe(
+          map(result => {
+            return result.map(chunkObj => {
+              return Object.entries(chunkObj).map(([key, value]) => {
+                return value
+              })
+            })
+          })
+        )).then(response => {
+        return response.flat()
+      })
+      gamePrices = gamePricesResponse
+    }
+    else {
+      gamePrices = await firstValueFrom(this.http.get<IGamePriceResponseDetails[]>(this.apiUrl + `/game/getGamePrices?appId=${appIds.join(',')}`, { withCredentials: true }))
+    }
+
+    gameLibrary.games.forEach(game => {
+      appIds.forEach((id, i) => {
+        if (game.appid === id) {
+          if (gamePrices[i].success === false) {
+            game.prices = this.createNewPriceObject()
+          }
+          else {
+            game.prices = gamePrices[i].data.price_overview !== undefined ? gamePrices[i].data.price_overview : this.createNewPriceObject()
+          }
+        }
+      })
+    })
+
+    return gameLibrary
+  }
+
   public initializeFriendList = async () => {
     const friendList = await this.getFriendList()
 
@@ -97,23 +155,126 @@ export class SteamService {
       .pipe(
         map(result => {
           return result.map((library, i) => {
-            const friendGameResponse: IFriendGameResponse = {
-              libraryResponse: library,
-              steamId: steamIds[i]
+            if (library.games) {
+              const friendGameResponse: IFriendGameResponse = {
+                libraryResponse: library,
+                steamId: steamIds[i]
+              }
+              return friendGameResponse
             }
-            return friendGameResponse
+            else {
+              const friendGameResponse: IFriendGameResponse = {
+                libraryResponse: library,
+                steamId: steamIds[i]
+              }
+              return friendGameResponse
+            }
           })
         })
       ))
 
-    const friendListDetails = await this.getFriendListDetails(steamIds)
+    const friendListResponseSplit: IFriendGameFullResponse[] = []
 
+    friendListGamesResponse.forEach(response => {
+      if (Object.keys(response.libraryResponse).length > 0) {
+        if (response.libraryResponse.game_count < 300) {
+          const formattedResponse: IFriendGameFullResponse = {
+            steamId: response.steamId,
+            libraryResponse: response.libraryResponse,
+            appIds: response.libraryResponse.games.map(game => game.appid).join(',')
+          }
+          friendListResponseSplit.push(formattedResponse)
+        }
+        else {
+          const multipleReqArrays: number[][] = []
+          const appIdChunkSize = 300
+          const appIds = response.libraryResponse.games.map(game => game.appid)
+          for (let i = 0; i < response.libraryResponse.game_count; i += appIdChunkSize) {
+            const chunk = appIds.slice(i, i + appIdChunkSize)
+            multipleReqArrays.push(chunk)
+          }
+
+          multipleReqArrays.forEach(chunk => {
+            const formattedResponse: IFriendGameFullResponse = {
+              steamId: response.steamId,
+              libraryResponse: response.libraryResponse,
+              appIds: chunk.join(',')
+            }
+            friendListResponseSplit.push(formattedResponse)
+          })
+        }
+      }
+    })
+
+    friendListResponseSplit.forEach((friend, i) => {
+      friend.index = i
+    })
+
+    const friendListGamesPrices$: Observable<IGamePriceResponseDetails[]>[] = friendListResponseSplit.map(friend => this.http.get<IGamePriceResponseDetails[]>(this.apiUrl + `/game/getGamePrices?appId=${friend.appIds}`, { withCredentials: true }))
+
+    const gamePrices = await firstValueFrom(forkJoin(friendListGamesPrices$)
+      .pipe(
+        map(result => {
+          return result.map(user => {
+            const appIds = Object.keys(user)
+            return Object.values(user).map((game: IGamePriceResponseDetails, i) => {
+              const appId = appIds[i]
+              if (game.success === true) {
+                const formattedResponse: IGamePriceResponseFormat = {
+                  appId: Number(appId),
+                  price_overview: Array.isArray(game.data) ? this.createNewPriceObject() : game.data.price_overview
+                }
+                return formattedResponse
+              }
+              else {
+                const formattedResponse: IGamePriceResponseFormat = {
+                  appId: Number(appId),
+                  price_overview: this.createNewPriceObject()
+                }
+                return formattedResponse
+              }
+            })
+          })
+        })
+      ))
+
+    friendListGamesResponse.forEach((friend, i) => {
+      if (!friend.libraryResponse.games) {
+        return
+      }
+      const matchingUserPriceIndexes = friendListResponseSplit.filter(user => {
+        return user.steamId === friend.steamId
+      })
+      let combinedArrays: IGamePriceResponseFormat[]
+      if (matchingUserPriceIndexes && matchingUserPriceIndexes.every(match => match.index !== undefined)) {
+        matchingUserPriceIndexes.forEach(match => {
+          combinedArrays = [...gamePrices[match.index as number]]
+        })
+      }
+      friend.libraryResponse.games.forEach(game => {
+        const matchingPrice = combinedArrays.find(price => price.appId === game.appid)
+        if (matchingPrice) {
+          game.prices = matchingPrice.price_overview
+        }
+        else {
+          game.prices = this.createNewPriceObject()
+        }
+      })
+    })
+
+    const friendListDetails = await this.getFriendListDetails(steamIds)
     const friendListFull: IFriendListFullResponse = {
       friendList: friendList,
       details: friendListDetails,
       gameLibraries: friendListGamesResponse
     }
     return friendListFull
+  }
+
+  public initializeFriendDialog = (friendId: number) => {
+    const badges = this.getUserBadges(friendId)
+
+    return forkJoin([badges])
   }
 
   public initializeGameInfo = (gameId: string) => {
@@ -126,6 +287,26 @@ export class SteamService {
     const userAchievements = this.getUserAchievements(gameId)
 
     return forkJoin([gameNews, concurrent, gameSchema, userAchievements])
+  }
+
+  private getMultipleSchemas = (gameIds:number[]) => {
+    const friendGameSchema$: Observable<IGameSchemaResponse>[] = gameIds.map(id => this.http.get<IGameSchemaResponse>(this.apiUrl + `/game/getSchemaForGame?appId=${id}`, { withCredentials: true }))
+
+    return forkJoin(friendGameSchema$)
+  }
+
+  private getFriendLibraryAchievements = (gameIds:number[], steamId: string) => {
+    const friendGamesAchievements$: Observable<IUserAchievementsResponse>[] = gameIds.map(id => this.http.get<IUserAchievementsResponse>(this.apiUrl + `/game/getUserAchievements?steamId=${steamId}&?appId=${id}`, { withCredentials: true }))
+
+    return forkJoin(friendGamesAchievements$)
+  }
+
+  public initializeFriendAchievements = (gameIds: number[], steamId: string) => {
+    const gameSchemas = this.getMultipleSchemas(gameIds)
+
+    const friendAchievements = this.getFriendLibraryAchievements(gameIds, steamId)
+
+    return forkJoin([gameSchemas, friendAchievements])
   }
 
   protected calculateGameLibraryHoursPlayed = (library: IUserGamesLibraryResponse): IUserGamesLibraryResponse => {
@@ -313,7 +494,15 @@ export class SteamService {
         playtimeLinuxForever: response.playtime_linux_forever,
         playtimeMacForever: response.playtime_mac_forever,
         playtimeWindowsForever: response.playtime_windows_forever,
-        dateLastPlayed: new Date(response.rtime_last_played * 1000)
+        dateLastPlayed: new Date(response.rtime_last_played * 1000),
+        prices: {
+          currency: response.prices.currency,
+          initial: response.prices.initial,
+          final: response.prices.final,
+          discountPercent: response.prices.discount_percent,
+          initialFormatted: response.prices.initial_formatted,
+          finalFormatted: response.prices.final_formatted
+        }
       }
     }
     else {
@@ -333,8 +522,64 @@ export class SteamService {
         playtimeLinuxForever: 0,
         playtimeMacForever: 0,
         playtimeWindowsForever: 0,
-        dateLastPlayed: new Date()
+        dateLastPlayed: new Date(),
+        prices: {
+          currency: 'USD',
+          initial: 0,
+          final: 0,
+          discountPercent: 0,
+          initialFormatted: '',
+          finalFormatted: ''
+        }
       }
+    }
+  }
+
+  public isSuccessfulResponse = (response: any): boolean => {
+    if (response.status) {
+      return false
+    }
+    else {
+      return true
+    }
+  }
+
+  private createNewPriceObject = (): IGamePriceOverviewResponse => {
+    return {
+      currency: '',
+      initial: 0,
+      final: 0,
+      discount_percent: 0,
+      initial_formatted: '',
+      final_formatted: ''
+    }
+  }
+
+  public createNewGameInfoPrice = (): IGamePrice => {
+    return {
+      currency: '',
+      initial: 0,
+      final: 0,
+      discountPercent: 0,
+      initialFormatted: '',
+      finalFormatted: ''
+    }
+  }
+
+  public createNewAccountValueDetails = (): IAccountValueDetails => {
+    return {
+      totalEstLibraryValue: 0,
+      totalEstLibraryValueFormatted: '',
+      currentEstLibraryValue: 0,
+      currentEstLibraryValueFormatted: '',
+      averageCostPerGameTotal: 0,
+      averageCostPerGameTotalFormatted: '',
+      averageCostPerGameCurrent: 0,
+      averageCostPerGameCurrentFormatted: '',
+      averageValuePerHourTotal: 0,
+      averageValuePerHourTotalFormatted: '',
+      averageValuePerHourCurrent: 0,
+      averageValuePerHourCurrentFormatted: ''
     }
   }
 }

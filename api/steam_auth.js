@@ -350,13 +350,28 @@ app.get('/game/getUserAchievements', ensureAuthenticated, (req, res) => {
   const user = decoded.user
   const steamId = req.query.steamId !== undefined ? req.query.steamId : user.id
   const appId = req.query.appId
-  if (!appId) {
-    res.statusCode(400).json('App ID for game was not provided.');
-  }
   axios
     .get(`https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key=${process.env.STEAM_API_KEY}&steamid=${steamId}&appid=${appId}`)
     .then(response => {
       res.send(response.data.playerstats)
+    })
+    .catch(err => {
+      console.error(err)
+      res.send(err)
+    })
+})
+
+app.get('/game/getGamePrices', ensureAuthenticated, (req, res) => {
+  const token = req.cookies.access;
+  const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_KEY)
+  if (!decoded) {
+    res.statusCode(401).json('Unauthorized user');
+  }
+  const appIds = req.query.appId
+  axios
+    .get(`https://store.steampowered.com/api/appdetails/?appids=${appIds}&filters=price_overview`)
+    .then(response => {
+      res.send(response.data)
     })
     .catch(err => {
       console.error(err)

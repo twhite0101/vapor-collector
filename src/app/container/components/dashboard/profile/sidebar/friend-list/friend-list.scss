@@ -42,23 +42,48 @@
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  width: 15vw;
+  width: 14vw;
 }
 
 .friend-card-content {
   display: flex;
   flex-direction: row;
+  align-items: center;
   width: 15vw;
-  height: 53.75px;
+}
+
+.friend-btn-cont {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.friend-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
 }
 
 .friend-details {
-  width: 100%;
+  width: 75%;
+  text-overflow: ellipsis;
 }
 
 .friend-name,
 .friend-online {
+  max-width: 100%;
   margin: 0 0 0 10px;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+}
+
+.friend-online {
+  font-size: 10px;
 }
 
 .friend-avi {

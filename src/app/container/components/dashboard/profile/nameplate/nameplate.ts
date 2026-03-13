@@ -2,7 +2,6 @@ import { DatePipe, NgClass, NgOptimizedImage } from '@angular/common'
 import type { OnInit } from '@angular/core'
 import { Component, inject, Input } from '@angular/core'
 import type { IUser } from '../../../../../models/Steam'
-import { AuthService } from '../../../../../services/auth/auth-service'
 import { StateService } from '../../../../../services/state/state-service'
 import { SteamLevel } from '../../../shared/steam-level/steam-level'
 
@@ -19,7 +18,6 @@ import { SteamLevel } from '../../../shared/steam-level/steam-level'
 })
 export class Nameplate implements OnInit {
   // Dependency Injections
-  protected readonly authService: AuthService = inject(AuthService)
   private readonly state: StateService = inject(StateService)
 
   @Input({ required: true }) public user: IUser
@@ -35,7 +33,7 @@ export class Nameplate implements OnInit {
       this.user.avatars.avatar,
       this.user.avatars.avatarMedium
     ]
-    this.countryCode = this.user.locCountryCode.toLowerCase()
+    this.countryCode = this.user.locCountryCode !== undefined ? this.user.locCountryCode.toLowerCase() : 'NA'
     this.levelPercentile = this.user.playerLevel.levelPercentile
     this.state.setNamePlateStatus(true)
   }

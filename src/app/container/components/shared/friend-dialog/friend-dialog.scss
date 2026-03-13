@@ -1,0 +1,47 @@
+.friend-dialog-tabs {
+  display: flex;
+  flex-direction: column;
+}
+
+.recent-games-cont {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+::ng-deep .mat-mdc-tab.mdc-tab {
+  min-width: auto !important; /* Or a specific pixel value */
+  padding: 0 5px; /* Adjust padding as needed */
+}
+
+.mat-tab-body-wrapper {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.mat-tab-body,
+.mat-tab-body-content {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.friend-dialog-tabs .mat-mdc-tab-header {
+  overflow: hidden;
+}
+
+.friend-dialog-tabs .mat-mdc-tab-list {
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.friend-dialog-tabs .mat-mdc-tab-list {
+  flex: 0 0 200px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.grid-container {
+  height: 32hv;
+}

@@ -1,0 +1,32 @@
+
+@if (loading) {
+  <div class="spinner-cont">
+    <mat-progress-bar mode="indeterminate" />
+  </div>
+}
+@else {
+  <div class="friend-dialog-cont">
+    <div class="header-cont">
+      <app-nameplate [user]="friendDetails.friendUser"/>
+    </div>
+    <mat-tab-group class="friend-dialog-tabs" mat-stretch-tabs="true" (selectedTabChange)="onTabChange($event)">
+      <mat-tab class="friend-details-tab" label="Friend Details">
+        <div class="friend-details-cont">
+          <app-value-details isAuthUser="false" [user]="friendDetails.friendUser" />
+        </div>
+      </mat-tab>
+      <mat-tab class="recent-games-tab" label="Recent Games">
+        <div class="recent-games-cont">
+          <app-recent-games class="recent-games" isFriend="true" [user]="friendDetails.user" [recentlyPlayedGames]="friendDetails.recentlyPlayedGames" [recentPlayTime]="friendDetails.recentPlayTime" />
+        </div>
+      </mat-tab>
+      <mat-tab class="library-tab" label="Game Library">
+        @if (isLibraryActive) {
+          <div class="grid-container">
+            <app-grid class="ag-grid" parentGridType="Games" [parentData]="friendDetails.friend.gameLibrary" [parentColDefs]="libraryColDefs" [autoSizeStrat]="friendLibrarySizeStrat" />
+          </div>
+        }
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+}

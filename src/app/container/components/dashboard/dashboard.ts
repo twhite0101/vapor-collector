@@ -2,6 +2,7 @@ import type { OnInit } from '@angular/core'
 import { Component, inject } from '@angular/core'
 import type { IUser, IUserGameInfo } from '../../../models/Steam'
 import { AuthService } from '../../../services/auth/auth-service'
+import { ValueDetails } from '../shared/value-details/value-details'
 import { Nameplate } from './profile/nameplate/nameplate'
 import { RecentGames } from './profile/recent-games/recent-games'
 import { Sidebar } from './profile/sidebar/sidebar'
@@ -11,7 +12,8 @@ import { Sidebar } from './profile/sidebar/sidebar'
   imports: [
     Nameplate,
     RecentGames,
-    Sidebar
+    Sidebar,
+    ValueDetails
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'

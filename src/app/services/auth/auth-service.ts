@@ -5,7 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { Router } from '@angular/router'
 import type { Observable } from 'rxjs'
 import { firstValueFrom, forkJoin } from 'rxjs'
-import type { IBadge, IFriendGameResponse, IFriendListDetailsResponseFriend, IFriendListFullResponse, IGetBadgesFullResponse, IGetBadgesResponseArray, ILoginResponse, ISteamFriend, IUser, IUserFullResponse, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse } from '../../models/Steam'
+import type { IAccountValueDetails, IBadge, IFriendGameResponse, IFriendListDetailsResponseFriend, IFriendListFullResponse, IGetBadgesFullResponse, IGetBadgesResponseArray, ILoginResponse, ISteamFriend, IUser, IUserFullResponse, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse } from '../../models/Steam'
 import { LoadingService } from '../loading/loading-service'
 import { StateService } from '../state/state-service'
 import { SteamService } from '../steam/data/steam-service'
@@ -92,7 +92,7 @@ export class AuthService {
     const user = this.initializeUserDetails()
 
     // Get user's game library
-    const library = this.steamService.getOwnedGames()
+    const library = this.steamService.initializeGameLibrary()
 
     // Get user's badge and account level info
     const badges = this.steamService.getUserBadges()
@@ -111,6 +111,9 @@ export class AuthService {
       .subscribe({
         next: ([user, library, badges, friendList]) => {
           const returnedData = this.mapAuthResponseToUser(user, library, badges, friendList)
+          returnedData.accountValues = this.calculateAccountValueDetails(returnedData.gameLibrary)
+          returnedData.friendList.forEach(friend => friend.accountValues = friend.gameLibrary.length > 0 ? this.calculateAccountValueDetails(friend.gameLibrary) : this.steamService.createNewAccountValueDetails())
+          this.calculateAccountRankings(returnedData)
           this._user.set(returnedData)
           this._hasUser.set(true)
           this._hasLibrary.set(true)
@@ -270,10 +273,62 @@ export class AuthService {
         playtimeLinuxForever: isAuthUser ? response.playtime_linux_forever : this.formatFriendPlayTime(response.playtime_linux_forever),
         playtimeMacForever: isAuthUser ? response.playtime_mac_forever : this.formatFriendPlayTime(response.playtime_mac_forever),
         playtimeWindowsForever: isAuthUser ? response.playtime_windows_forever : this.formatFriendPlayTime(response.playtime_windows_forever),
-        dateLastPlayed: new Date(response.rtime_last_played * 1000)
+        dateLastPlayed: new Date(response.rtime_last_played * 1000),
+        prices: !response.prices ? this.steamService.createNewGameInfoPrice() : {
+          currency: response.prices.currency,
+          initial: response.prices.initial / 100,
+          final: response.prices.final / 100,
+          discountPercent: response.prices.discount_percent,
+          initialFormatted: response.prices.initial_formatted,
+          finalFormatted: response.prices.final_formatted
+        }
       }
     })
     return games
+  }
+
+  private formatMonetaryAmount = (value: number): string => {
+    return '$' + value.toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+  }
+
+  private calculateAccountValueDetails = (responses: IUserGameInfoResponse[] | IUserGameInfo[]): IAccountValueDetails => {
+    const totalAccountString = responses.reduce((accumulator, currentValue) => {
+      return accumulator + currentValue.prices.initial
+    }, 0).toFixed(2)
+
+    const currentAccountString = responses.reduce((accumulator, currentValue) => {
+      return accumulator + currentValue.prices.final
+    }, 0).toFixed(2)
+
+    let totalHoursString = ''
+    if (Object.keys(responses[0]).some(response => response === 'playtime_forever')) {
+      totalHoursString = responses.reduce((accumulator, currentValue) => {
+        return accumulator + (currentValue as IUserGameInfoResponse).playtime_forever
+      }, 0).toFixed(2)
+    }
+    else {
+      totalHoursString = responses.reduce((accumulator, currentValue) => {
+        return accumulator + (currentValue as IUserGameInfo).playtimeForever
+      }, 0).toFixed(2)
+    }
+    const totalAccountNum = parseFloat(totalAccountString)
+    const currentAccountNum = parseFloat(currentAccountString)
+    const totalHoursNum = parseFloat(totalHoursString)
+
+    return {
+      totalEstLibraryValue: totalAccountNum,
+      totalEstLibraryValueFormatted: this.formatMonetaryAmount(totalAccountNum),
+      currentEstLibraryValue: currentAccountNum,
+      currentEstLibraryValueFormatted: this.formatMonetaryAmount(currentAccountNum),
+      averageCostPerGameTotal: parseFloat((totalAccountNum / responses.length).toFixed(2)),
+      averageCostPerGameTotalFormatted: this.formatMonetaryAmount(parseFloat((totalAccountNum / responses.length).toFixed(2))),
+      averageCostPerGameCurrent: parseFloat((currentAccountNum / responses.length).toFixed(2)),
+      averageCostPerGameCurrentFormatted: this.formatMonetaryAmount(parseFloat((currentAccountNum / responses.length).toFixed(2))),
+      averageValuePerHourTotal: parseFloat((totalAccountNum / totalHoursNum).toFixed(2)),
+      averageValuePerHourTotalFormatted: this.formatMonetaryAmount(parseFloat((totalAccountNum / totalHoursNum).toFixed(2))),
+      averageValuePerHourCurrent: parseFloat((currentAccountNum / totalHoursNum).toFixed(2)),
+      averageValuePerHourCurrentFormatted: this.formatMonetaryAmount(parseFloat((currentAccountNum / totalHoursNum).toFixed(2)))
+    }
   }
 
   private formatFriendPlayTime = (time: number): number => {
@@ -341,6 +396,106 @@ export class AuthService {
       }
     })
     return friends
+  }
+
+  public mapSteamFriendToUser = (friend: ISteamFriend): IUser => {
+    return {
+      steamId: friend.steamId,
+      communityVisibilityState: Number(friend.communityVisibilityState),
+      profileState: friend.profileState,
+      personaName: friend.personaState.toString(),
+      commentPermission: 0,
+      profileUrl: friend.profileUrl,
+      avatars: {
+        avatar: friend.avatars.avatar,
+        avatarMedium: friend.avatars.avatarMedium,
+        avatarFull: friend.avatars.avatarFull,
+        avatarHash: friend.avatars.avatarHash
+      },
+      lastLogoff: friend.lastLogoff,
+      personaState: friend.personaState,
+      status: this.setUserStatus(friend.personaState),
+      primaryClanId: friend.primaryClanId,
+      timeCreated: this.convertUnixTimeToCurrentTime(friend.timeCreated),
+      profileAgeYears: this.calculateProfileAgeYears(friend.timeCreated),
+      personaStateFlags: friend.personaStateFlags,
+      locCountryCode: friend.locCountryCode,
+      displayName: friend.displayName,
+      badges: [],
+      playerLevel: {
+        playerXp: 0,
+        playerLevel: 0,
+        playerXpNeededToLevelUp: 0,
+        playerXpNeededCurrentLevel: 0,
+        levelPercentile: 0
+      },
+      friendList: [],
+      gameLibrary: this.sortGamesByRecentlyPlayed(friend.gameLibrary),
+      accountValues: friend.accountValues as IAccountValueDetails,
+      gameCount: friend.gameLibrary.length,
+      currentGameId: friend.currentGameId !== undefined ? friend.currentGameId : '',
+      gameServerIp: friend.gameServerIp !== undefined ? friend.gameServerIp : '',
+      currentGameName: friend.currentGameName !== undefined ? friend.currentGameName : ''
+    }
+  }
+
+  private calculateAccountRankings = (user: IUser) => {
+    const userAccountDetails = user.friendList.map(friend => {
+      return {
+        steamId: friend.steamId,
+        accountValues: friend.accountValues
+      }
+    })
+    userAccountDetails.push({
+      steamId: user.steamId,
+      accountValues: user.accountValues
+    })
+
+    const totalLibrarySort = [...userAccountDetails]
+    totalLibrarySort.sort((userA, userB) => {
+      return (userB.accountValues as IAccountValueDetails).totalEstLibraryValue - (userA.accountValues as IAccountValueDetails).totalEstLibraryValue
+    })
+
+    const currentLibrarySort = [...userAccountDetails]
+    currentLibrarySort.sort((userA, userB) => {
+      return (userB.accountValues as IAccountValueDetails).currentEstLibraryValue - (userA.accountValues as IAccountValueDetails).currentEstLibraryValue
+    })
+
+    const averageCPGTotalSort = [...userAccountDetails]
+    averageCPGTotalSort.sort((userA, userB) => {
+      return (userB.accountValues as IAccountValueDetails).averageCostPerGameTotal - (userA.accountValues as IAccountValueDetails).averageCostPerGameTotal
+    })
+
+    const averageCPGCurrentSort = [...userAccountDetails]
+    averageCPGCurrentSort.sort((userA, userB) => {
+      return (userB.accountValues as IAccountValueDetails).averageCostPerGameCurrent - (userA.accountValues as IAccountValueDetails).averageCostPerGameCurrent
+    })
+
+    const averageVPHTotalSort = [...userAccountDetails]
+    averageVPHTotalSort.sort((userA, userB) => {
+      return (userB.accountValues as IAccountValueDetails).averageValuePerHourTotal - (userA.accountValues as IAccountValueDetails).averageValuePerHourTotal
+    })
+
+    const averageVPHCurrentSort = [...userAccountDetails]
+    averageVPHCurrentSort.sort((userA, userB) => {
+      return (userB.accountValues as IAccountValueDetails).averageValuePerHourCurrent - (userA.accountValues as IAccountValueDetails).averageValuePerHourCurrent
+    });
+
+    (user.accountValues as IAccountValueDetails).totalEstLibraryFriendRank = totalLibrarySort.findIndex(account => account.steamId === user.steamId) + 1;
+    (user.accountValues as IAccountValueDetails).currentEstLibraryFriendRank = currentLibrarySort.findIndex(account => account.steamId === user.steamId) + 1;
+    (user.accountValues as IAccountValueDetails).averageCPGTotalFriendRank = averageCPGTotalSort.findIndex(account => account.steamId === user.steamId) + 1;
+    (user.accountValues as IAccountValueDetails).averageCPGCurrentFriendRank = averageCPGCurrentSort.findIndex(account => account.steamId === user.steamId) + 1;
+    (user.accountValues as IAccountValueDetails).averageVPHTotalFriendRank = averageVPHTotalSort.findIndex(account => account.steamId === user.steamId) + 1;
+    (user.accountValues as IAccountValueDetails).averageVPHCurrentFriendRank = averageVPHCurrentSort.findIndex(account => account.steamId === user.steamId) + 1
+
+    user.friendList.forEach(friend => {
+      (friend.accountValues as IAccountValueDetails).totalEstLibraryFriendRank = totalLibrarySort.findIndex(account => account.steamId === friend.steamId) + 1;
+      (friend.accountValues as IAccountValueDetails).currentEstLibraryFriendRank = currentLibrarySort.findIndex(account => account.steamId === friend.steamId) + 1;
+      (friend.accountValues as IAccountValueDetails).averageCPGTotalFriendRank = averageCPGTotalSort.findIndex(account => account.steamId === friend.steamId) + 1;
+      (friend.accountValues as IAccountValueDetails).averageCPGCurrentFriendRank = averageCPGCurrentSort.findIndex(account => account.steamId === friend.steamId) + 1;
+      (friend.accountValues as IAccountValueDetails).averageVPHTotalFriendRank = averageVPHTotalSort.findIndex(account => account.steamId === friend.steamId) + 1;
+      (friend.accountValues as IAccountValueDetails).averageVPHCurrentFriendRank = averageVPHCurrentSort.findIndex(account => account.steamId === friend.steamId) + 1
+    })
   }
 
   private findFriendGameLibrary = (steamId: number, gameLibraries: IFriendGameResponse[]): IUserGameInfo[] => {

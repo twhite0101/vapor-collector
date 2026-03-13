@@ -1,5 +1,7 @@
 import type { SafeResourceUrl } from '@angular/platform-browser'
 
+export type IGamePriceResponse = Record<string, IGamePriceResponseDetails>
+
 export interface ILoginResponse {
   response: ILoginResponseUser;
 }
@@ -47,12 +49,7 @@ export interface IUser {
   personaName: string;
   commentPermission: number;
   profileUrl: string;
-  avatars: {
-    avatar: string;
-    avatarMedium: string;
-    avatarFull: string;
-    avatarHash: string;
-  };
+  avatars: IAvatars;
   lastLogoff: string;
   playTime2Weeks?: number;
   personaState: number;
@@ -66,6 +63,7 @@ export interface IUser {
   badges: IBadge[];
   playerLevel: IPlayerLevel;
   gameLibrary: IUserGameInfo[];
+  accountValues?: IAccountValueDetails;
   gameCount: number;
   friendList: ISteamFriend[];
   currentGameId?: string;
@@ -150,6 +148,7 @@ export interface IUserGameInfoResponse {
   playtime_windows_forever: number;
   rtime_last_played: number;
   news?: INewsItemsResponse[];
+  prices: IGamePriceOverviewResponse;
 }
 
 export interface IUserGameInfo {
@@ -168,11 +167,13 @@ export interface IUserGameInfo {
   playtimeLinuxForever: number;
   playtimeMacForever: number;
   playtimeWindowsForever: number;
-  dateLastPlayed: Date;
+  dateLastPlayed: Date | string;
   news?: INewsItems[];
   friendsWhoPlay?: ISteamFriend[];
   gameVersion?: number;
   achievements?: IAchievement[];
+  prices: IGamePrice;
+  id?: string;
 }
 
 export interface ISteamLevelIcon {
@@ -252,7 +253,7 @@ export interface IFriendListFullResponse {
   gameLibraries: IFriendGameResponse[];
 }
 
-export interface IFriendAvatars {
+export interface IAvatars {
   avatar: string;
   avatarMedium: string;
   avatarFull: string;
@@ -264,6 +265,11 @@ export interface IFriendGameResponse {
   libraryResponse: IUserGamesLibraryResponse;
 }
 
+export interface IFriendGameFullResponse extends IFriendGameResponse {
+  appIds: string;
+  index?: number;
+}
+
 export interface ISteamFriend {
   steamId: string;
   relationship: string;
@@ -272,7 +278,7 @@ export interface ISteamFriend {
   profileState: number;
   displayName: string;
   profileUrl: string;
-  avatars: IFriendAvatars;
+  avatars: IAvatars;
   lastLogoff: string;
   personaState: number;
   realName: string;
@@ -286,6 +292,10 @@ export interface ISteamFriend {
   gameServerIp?: string;
   currentGameName?: string;
   gameLibrary: IUserGameInfo[];
+  accountValues?: IAccountValueDetails;
+  achievements?: ILibraryAchievements[];
+  badges?: IBadge[];
+  playerLevel?: IPlayerLevel;
 }
 
 export interface IGetGameNewsResponse {
@@ -392,4 +402,96 @@ export interface IAchievement {
   icon: string;
   iconGray: string;
   unlockTime: Date;
+}
+
+export interface IFriendAchievementSchemaResponse {
+  schemas: IGameSchemaResponse[];
+  achievementResponses: IUserAchievementsResponse[];
+}
+
+export interface ILibraryAchievements {
+  appId: number;
+  achievements: IAchievement[];
+}
+
+export interface HttpError {
+  code: string;
+  config: unknown;
+  message: string;
+  name:  string;
+  stack: string;
+  status: number;
+}
+
+export interface IFriendDialogPassedData {
+  user: IUser;
+  friend: ISteamFriend;
+  friendUser: IUser;
+  recentlyPlayedGames: IUserGameInfo[];
+  recentPlayTime: number;
+}
+
+export interface IGamePriceResponseDetails {
+  success: boolean;
+  data: IGamePriceDataResponse;
+}
+
+export interface IGamePriceDataResponse {
+  price_overview: IGamePriceOverviewResponse;
+}
+
+export interface IGamePriceResponseFormat {
+  appId: number;
+  price_overview: IGamePriceOverviewResponse;
+}
+
+export interface IGamePriceOverviewResponse {
+  currency: string;
+  initial: number;
+  final: number;
+  discount_percent: number;
+  initial_formatted: string;
+  final_formatted: string;
+}
+
+export interface IGamePrice {
+  currency: string;
+  initial: number;
+  final: number;
+  discountPercent: number;
+  initialFormatted: string;
+  finalFormatted: string;
+}
+
+export interface IAccountValueDetails {
+  totalEstLibraryValue: number;
+  totalEstLibraryValueFormatted: string;
+  currentEstLibraryValue: number;
+  currentEstLibraryValueFormatted: string;
+  averageCostPerGameTotal: number;
+  averageCostPerGameTotalFormatted: string;
+  averageCostPerGameCurrent: number;
+  averageCostPerGameCurrentFormatted: string;
+  averageValuePerHourTotal: number;
+  averageValuePerHourTotalFormatted: string;
+  averageValuePerHourCurrent: number;
+  averageValuePerHourCurrentFormatted: string;
+  totalEstLibraryFriendRank?: number;
+  currentEstLibraryFriendRank?: number;
+  averageCPGTotalFriendRank?: number;
+  averageCPGCurrentFriendRank?: number;
+  averageVPHTotalFriendRank?: number;
+  averageVPHCurrentFriendRank?: number;
+  totalEstLibraryWorldRank?: number;
+  currentEstLibraryWorldRank?: number;
+  averageCPGTotalWorldRank?: number;
+  averageCPGCurrentWorldRank?: number;
+  averageVPHTotalWorldRank?: number;
+  averageVPHCurrentWorldRank?: number;
+}
+
+export interface IChartData {
+  label: string;
+  value: number;
+  backgroundColor?: string;
 }

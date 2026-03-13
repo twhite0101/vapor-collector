@@ -1,0 +1,16 @@
+<div class="component">
+  <div class="grid-container ag-theme-quartz-auto-dark">
+    @if (isStatusBarActive) {
+      <div class="status-bar">
+        <div>
+          Grid Filter:
+          <input matInput type="text" id="filter-input" (input)="onFilterInputChange()" />
+        </div>
+        <span>{{ status }}</span>
+      </div>
+    }
+    <div class="grid-container">
+      <ag-grid-angular class="ag-grid" [rowData]="myGridData" [columnDefs]="myColDefs" [defaultColDef]="myDefaultColDef" [autoSizeStrategy]="mySizeStrat" [domLayout]="domLayout" [getRowId]="getRowId" [pagination]="true" [paginationPageSize]="10" [paginationPageSizeSelector]="[10, 25, 50, 100]" [suppressNoRowsOverlay]="isNoRowsHidden" (gridReady)="onGridReady($event)" (filterChanged)="onFilterChanged()" />
+    </div>
+  </div>
+</div>
