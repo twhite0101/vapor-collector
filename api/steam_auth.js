@@ -6,6 +6,8 @@ const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const axios = require('axios');
 const cors = require('cors');
+const cron = require('cron');
+const scrapeSteamStoreAndSave = require('./scraper');
 const passport = require('passport');
 const SteamStrategy = require('passport-steam').Strategy;
 const User = require('./db/User');
@@ -45,6 +47,14 @@ main().then(() => {
   console.log(error);
   process.exit(1);
 });
+
+const job = new cron.CronJob('0 0 * * *', async () => {
+  console.log('Running daily store scraping...')
+  await scrapeSteamStoreAndSave()
+    .then(newItemsNum => console.log(`Store Items DB has finished updating. New records added today: ${newItemsNum}`))
+})
+
+job.start();
 
 passport.serializeUser(function(user, done) {
     done(null, user);
