@@ -80,9 +80,12 @@ export class AuthService {
 
     const userAdditionalDetails = await this.getUserAdditionalDetails(user.response._json.steamid)
 
+    const wishlist = await this.steamService.initializeWishlist(user.response._json.steamid)
+
     const userFull: IUserFullResponse = {
       user: user.response,
-      additionalDetails: userAdditionalDetails
+      additionalDetails: userAdditionalDetails,
+      wishlist: wishlist
     }
     return userFull
   }
@@ -203,6 +206,7 @@ export class AuthService {
       },
       friendList: this.mapFriendListResponse(friendList),
       gameLibrary: this.sortGamesByRecentlyPlayed(this.mapGameLibraryResponse(library.games, true)),
+      wishlist: this.steamService.mapWishlist(userFull.wishlist, library.games),
       gameCount: library.game_count,
       currentGameId: userFull.additionalDetails[0].gameid !== undefined ? userFull.additionalDetails[0].gameid: '',
       gameServerIp: userFull.additionalDetails[0].gameserverip !== undefined ? userFull.additionalDetails[0].gameserverip : '',
@@ -431,6 +435,7 @@ export class AuthService {
       },
       friendList: [],
       gameLibrary: this.sortGamesByRecentlyPlayed(friend.gameLibrary),
+      wishlist: [],
       accountValues: friend.accountValues as IAccountValueDetails,
       gameCount: friend.gameLibrary.length,
       currentGameId: friend.currentGameId !== undefined ? friend.currentGameId : '',

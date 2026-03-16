@@ -1,5 +1,5 @@
 import { formatNumber } from '@angular/common'
-import type { OnChanges, SimpleChanges } from '@angular/core'
+import type { OnChanges, SimpleChanges, WritableSignal } from '@angular/core'
 import { Component, computed, Input, signal } from '@angular/core'
 import { MatInput } from '@angular/material/input'
 import { AgGridAngular } from 'ag-grid-angular'
@@ -39,16 +39,23 @@ export class Grid implements OnChanges {
 
   @Input() public domLayout: 'normal' | 'autoHeight' | 'print' = 'normal'
 
-  @Input({ required: true }) public parentGridType: 'Games' | 'Achievements'
+  @Input({ required: true }) public parentGridType: 'Games' | 'Achievements' | 'Wishlist'
+
+  @Input() public parentStyle: string
 
   protected myGridData: unknown[] | undefined = []
   protected myColDefs: ColDef[] = []
   protected myDefaultColDef: ColDef = this.defaultColDef
   protected myGridType = ''
   protected mySizeStrat: SizeColumnsToFitGridStrategy | SizeColumnsToFitProvidedWidthStrategy | SizeColumnsToContentStrategy
+  private _myGridStyle: WritableSignal<string> = signal('')
   protected isNoRowsHidden = true
 
   protected isStatusBarActive = true
+
+  protected get myGridStyle () {
+    return this._myGridStyle()
+  }
 
   private gridLengthStatus = signal(0)
   private filteredCount = signal(0)
@@ -107,6 +114,14 @@ export class Grid implements OnChanges {
           break
         case 'autoSizeStrat':
           this.mySizeStrat = this.autoSizeStrat
+          break
+        case 'parentStyle':
+          if (!this.parentStyle) {
+            this._myGridStyle.set('height: 32vh')
+          }
+          else {
+            this._myGridStyle.set(this.parentStyle)
+          }
           break
         default:
           throw Error(`Unhandled change event type: "${change[0]}"`)

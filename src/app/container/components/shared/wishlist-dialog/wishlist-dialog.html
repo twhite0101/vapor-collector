@@ -1,0 +1,13 @@
+@if (loading) {
+  <div class="spinner-cont">
+    <mat-progress-bar mode="indeterminate" />
+  </div>
+}
+@else {
+  <div class="wishlist-container">
+    <h3 class="wishlist-title">Wishlist</h3>
+    <div class="grid-container">
+      <app-grid class="ag-grid" parentGridType="Wishlist" [parentStyle]="gridStyle" [parentData]="wishlistData" [parentColDefs]="wishlistColDefs" [autoSizeStrat]="wishlistSizeStrat" />
+    </div>
+  </div>
+}

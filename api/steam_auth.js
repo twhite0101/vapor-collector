@@ -11,6 +11,7 @@ const scrapeSteamStoreAndSave = require('./scraper');
 const passport = require('passport');
 const SteamStrategy = require('passport-steam').Strategy;
 const User = require('./db/User');
+const StoreItem = require('./db/StoreItem');
 require('dotenv').config();
 
 let database;
@@ -387,6 +388,40 @@ app.get('/game/getGamePrices', ensureAuthenticated, (req, res) => {
       console.error(err)
       res.send(err)
     })
+})
+
+app.get('/user/getWishlist', ensureAuthenticated, (req, res) => {
+  const token = req.cookies.access;
+  const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_KEY)
+  if (!decoded) {
+    res.statusCode(401).json('Unauthorized user');
+  }
+  const steamId = req.query.steamId
+  axios
+    .get(`https://api.steampowered.com/IWishlistService/GetWishlist/v1/?key=${process.env.STEAM_API_KEY}&steamid=${steamId}`)
+    .then(response => {
+      res.send(response.data.response.items)
+    })
+    .catch(err => {
+      console.error(err)
+      res.send(err)
+    })
+})
+
+app.get('/game/getGameName', ensureAuthenticated, async (req, res) => {
+  const token = req.cookies.access;
+  const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_KEY)
+  if (!decoded) {
+    res.statusCode(401).json('Unauthorized user');
+  }
+  const appId = Number(req.query.appId)
+  try {
+    const storeItem = await StoreItem.findOne({ appid: appId })
+    res.json(storeItem)
+  }
+  catch (err) {
+    console.error(err)
+  }
 })
 
 // MIDDLEWARE

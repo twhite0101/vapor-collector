@@ -4,7 +4,7 @@ import type { SafeResourceUrl } from '@angular/platform-browser'
 import { DomSanitizer } from '@angular/platform-browser'
 import type { Observable } from 'rxjs'
 import { firstValueFrom, forkJoin, map } from 'rxjs'
-import type { IAccountValueDetails, IAchievement, IFriendGameFullResponse, IFriendGameResponse, IFriendListDetailsResponseFriend, IFriendListFullResponse, IFriendListResponseFriend, IFriendsWhoPlay, IGamePrice, IGamePriceOverviewResponse, IGamePriceResponseDetails, IGamePriceResponseFormat, IGameSchemaResponse, IGetBadgesFullResponse, IGetBadgesResponse, IGetGameNewsResponse, IGetRecentlyPlayedGamesResponse, INewsItems, INewsItemsResponse, IPlayLevelPercentileResponse, ISteamFriend, IUserAchievementsResponse, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse } from '../../../models/Steam'
+import type { IAccountValueDetails, IAchievement, IFriendGameFullResponse, IFriendGameResponse, IFriendListDetailsResponseFriend, IFriendListFullResponse, IFriendListResponseFriend, IFriendsWhoPlay, IGameNameResponse, IGamePrice, IGamePriceOverviewResponse, IGamePriceResponseDetails, IGamePriceResponseFormat, IGameSchemaResponse, IGetBadgesFullResponse, IGetBadgesResponse, IGetGameNewsResponse, IGetRecentlyPlayedGamesResponse, INewsItems, INewsItemsResponse, IPlayLevelPercentileResponse, ISteamFriend, IUserAchievementsResponse, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse, IWishlist, IWishlistResponse, IWishlistResponseWithPrices } from '../../../models/Steam'
 
 const STEAM_IMAGE_CLAN = 'https://cdn.cloudflare.steamstatic.com/steamcommunity/public/images/clans'
 const YT_WATCH_LINK = 'https://www.youtube.com/embed/'
@@ -89,6 +89,77 @@ export class SteamService {
   public getGamePrices = async (gameIds: string) => {
     const response = firstValueFrom(this.http.get<IGamePriceResponseDetails[]>(this.apiUrl + `/game/getGamePrices?appId=${gameIds}`, { withCredentials: true }))
     return response
+  }
+
+  public getWishlist = async (steamId: string) => {
+    const response = firstValueFrom(this.http.get<IWishlistResponse[]>(this.apiUrl + `/user/getWishlist?steamId=${steamId}`, { withCredentials: true }))
+    return response
+  }
+
+  public initializeWishlist = async (steamId: string) => {
+    const wishlist = await this.getWishlist(steamId)
+    let gamePrices: IGamePriceResponseDetails[] = []
+    const appIds = wishlist.map(game => {
+      return game.appid
+    })
+    if (appIds.length >= 300) {
+      const multipleReqArrays: number[][] = []
+      const appIdChunkSize = 300
+      for (let i = 0; i < appIds.length; i += appIdChunkSize) {
+        const chunk = appIds.slice(i, i + appIdChunkSize)
+        multipleReqArrays.push(chunk)
+      }
+
+      const gamePrices$: Observable<IGamePriceResponseDetails[]>[] = multipleReqArrays.map(chunk => this.http.get<IGamePriceResponseDetails[]>(this.apiUrl + `/game/getGamePrices?appId=${chunk.join(',')}`, { withCredentials: true }))
+
+      const gamePricesResponse = await firstValueFrom(forkJoin(gamePrices$)
+        .pipe(
+          map(result => {
+            return result.map(chunkObj => {
+              return Object.entries(chunkObj).map(([key, value]) => {
+                return value
+              })
+            })
+          })
+        )).then(response => {
+        return response.flat()
+      })
+      gamePrices = gamePricesResponse
+    }
+    else {
+      gamePrices = await this.getGamePrices(appIds.join(','))
+    }
+
+    const gameNames$: Observable<IGameNameResponse>[] = appIds.map(id => this.http.get<IGameNameResponse>(this.apiUrl + `/game/getGameName?appId=${id}`, { withCredentials: true }))
+
+    const gameNamesResponse = await firstValueFrom(forkJoin(gameNames$))
+    const wishListWithPrices: IWishlistResponseWithPrices[] = wishlist.map(game => {
+      const matchingIdIndex = appIds.indexOf(game.appid)
+      if (gamePrices[matchingIdIndex].success === false) {
+        const gameWithPrice: IWishlistResponseWithPrices = {
+          appid: game.appid,
+          priority: game.priority,
+          date_added: game.date_added,
+          priceCurrent: 0,
+          priceInitial: 0,
+          name: gameNamesResponse[matchingIdIndex] !== null ? gameNamesResponse[matchingIdIndex].name : ''
+        }
+        return gameWithPrice
+      }
+      else {
+        const gameWithPrice: IWishlistResponseWithPrices = {
+          appid: game.appid,
+          priority: game.priority,
+          date_added: game.date_added,
+          priceCurrent: gamePrices[matchingIdIndex].data.price_overview !== undefined ? gamePrices[matchingIdIndex].data.price_overview.final : 0,
+          priceInitial: gamePrices[matchingIdIndex].data.price_overview !== undefined ? gamePrices[matchingIdIndex].data.price_overview.initial : 0,
+          name: gameNamesResponse[matchingIdIndex] !== null ? gameNamesResponse[matchingIdIndex].name : ''
+        }
+        return gameWithPrice
+      }
+    })
+    const wishListFormatter = wishListWithPrices.filter(item => item.name !== '')
+    return wishListFormatter
   }
 
   public initializeGameLibrary = async () => {
@@ -581,5 +652,26 @@ export class SteamService {
       averageValuePerHourCurrent: 0,
       averageValuePerHourCurrentFormatted: ''
     }
+  }
+
+  public mapWishlist = (wishlist: IWishlistResponseWithPrices[], library: IUserGameInfoResponse[]): IWishlist[] => {
+    const wishlistFormatted: IWishlist[] = wishlist.map(game => {
+      library.forEach((libGame, i) => {
+        if (libGame.appid !== game.appid) {
+          return
+        }
+        return i
+      })
+      return {
+        appId: game.appid,
+        priority: game.priority,
+        dateAdded: new Date(game.date_added * 1000).toISOString().slice(0, new Date(game.date_added * 1000).toISOString().indexOf('T')),
+        priceCurrent: game.priceCurrent / 100,
+        priceInitial: game.priceInitial / 100,
+        name: game.name,
+        storeUrl: `https://store.steampowered.com/app/${game.appid}`
+      }
+    })
+    return wishlistFormatted
   }
 }

@@ -63,6 +63,7 @@ export interface IUser {
   badges: IBadge[];
   playerLevel: IPlayerLevel;
   gameLibrary: IUserGameInfo[];
+  wishlist: IWishlist[];
   accountValues?: IAccountValueDetails;
   gameCount: number;
   friendList: ISteamFriend[];
@@ -74,6 +75,7 @@ export interface IUser {
 export interface IUserFullResponse {
   user: ILoginResponseUser;
   additionalDetails: IFriendListDetailsResponseFriend[];
+  wishlist: IWishlistResponseWithPrices[];
 }
 
 export interface IGetBadgesResponse {
@@ -333,9 +335,12 @@ export interface INewsItems {
   videoLink: SafeResourceUrl;
 }
 
-export interface IGameDialogPassedData {
-  game: IUserGameInfo;
+export interface IBaseDialogPassedData {
   user: IUser;
+}
+
+export interface IGameDialogPassedData extends IBaseDialogPassedData {
+  game: IUserGameInfo;
 }
 
 export interface IGameDialogInfo {
@@ -423,8 +428,7 @@ export interface HttpError {
   status: number;
 }
 
-export interface IFriendDialogPassedData {
-  user: IUser;
+export interface IFriendDialogPassedData extends IBaseDialogPassedData {
   friend: ISteamFriend;
   friendUser: IUser;
   recentlyPlayedGames: IUserGameInfo[];
@@ -494,4 +498,40 @@ export interface IChartData {
   label: string;
   value: number;
   backgroundColor?: string;
+}
+
+export interface IWishlistResponse {
+  appid: number;
+  priority: number;
+  date_added: number;
+}
+
+export interface IWishlistResponseWithPrices extends IWishlistResponse {
+  priceCurrent: number;
+  priceInitial: number;
+  name: string;
+}
+
+export interface IWishlist {
+  appId: number;
+  name: string;
+  priceCurrent: number;
+  priceInitial: number;
+  priority: number;
+  dateAdded: string;
+  storeUrl: string;
+  id?: string;
+}
+
+export interface IGameNameResponse {
+  appid: number;
+  last_modified: number;
+  name: string;
+  price_change_number: number;
+  __v: number;
+  _id: string;
+}
+
+export interface IWishlistDialogPassedData extends IBaseDialogPassedData {
+  style: string;
 }
