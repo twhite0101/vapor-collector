@@ -44,8 +44,8 @@ export interface IUser {
   steamId: string;
   communityVisibilityState: number;
   profileState: number;
-  personaName: string;
-  commentPermission: number;
+  realName: string;
+  commentPermission?: number;
   profileUrl: string;
   avatars: IAvatars;
   lastLogoff: string;
@@ -57,14 +57,16 @@ export interface IUser {
   profileAgeYears: number;
   personaStateFlags: number;
   locCountryCode: string;
+  locStateCode: string;
+  locCityId?: string;
   displayName: string;
-  badges: IBadge[];
-  playerLevel: IPlayerLevel;
+  badges?: IBadge[];
+  playerLevel?: IPlayerLevel;
   gameLibrary: IUserGameInfo[];
-  wishlist: IWishlist[];
+  wishlist?: IWishlist[];
   accountValues?: IAccountValueDetails;
   gameCount: number;
-  friendList: ISteamFriend[];
+  friendList?: ISteamFriend[];
   currentGameId?: string;
   gameServerIp?: string;
   currentGameName?: string;
@@ -72,7 +74,7 @@ export interface IUser {
 
 export interface IUserFullResponse {
   user: ILoginResponseUser;
-  additionalDetails: IFriendListDetailsResponseFriend[];
+  additionalDetails: IUserAdditionalDetailsResponse[];
   wishlist: IWishlistResponseWithPrices[];
 }
 
@@ -184,7 +186,7 @@ export interface IFriendListResponseFriend {
   friend_since: number;
 }
 
-export interface IFriendListDetailsResponseFriend {
+export interface IUserAdditionalDetailsResponse {
   steamid: string;
   communityvisibilitystate: number;
   profilestate: number;
@@ -210,7 +212,7 @@ export interface IFriendListDetailsResponseFriend {
 
 export interface IFriendListFullResponse {
   friendList: IFriendListResponseFriend[];
-  details: IFriendListDetailsResponseFriend[];
+  details: IUserAdditionalDetailsResponse[];
   gameLibraries: IFriendGameResponse[];
 }
 
@@ -231,32 +233,9 @@ export interface IFriendGameFullResponse extends IFriendGameResponse {
   index?: number;
 }
 
-export interface ISteamFriend {
-  steamId: string;
+export interface ISteamFriend extends IUser {
   relationship: string;
   friendSince: string;
-  communityVisibilityState: string;
-  profileState: number;
-  displayName: string;
-  profileUrl: string;
-  avatars: IAvatars;
-  lastLogoff: string;
-  personaState: number;
-  realName: string;
-  primaryClanId: string;
-  timeCreated: number;
-  personaStateFlags: number;
-  locCountryCode: string;
-  locStateCode: string;
-  locCityId?: string;
-  currentGameId?: string;
-  gameServerIp?: string;
-  currentGameName?: string;
-  gameLibrary: IUserGameInfo[];
-  accountValues?: IAccountValueDetails;
-  achievements?: ILibraryAchievements[];
-  badges?: IBadge[];
-  playerLevel?: IPlayerLevel;
 }
 
 export interface IGetGameNewsResponse {

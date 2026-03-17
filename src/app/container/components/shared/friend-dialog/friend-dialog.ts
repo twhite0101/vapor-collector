@@ -9,6 +9,8 @@ import { CarouselModule } from 'primeng/carousel'
 import { FriendGameLibraryColDef } from '../../../../models/ColdDefs'
 import type { IFriendDialogPassedData, IUserGameInfo } from '../../../../models/Steam'
 import { AuthService } from '../../../../services/auth/auth-service'
+import { MappingService } from '../../../../services/mapping/mapping-service'
+import { SteamService } from '../../../../services/steam/data/steam-service'
 import { Nameplate } from '../../dashboard/profile/nameplate/nameplate'
 import { RecentGames } from '../../dashboard/profile/recent-games/recent-games'
 import { Grid } from '../grid/grid'
@@ -33,6 +35,8 @@ export class FriendDialog implements AfterViewInit {
   private readonly dialogRef = inject(MatDialogRef<FriendDialog>)
   private readonly data = inject<IFriendDialogPassedData>(MAT_DIALOG_DATA)
   protected readonly authService: AuthService = inject(AuthService)
+  protected readonly steamService: SteamService = inject(SteamService)
+  private readonly mappingService: MappingService = inject(MappingService)
 
   protected friendDetails: IFriendDialogPassedData
   private _loading: WritableSignal<boolean> = signal(true)
@@ -56,7 +60,7 @@ export class FriendDialog implements AfterViewInit {
 
   public ngAfterViewInit (): void {
     this.dialogRef.afterOpened()
-      .subscribe(() => {
+      .subscribe(async () => {
         this.friendDetails = {
           user: this.data.user,
           friend: this.data.friend,
@@ -65,6 +69,19 @@ export class FriendDialog implements AfterViewInit {
           recentPlayTime: this.data.recentPlayTime
         }
         this.friendDetails.friend.gameLibrary.forEach(game => game.id = game.appId.toString())
+        if (!this.friendDetails.friend.badges) {
+          await this.steamService.getUserBadges(this.friendDetails.friend.steamId)
+            .then(response => {
+              this.friendDetails.friend.badges = this.mappingService.mapBadgesResponse(response.badges.badges)
+              this.friendDetails.friend.playerLevel = {
+                playerXp: response.badges.player_xp,
+                playerLevel: response.badges.player_level,
+                playerXpNeededToLevelUp: response.badges.player_xp_needed_to_level_up,
+                playerXpNeededCurrentLevel: response.badges.player_xp_needed_current_level,
+                levelPercentile: Math.ceil(response.levelPercentile.player_level_percentile * 100 ) / 100
+              }
+            })
+        }
         this._loading.set(false)
       })
   }

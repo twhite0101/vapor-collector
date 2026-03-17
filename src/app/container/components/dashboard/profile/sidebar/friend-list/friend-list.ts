@@ -53,17 +53,21 @@ export class FriendList implements OnInit {
   protected filterFriendListControl: FormControl<string> = this.fb.control<string>('')
 
   protected _showNoFriends: WritableSignal<boolean> = signal(false)
-  protected friendListLength: WritableSignal<number> = signal(0)
+  private _friendListLength: WritableSignal<number> = signal(0)
+
+  public get friendListLength () {
+    return this._friendListLength()
+  }
 
   public constructor () {
     this.filterFriendListControl.valueChanges
       .pipe(takeUntilDestroyed())
       .subscribe(value => {
         this.filteredFriends = this.filterFriends(value)
-        this.friendListLength.set(this.filteredFriends.length)
+        this._friendListLength.set(this.filteredFriends.length)
       })
     effect(() => {
-      if (this.friendListLength() === 0) {
+      if (this._friendListLength() === 0) {
         this._showNoFriends.set(true)
       }
       else {
@@ -73,10 +77,10 @@ export class FriendList implements OnInit {
   }
 
   public ngOnInit (): void {
-    this._allFriends = this.user.friendList
+    this._allFriends = this.user.friendList as ISteamFriend[]
     this.onlineFriends = this._allFriends.filter(friend => friend.personaState === 1 || friend.personaState === 2 || friend.personaState === 3 || friend.personaState === 4)
     this.filteredFriends.push(...this.onlineFriends)
-    this.friendListLength.set(this.filteredFriends.length)
+    this._friendListLength.set(this.filteredFriends.length)
     this.state.setFriendListStatus(true)
   }
 
@@ -94,9 +98,9 @@ export class FriendList implements OnInit {
     return this._showNoFriends()
   }
 
-  protected openGameDialog = (friend: ISteamFriend) => {
+  protected openFriendDialog = (friend: ISteamFriend) => {
     const dialogConfig = new MatDialogConfig()
-    const friendUser = this.mappingService.mapSteamFriendToUser(friend)
+    const friendUser = friend
     const recentlyPlayedGames = friendUser.gameLibrary.filter(game => game.playtime2Weeks > 0)
     dialogConfig.data = {
       friend: friend,

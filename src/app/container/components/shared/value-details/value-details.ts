@@ -2,6 +2,7 @@ import type { OnChanges, SimpleChanges } from '@angular/core'
 import { booleanAttribute, Component, inject, Input } from '@angular/core'
 import type { IChartData, IUser } from '../../../../models/Steam'
 import { MappingService } from '../../../../services/mapping/mapping-service'
+import { SteamService } from '../../../../services/steam/data/steam-service'
 import { DonutChart } from '../donut-chart/donut-chart'
 
 @Component({
@@ -15,6 +16,8 @@ import { DonutChart } from '../donut-chart/donut-chart'
 export class ValueDetails implements OnChanges {
   // Dependency Injections
   private readonly mappingService: MappingService = inject(MappingService)
+  protected readonly steamService: SteamService = inject(SteamService)
+
   @Input({ required: true }) public user: IUser
   @Input({ required: true, transform: booleanAttribute }) public isAuthUser: boolean
 

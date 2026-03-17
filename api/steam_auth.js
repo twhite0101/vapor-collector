@@ -201,8 +201,9 @@ app.get('/user/getUserBadges', ensureAuthenticated, (req, res) => {
     res.statusCode(401).json('Unauthorized user');
   }
   const user = decoded.user
+  const steamId = req.query.steamId !== undefined ? req.query.steamId : user.id
   axios
-    .get(`https://api.steampowered.com/IPlayerService/GetBadges/v1/?key=${process.env.STEAM_API_KEY}&steamid=${user.id}`)
+    .get(`https://api.steampowered.com/IPlayerService/GetBadges/v1/?key=${process.env.STEAM_API_KEY}&steamid=${steamId}`)
     .then(response => {
       res.send(response.data.response)
     })
@@ -245,7 +246,7 @@ app.get('/user/getFriendList', ensureAuthenticated, (req, res) => {
     })
 })
 
-app.get('/user/getFriendListDetails', ensureAuthenticated, (req, res) => {
+app.get('/user/getAdditionalUserDetails', ensureAuthenticated, (req, res) => {
   const token = req.cookies.access;
   const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_KEY)
   if (!decoded) {

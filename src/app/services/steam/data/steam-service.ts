@@ -1,8 +1,9 @@
 import { HttpClient } from '@angular/common/http'
-import { inject, Injectable } from '@angular/core'
+import type { WritableSignal } from '@angular/core'
+import { inject, Injectable, signal } from '@angular/core'
 import type { Observable } from 'rxjs'
 import { firstValueFrom, forkJoin, map } from 'rxjs'
-import type { IAccountValueDetails, IFriendGameFullResponse, IFriendGameResponse, IFriendListDetailsResponseFriend, IFriendListFullResponse, IFriendListResponseFriend, IFriendsWhoPlay, IGameNameResponse, IGamePrice, IGamePriceOverviewResponse, IGamePriceResponseDetails, IGamePriceResponseFormat, IGameSchemaResponse, IGetBadgesFullResponse, IGetBadgesResponse, IGetGameNewsResponse, IPlayLevelPercentileResponse, ISteamFriend, IUserAchievementsResponse, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse, IWishlistResponse, IWishlistResponseWithPrices } from '../../../models/Steam'
+import type { IAccountValueDetails, IFriendGameFullResponse, IFriendGameResponse, IFriendListFullResponse, IFriendListResponseFriend, IFriendsWhoPlay, IGameNameResponse, IGamePrice, IGamePriceOverviewResponse, IGamePriceResponseDetails, IGamePriceResponseFormat, IGameSchemaResponse, IGetBadgesFullResponse, IGetBadgesResponse, IGetGameNewsResponse, IPlayerLevel, IPlayLevelPercentileResponse, ISteamFriend, IUserAchievementsResponse, IUserAdditionalDetailsResponse, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse, IWishlistResponse, IWishlistResponseWithPrices } from '../../../models/Steam'
 import { UtilsService } from '../../utils/utils-service'
 
 const LIBRARY_PLAY_TIME_TYPES = ['playtime_forever', 'playtime_2weeks', 'playtime_deck_forever', 'playtime_disconnected', 'playtime_linux_forever', 'playtime_mac_forever', 'playtime_windows_forever'] as const
@@ -17,13 +18,19 @@ export class SteamService {
 
   private apiUrl = 'http://localhost:3000'
 
+  private _friendListLength: WritableSignal<number> = signal(0)
+
+  public get friendListLength () {
+    return this._friendListLength()
+  }
+
   public getOwnedGames = async () => {
     const response = await firstValueFrom(this.http.get<IUserGamesLibraryResponse>(this.apiUrl + '/user/getGameLibrary', { withCredentials: true }))
     const library = this.calculateGameLibraryHoursPlayed(response)
     return library
   }
 
-  public getUserBadges = async (steamId?: number) => {
+  public getUserBadges = async (steamId?: string) => {
     const endpoint = steamId !== undefined ? `/user/getUserBadges?steamId=${steamId}` : '/user/getUserBadges'
 
     const badgesDetails = await firstValueFrom(this.http.get<IGetBadgesResponse>(this.apiUrl + endpoint, { withCredentials: true }))
@@ -45,7 +52,7 @@ export class SteamService {
 
   public getFriendListDetails = async (ids: string[]) => {
     const steamIdsParams = ids.join('%2C')
-    const response = await firstValueFrom(this.http.get<IFriendListDetailsResponseFriend[]>(this.apiUrl + `/user/getFriendListDetails?steamIds=${steamIdsParams}`, { withCredentials: true }))
+    const response = await firstValueFrom(this.http.get<IUserAdditionalDetailsResponse[]>(this.apiUrl + `/user/getAdditionalUserDetails?steamIds=${steamIdsParams}`, { withCredentials: true }))
     return response
   }
 
@@ -183,6 +190,8 @@ export class SteamService {
 
   public initializeFriendList = async () => {
     const friendList = await this.getFriendList()
+
+    this._friendListLength.set(friendList.length)
 
     const steamIds = friendList.map(friend => {
       return friend.steamid
@@ -470,6 +479,16 @@ export class SteamService {
       averageValuePerHourTotalFormatted: '',
       averageValuePerHourCurrent: 0,
       averageValuePerHourCurrentFormatted: ''
+    }
+  }
+
+  public createPlayerLevel = (): IPlayerLevel => {
+    return {
+      playerXp: 0,
+      playerLevel: 0,
+      playerXpNeededToLevelUp: 0,
+      playerXpNeededCurrentLevel: 0,
+      levelPercentile: 0
     }
   }
 

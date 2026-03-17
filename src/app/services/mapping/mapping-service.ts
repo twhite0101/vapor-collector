@@ -25,7 +25,7 @@ export class MappingService {
       steamId: userFull.user._json.steamid,
       communityVisibilityState: userFull.user._json.communityvisibilitystate,
       profileState: userFull.user._json.profilestate,
-      personaName: userFull.user._json.personaname,
+      realName: userFull.additionalDetails[0].realname,
       commentPermission: userFull.user._json.commentpermission,
       profileUrl: userFull.user._json.profileurl,
       avatars: {
@@ -41,6 +41,8 @@ export class MappingService {
       timeCreated: this.utilsService.convertUnixTimeToCurrentTime(userFull.user._json.timecreated),
       profileAgeYears: this.calculateProfileAgeYears(userFull.user._json.timecreated),
       personaStateFlags: userFull.user._json.personastateflags,
+      locStateCode: userFull.additionalDetails[0].locstatecode,
+      locCityId: userFull.additionalDetails[0].loccityid !== undefined ? userFull.additionalDetails[0].loccityid : '',
       locCountryCode: userFull.user._json.loccountrycode,
       displayName: userFull.user.displayName,
       badges: this.mapBadgesResponse(badgesFull.badges.badges),
@@ -154,57 +156,15 @@ export class MappingService {
     return Math.abs(years)
   }
 
-  public mapSteamFriendToUser = (friend: ISteamFriend): IUser => {
-    return {
-      steamId: friend.steamId,
-      communityVisibilityState: Number(friend.communityVisibilityState),
-      profileState: friend.profileState,
-      personaName: friend.personaState.toString(),
-      commentPermission: 0,
-      profileUrl: friend.profileUrl,
-      avatars: {
-        avatar: friend.avatars.avatar,
-        avatarMedium: friend.avatars.avatarMedium,
-        avatarFull: friend.avatars.avatarFull,
-        avatarHash: friend.avatars.avatarHash
-      },
-      lastLogoff: friend.lastLogoff,
-      personaState: friend.personaState,
-      status: this.setUserStatus(friend.personaState),
-      primaryClanId: friend.primaryClanId,
-      timeCreated: this.utilsService.convertUnixTimeToCurrentTime(friend.timeCreated),
-      profileAgeYears: this.calculateProfileAgeYears(friend.timeCreated),
-      personaStateFlags: friend.personaStateFlags,
-      locCountryCode: friend.locCountryCode,
-      displayName: friend.displayName,
-      badges: [],
-      playerLevel: {
-        playerXp: 0,
-        playerLevel: 0,
-        playerXpNeededToLevelUp: 0,
-        playerXpNeededCurrentLevel: 0,
-        levelPercentile: 0
-      },
-      friendList: [],
-      gameLibrary: this.sortGamesByRecentlyPlayed(friend.gameLibrary),
-      wishlist: [],
-      accountValues: friend.accountValues as IAccountValueDetails,
-      gameCount: friend.gameLibrary.length,
-      currentGameId: friend.currentGameId !== undefined ? friend.currentGameId : '',
-      gameServerIp: friend.gameServerIp !== undefined ? friend.gameServerIp : '',
-      currentGameName: friend.currentGameName !== undefined ? friend.currentGameName : ''
-    }
-  }
-
   private mapFriendListResponse = (responses: IFriendListFullResponse): ISteamFriend[] => {
-    const friends: ISteamFriend[] = responses.friendList.map(response => {
+    const friends: ISteamFriend[] = responses.friendList.map((response, i) => {
       const matchingDetails = responses.details.find(detail => detail.steamid === response.steamid)
       if (matchingDetails === undefined) {
         return {
           steamId: '',
           relationship: '',
           friendSince: '',
-          communityVisibilityState: '',
+          communityVisibilityState: 0,
           profileState: 0,
           displayName: '',
           profileUrl: '',
@@ -218,19 +178,26 @@ export class MappingService {
           personaState: 0,
           realName: '',
           primaryClanId: '',
-          timeCreated: 0,
+          timeCreated: '',
           personaStateFlags: 0,
           locCountryCode: '',
           locStateCode: '',
-          gameLibrary: []
+          gameLibrary: [],
+          status: '',
+          profileAgeYears: 0,
+          locCityId: '',
+          currentGameId: '',
+          gameServerIp: '',
+          currentGameName: '',
+          gameCount: 0
         }
       }
       else {
         return {
           steamId: response.steamid,
           relationship: response.relationship,
-          friendSince: this.utilsService.convertUnixTimeToCurrentTime(response.friend_since),
-          communityVisibilityState: matchingDetails?.communityvisibilitystate.toString(),
+          friendSince: response.friend_since ? this.utilsService.convertUnixTimeToCurrentTime(response.friend_since) : '',
+          communityVisibilityState: matchingDetails?.communityvisibilitystate,
           profileState: matchingDetails?.profilestate,
           displayName: matchingDetails?.personaname,
           profileUrl: matchingDetails?.profileurl,
@@ -240,11 +207,13 @@ export class MappingService {
             avatarFull: matchingDetails?.avatarfull,
             avatarHash: matchingDetails?.avatarhash
           },
-          lastLogoff: this.utilsService.convertUnixTimeToCurrentTime(matchingDetails?.lastlogoff),
+          lastLogoff: matchingDetails?.lastlogoff ? this.utilsService.convertUnixTimeToCurrentTime(matchingDetails?.lastlogoff) : '',
           personaState: matchingDetails?.personastate,
+          status: this.setUserStatus(matchingDetails.personastate),
           realName: matchingDetails?.realname,
           primaryClanId: matchingDetails?.primaryclanid,
-          timeCreated: matchingDetails?.timecreated,
+          timeCreated: matchingDetails?.timecreated ? this.utilsService.convertUnixTimeToCurrentTime(matchingDetails?.timecreated) : '',
+          profileAgeYears: this.calculateProfileAgeYears(matchingDetails.timecreated),
           personaStateFlags: matchingDetails?.personastateflags,
           locCountryCode: matchingDetails?.loccountrycode,
           locStateCode: matchingDetails?.locstatecode,
@@ -252,7 +221,8 @@ export class MappingService {
           currentGameId: matchingDetails?.gameid !== undefined ? matchingDetails?.gameid : '',
           gameServerIp: matchingDetails?.gameserverip !== undefined ? matchingDetails?.gameserverip : '',
           currentGameName: matchingDetails?.gameextrainfo !== undefined ? matchingDetails?.gameextrainfo : '',
-          gameLibrary: this.findFriendGameLibrary(Number(response.steamid), responses.gameLibraries)
+          gameLibrary: this.findFriendGameLibrary(Number(response.steamid), responses.gameLibraries),
+          gameCount: responses.gameLibraries[i].libraryResponse.game_count
         }
       }
     })
@@ -420,7 +390,7 @@ export class MappingService {
   }
 
   public calculateAccountRankings = (user: IUser) => {
-    const userAccountDetails = user.friendList.map(friend => {
+    const userAccountDetails = (user.friendList as ISteamFriend[]).map(friend => {
       return {
         steamId: friend.steamId,
         accountValues: friend.accountValues
@@ -466,9 +436,9 @@ export class MappingService {
     (user.accountValues as IAccountValueDetails).averageCPGTotalFriendRank = averageCPGTotalSort.findIndex(account => account.steamId === user.steamId) + 1;
     (user.accountValues as IAccountValueDetails).averageCPGCurrentFriendRank = averageCPGCurrentSort.findIndex(account => account.steamId === user.steamId) + 1;
     (user.accountValues as IAccountValueDetails).averageVPHTotalFriendRank = averageVPHTotalSort.findIndex(account => account.steamId === user.steamId) + 1;
-    (user.accountValues as IAccountValueDetails).averageVPHCurrentFriendRank = averageVPHCurrentSort.findIndex(account => account.steamId === user.steamId) + 1
+    (user.accountValues as IAccountValueDetails).averageVPHCurrentFriendRank = averageVPHCurrentSort.findIndex(account => account.steamId === user.steamId) + 1;
 
-    user.friendList.forEach(friend => {
+    (user.friendList as ISteamFriend[]).forEach(friend => {
       (friend.accountValues as IAccountValueDetails).totalEstLibraryFriendRank = totalLibrarySort.findIndex(account => account.steamId === friend.steamId) + 1;
       (friend.accountValues as IAccountValueDetails).currentEstLibraryFriendRank = currentLibrarySort.findIndex(account => account.steamId === friend.steamId) + 1;
       (friend.accountValues as IAccountValueDetails).averageCPGTotalFriendRank = averageCPGTotalSort.findIndex(account => account.steamId === friend.steamId) + 1;

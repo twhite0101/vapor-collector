@@ -45,9 +45,9 @@ export class WishlistDialog implements AfterViewInit {
   public ngAfterViewInit (): void {
     this.dialogRef.afterOpened()
       .subscribe(() => {
-        this.user = this.data.user
-        this.user.wishlist.forEach(game => game.id = game.appId.toString())
-        this.wishlistData = [...this.data.user.wishlist]
+        this.user = this.data.user;
+        (this.user.wishlist as IWishlist[]).forEach(game => game.id = game.appId.toString())
+        this.wishlistData = [...this.data.user.wishlist as IWishlist[]]
         this.gridStyle = this.data.style
         this._loading.set(false)
       })

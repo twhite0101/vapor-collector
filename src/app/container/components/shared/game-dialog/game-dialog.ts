@@ -5,7 +5,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog'
 import { MatProgressBarModule } from '@angular/material/progress-bar'
 import { MatTabsModule } from '@angular/material/tabs'
 import { CarouselModule } from 'primeng/carousel'
-import type { IGameDialogInfo, IGameDialogPassedData } from '../../../../models/Steam'
+import type { IGameDialogInfo, IGameDialogPassedData, ISteamFriend } from '../../../../models/Steam'
 import { MappingService } from '../../../../services/mapping/mapping-service'
 import { SteamService } from '../../../../services/steam/data/steam-service'
 import { UtilsService } from '../../../../services/utils/utils-service'
@@ -49,7 +49,7 @@ export class GameDialog implements AfterViewInit {
                 user: this.data.user,
                 game: this.data.game,
                 news: gameNews.count > 0 ? this.mappingService.mapGameNewsResponse(gameNews.newsitems) : [],
-                friendsWhoPlay: this.steamService.findFriendsWhoPlayGame(this.data.game.appId, this.data.user.friendList),
+                friendsWhoPlay: this.steamService.findFriendsWhoPlayGame(this.data.game.appId, this.data.user.friendList as ISteamFriend[]),
                 concurrentPlayers: concurrentPlayers,
                 achievements: this.utilsService.isSuccessfulResponse(userAchievements) === true ? this.mappingService.mapUserAchievements(gameSchema, userAchievements) : []
               }

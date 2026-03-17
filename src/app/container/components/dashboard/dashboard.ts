@@ -21,7 +21,7 @@ import { Sidebar } from './profile/sidebar/sidebar'
 })
 export class Dashboard implements OnInit {
   protected readonly authService: AuthService = inject(AuthService)
-  private readonly steamService: SteamService = inject(SteamService)
+  protected readonly steamService: SteamService = inject(SteamService)
 
   protected user: IUser
   protected recentlyPlayedGames: IUserGameInfo[] = []

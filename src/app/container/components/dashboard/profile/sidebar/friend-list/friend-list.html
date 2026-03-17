@@ -1,7 +1,7 @@
 <div class="friend-list-cont">
   <mat-expansion-panel>
     <mat-expansion-panel-header collapsedHeight="40px" expandedHeight="40px">
-      <mat-panel-description class="friend-list-header-desc">Friends: {{ this.user.friendList.length }}</mat-panel-description>
+      <mat-panel-description class="friend-list-header-desc">Friends: {{ friendListLength }}</mat-panel-description>
     </mat-expansion-panel-header>
     <div class="friend-list-search">
       <mat-form-field class="search-field" subscriptSizing="dynamic">
@@ -22,7 +22,7 @@
           <mat-card class="friend-card" appearance="outlined">
             <mat-card-content class="friend-card-content">
               <div class="friend-btn-cont">
-                <button class="friend-btn" type="button" (click)="openGameDialog(friend)">
+                <button class="friend-btn" type="button" (click)="openFriendDialog(friend)">
                   <img class="friend-avi" alt="Steam user avatar" height="32" width="32" [ngSrc]="friend.avatars.avatar">
                 </button>
               </div>

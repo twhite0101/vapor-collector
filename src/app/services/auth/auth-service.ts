@@ -5,7 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { Router } from '@angular/router'
 import type { Observable } from 'rxjs'
 import { firstValueFrom, forkJoin } from 'rxjs'
-import type { IFriendListDetailsResponseFriend, IFriendListFullResponse, IGetBadgesFullResponse, ILoginResponse, IUser, IUserFullResponse, IUserGamesLibraryResponse } from '../../models/Steam'
+import type { IFriendListFullResponse, IGetBadgesFullResponse, ILoginResponse, ISteamFriend, IUser, IUserAdditionalDetailsResponse, IUserFullResponse, IUserGamesLibraryResponse } from '../../models/Steam'
 import { LoadingService } from '../loading/loading-service'
 import { MappingService } from '../mapping/mapping-service'
 import { StateService } from '../state/state-service'
@@ -30,8 +30,9 @@ export class AuthService {
   private _isLoggedIn: WritableSignal<boolean> = signal(false)
 
   private _hasUser: WritableSignal<boolean> = signal(false)
-  private _hasLibrary: WritableSignal<boolean> = signal(false)
   private _hasBadges: WritableSignal<boolean> = signal(false)
+
+  private _hasLibrary: WritableSignal<boolean> = signal(false)
 
   private apiUrl = 'http://localhost:3000'
 
@@ -73,7 +74,7 @@ export class AuthService {
   }
 
   public getUserAdditionalDetails = async (id: string) => {
-    const response = await firstValueFrom(this.http.get<IFriendListDetailsResponseFriend[]>(this.apiUrl + `/user/getFriendListDetails?steamIds=${id}`, { withCredentials: true }))
+    const response = await firstValueFrom(this.http.get<IUserAdditionalDetailsResponse[]>(this.apiUrl + `/user/getAdditionalUserDetails?steamIds=${id}`, { withCredentials: true }))
     return response
   }
 
@@ -116,8 +117,8 @@ export class AuthService {
       .subscribe({
         next: ([user, library, badges, friendList]) => {
           const returnedData = this.mappingService.mapAuthResponseToUser(user, library, badges, friendList)
-          returnedData.accountValues = this.mappingService.calculateAccountValueDetails(returnedData.gameLibrary)
-          returnedData.friendList.forEach(friend => friend.accountValues = friend.gameLibrary.length > 0 ? this.mappingService.calculateAccountValueDetails(friend.gameLibrary) : this.steamService.createNewAccountValueDetails())
+          returnedData.accountValues = this.mappingService.calculateAccountValueDetails(returnedData.gameLibrary);
+          (returnedData.friendList as ISteamFriend[]).forEach(friend => friend.accountValues = friend.gameLibrary.length > 0 ? this.mappingService.calculateAccountValueDetails(friend.gameLibrary) : this.steamService.createNewAccountValueDetails())
           this.mappingService.calculateAccountRankings(returnedData)
           this._user.set(returnedData)
           this._hasUser.set(true)
