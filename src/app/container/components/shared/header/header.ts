@@ -1,7 +1,6 @@
 import { NgOptimizedImage } from '@angular/common'
 import type { OnInit } from '@angular/core'
 import { Component, inject } from '@angular/core'
-import { NonNullableFormBuilder } from '@angular/forms'
 import { MatButtonModule } from '@angular/material/button'
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog'
 import type { IUser } from '../../../../models/Steam'
@@ -21,7 +20,6 @@ import { WishlistDialog } from '../wishlist-dialog/wishlist-dialog'
 export class Header implements OnInit {
   // Dependency Injections
   protected readonly authService: AuthService = inject(AuthService)
-  private readonly fb: NonNullableFormBuilder = inject(NonNullableFormBuilder)
   private readonly state: StateService = inject(StateService)
   private readonly dialog: MatDialog = inject(MatDialog)
 

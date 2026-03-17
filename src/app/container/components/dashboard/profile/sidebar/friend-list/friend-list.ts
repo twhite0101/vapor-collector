@@ -14,7 +14,9 @@ import { MatFormFieldModule } from '@angular/material/form-field'
 import { MatInputModule } from '@angular/material/input'
 import type { ISteamFriend, IUser } from '../../../../../../models/Steam'
 import { AuthService } from '../../../../../../services/auth/auth-service'
+import { MappingService } from '../../../../../../services/mapping/mapping-service'
 import { StateService } from '../../../../../../services/state/state-service'
+import { SteamService } from '../../../../../../services/steam/data/steam-service'
 import { FriendDialog } from '../../../../shared/friend-dialog/friend-dialog'
 
 @Component({
@@ -39,6 +41,8 @@ export class FriendList implements OnInit {
   private readonly state: StateService = inject(StateService)
   private readonly dialog: MatDialog = inject(MatDialog)
   protected readonly authService: AuthService = inject(AuthService)
+  private readonly steamService: SteamService = inject(SteamService)
+  private readonly mappingService: MappingService = inject(MappingService)
 
   @Input({ required: true }) public user: IUser
 
@@ -92,14 +96,14 @@ export class FriendList implements OnInit {
 
   protected openGameDialog = (friend: ISteamFriend) => {
     const dialogConfig = new MatDialogConfig()
-    const friendUser = this.authService.mapSteamFriendToUser(friend)
+    const friendUser = this.mappingService.mapSteamFriendToUser(friend)
     const recentlyPlayedGames = friendUser.gameLibrary.filter(game => game.playtime2Weeks > 0)
     dialogConfig.data = {
       friend: friend,
       user: this.user,
       friendUser: friendUser,
       recentlyPlayedGames: recentlyPlayedGames,
-      recentPlayTime: this.authService.calculateRecentPlayTime(recentlyPlayedGames)
+      recentPlayTime: this.steamService.calculateRecentPlayTime(recentlyPlayedGames)
     }
     dialogConfig.panelClass = 'friend-dialog'
     this.dialog.open(FriendDialog, dialogConfig)

@@ -15,7 +15,7 @@
               <mat-card-content class="game-card">
                 <div class="game-btn-cont">
                   <button type="button" class="game-btn" (click)="openGameDialog(game)">
-                    <img height="53.75" width="115" mat-card-image [alt]="`Steam library photo for ${game.name}`" [ngSrc]="`https://steamcdn-a.akamaihd.net/steam/apps/${game.appId}/header.jpg`">
+                    <img height="53.75" width="115" appImageFallback="assets/cover_not_available.png" mat-card-image [alt]="`Steam library photo for ${game.name}`" [ngSrc]="`https://steamcdn-a.akamaihd.net/steam/apps/${game.appId}/header.jpg`">
                   </button>
                 </div>
                 <div class="details-cont">

@@ -10,6 +10,7 @@ import { MatDialog, MatDialogConfig } from '@angular/material/dialog'
 import { MatExpansionModule } from '@angular/material/expansion'
 import { MatFormFieldModule } from '@angular/material/form-field'
 import { MatInputModule } from '@angular/material/input'
+import { ImageFallback } from '../../../../directives/image-fallback/image-fallback'
 import type { IUser, IUserGameInfo } from '../../../../models/Steam'
 import { GameDialog } from '../game-dialog/game-dialog'
 
@@ -22,7 +23,8 @@ import { GameDialog } from '../game-dialog/game-dialog'
     ReactiveFormsModule,
     MatInputModule,
     MatFormFieldModule,
-    NgOptimizedImage
+    NgOptimizedImage,
+    ImageFallback
   ],
   templateUrl: './game-library.html',
   styleUrl: './game-library.scss'

@@ -6,7 +6,9 @@ import { MatProgressBarModule } from '@angular/material/progress-bar'
 import { MatTabsModule } from '@angular/material/tabs'
 import { CarouselModule } from 'primeng/carousel'
 import type { IGameDialogInfo, IGameDialogPassedData } from '../../../../models/Steam'
+import { MappingService } from '../../../../services/mapping/mapping-service'
 import { SteamService } from '../../../../services/steam/data/steam-service'
+import { UtilsService } from '../../../../services/utils/utils-service'
 
 @Component({
   selector: 'app-game-dialog',
@@ -25,6 +27,8 @@ export class GameDialog implements AfterViewInit {
   private readonly dialogRef = inject(MatDialogRef<GameDialog>)
   private readonly data = inject<IGameDialogPassedData>(MAT_DIALOG_DATA)
   private readonly steamService: SteamService = inject(SteamService)
+  private readonly utilsService: UtilsService = inject(UtilsService)
+  private readonly mappingService: MappingService = inject(MappingService)
 
   @ViewChild('details', { static: true }) protected detailsRef: ElementRef
 
@@ -44,10 +48,10 @@ export class GameDialog implements AfterViewInit {
               this.gameDetails = {
                 user: this.data.user,
                 game: this.data.game,
-                news: gameNews.count > 0 ? this.steamService.mapGameNewsResponse(gameNews.newsitems) : [],
+                news: gameNews.count > 0 ? this.mappingService.mapGameNewsResponse(gameNews.newsitems) : [],
                 friendsWhoPlay: this.steamService.findFriendsWhoPlayGame(this.data.game.appId, this.data.user.friendList),
                 concurrentPlayers: concurrentPlayers,
-                achievements: this.steamService.isSuccessfulResponse(userAchievements) === true ? this.steamService.mapUserAchievements(gameSchema, userAchievements) : []
+                achievements: this.utilsService.isSuccessfulResponse(userAchievements) === true ? this.mappingService.mapUserAchievements(gameSchema, userAchievements) : []
               }
               this._loading.set(false)
             },

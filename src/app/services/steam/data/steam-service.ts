@@ -1,16 +1,11 @@
 import { HttpClient } from '@angular/common/http'
 import { inject, Injectable } from '@angular/core'
-import type { SafeResourceUrl } from '@angular/platform-browser'
-import { DomSanitizer } from '@angular/platform-browser'
 import type { Observable } from 'rxjs'
 import { firstValueFrom, forkJoin, map } from 'rxjs'
-import type { IAccountValueDetails, IAchievement, IFriendGameFullResponse, IFriendGameResponse, IFriendListDetailsResponseFriend, IFriendListFullResponse, IFriendListResponseFriend, IFriendsWhoPlay, IGameNameResponse, IGamePrice, IGamePriceOverviewResponse, IGamePriceResponseDetails, IGamePriceResponseFormat, IGameSchemaResponse, IGetBadgesFullResponse, IGetBadgesResponse, IGetGameNewsResponse, IGetRecentlyPlayedGamesResponse, INewsItems, INewsItemsResponse, IPlayLevelPercentileResponse, ISteamFriend, IUserAchievementsResponse, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse, IWishlist, IWishlistResponse, IWishlistResponseWithPrices } from '../../../models/Steam'
+import type { IAccountValueDetails, IFriendGameFullResponse, IFriendGameResponse, IFriendListDetailsResponseFriend, IFriendListFullResponse, IFriendListResponseFriend, IFriendsWhoPlay, IGameNameResponse, IGamePrice, IGamePriceOverviewResponse, IGamePriceResponseDetails, IGamePriceResponseFormat, IGameSchemaResponse, IGetBadgesFullResponse, IGetBadgesResponse, IGetGameNewsResponse, IPlayLevelPercentileResponse, ISteamFriend, IUserAchievementsResponse, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse, IWishlistResponse, IWishlistResponseWithPrices } from '../../../models/Steam'
+import { UtilsService } from '../../utils/utils-service'
 
-const STEAM_IMAGE_CLAN = 'https://cdn.cloudflare.steamstatic.com/steamcommunity/public/images/clans'
-const YT_WATCH_LINK = 'https://www.youtube.com/embed/'
-const VIDEO_ID_REGEX = /\[previewyoutube=(.{11});full\]\[\/previewyoutube\]/
-const IMG_SRC_REGEX = /img src=["'](.*?)["']/
-const IMG_REGEX = /\[img\](.*?)\[\/img\]/
+const LIBRARY_PLAY_TIME_TYPES = ['playtime_forever', 'playtime_2weeks', 'playtime_deck_forever', 'playtime_disconnected', 'playtime_linux_forever', 'playtime_mac_forever', 'playtime_windows_forever'] as const
 
 @Injectable({
   providedIn: 'root'
@@ -18,7 +13,7 @@ const IMG_REGEX = /\[img\](.*?)\[\/img\]/
 export class SteamService {
   // Dependency Injections
   private readonly http: HttpClient = inject(HttpClient)
-  private readonly domSanitizer: DomSanitizer = inject(DomSanitizer)
+  private readonly utilsService: UtilsService = inject(UtilsService)
 
   private apiUrl = 'http://localhost:3000'
 
@@ -41,12 +36,6 @@ export class SteamService {
     }
 
     return badges
-  }
-
-  public getRecentlyPlayedGames = async () => {
-    const response = await firstValueFrom(this.http.get<IGetRecentlyPlayedGamesResponse>(this.apiUrl + '/user/getRecentlyPlayedGames', { withCredentials: true }))
-    const recentGames = this.calculateRecentGamesHoursPlayed(response)
-    return recentGames
   }
 
   public getFriendList = async () => {
@@ -91,6 +80,25 @@ export class SteamService {
     return response
   }
 
+  private getMultipleGamePrices = async (appIdArrays: number[][]) => {
+    const gamePrices$: Observable<IGamePriceResponseDetails[]>[] = appIdArrays.map(chunk => this.http.get<IGamePriceResponseDetails[]>(this.apiUrl + `/game/getGamePrices?appId=${chunk.join(',')}`, { withCredentials: true }))
+
+    const gamePricesResponse = await firstValueFrom(forkJoin(gamePrices$)
+      .pipe(
+        map(result => {
+          return result.map(chunkObj => {
+            return Object.entries(chunkObj).map(([key, value]) => {
+              return value
+            })
+          })
+        })
+      )).then(response => {
+      return response.flat()
+    })
+
+    return gamePricesResponse
+  }
+
   public getWishlist = async (steamId: string) => {
     const response = firstValueFrom(this.http.get<IWishlistResponse[]>(this.apiUrl + `/user/getWishlist?steamId=${steamId}`, { withCredentials: true }))
     return response
@@ -99,32 +107,11 @@ export class SteamService {
   public initializeWishlist = async (steamId: string) => {
     const wishlist = await this.getWishlist(steamId)
     let gamePrices: IGamePriceResponseDetails[] = []
-    const appIds = wishlist.map(game => {
-      return game.appid
-    })
+    const appIds = wishlist.map(game => game.appid)
     if (appIds.length >= 300) {
-      const multipleReqArrays: number[][] = []
-      const appIdChunkSize = 300
-      for (let i = 0; i < appIds.length; i += appIdChunkSize) {
-        const chunk = appIds.slice(i, i + appIdChunkSize)
-        multipleReqArrays.push(chunk)
-      }
+      const multipleReqArrays: number[][] = this.utilsService.separateArrayIntoChunks(appIds, 300)
 
-      const gamePrices$: Observable<IGamePriceResponseDetails[]>[] = multipleReqArrays.map(chunk => this.http.get<IGamePriceResponseDetails[]>(this.apiUrl + `/game/getGamePrices?appId=${chunk.join(',')}`, { withCredentials: true }))
-
-      const gamePricesResponse = await firstValueFrom(forkJoin(gamePrices$)
-        .pipe(
-          map(result => {
-            return result.map(chunkObj => {
-              return Object.entries(chunkObj).map(([key, value]) => {
-                return value
-              })
-            })
-          })
-        )).then(response => {
-        return response.flat()
-      })
-      gamePrices = gamePricesResponse
+      gamePrices = await this.getMultipleGamePrices(multipleReqArrays)
     }
     else {
       gamePrices = await this.getGamePrices(appIds.join(','))
@@ -170,28 +157,9 @@ export class SteamService {
       return game.appid
     })
     if (appIds.length >= 300) {
-      const multipleReqArrays: number[][] = []
-      const appIdChunkSize = 300
-      for (let i = 0; i < appIds.length; i += appIdChunkSize) {
-        const chunk = appIds.slice(i, i + appIdChunkSize)
-        multipleReqArrays.push(chunk)
-      }
+      const multipleReqArrays: number[][] = this.utilsService.separateArrayIntoChunks(appIds, 300)
 
-      const gamePrices$: Observable<IGamePriceResponseDetails[]>[] = multipleReqArrays.map(chunk => this.http.get<IGamePriceResponseDetails[]>(this.apiUrl + `/game/getGamePrices?appId=${chunk.join(',')}`, { withCredentials: true }))
-
-      const gamePricesResponse = await firstValueFrom(forkJoin(gamePrices$)
-        .pipe(
-          map(result => {
-            return result.map(chunkObj => {
-              return Object.entries(chunkObj).map(([key, value]) => {
-                return value
-              })
-            })
-          })
-        )).then(response => {
-        return response.flat()
-      })
-      gamePrices = gamePricesResponse
+      gamePrices = await this.getMultipleGamePrices(multipleReqArrays)
     }
     else {
       gamePrices = await firstValueFrom(this.http.get<IGamePriceResponseDetails[]>(this.apiUrl + `/game/getGamePrices?appId=${appIds.join(',')}`, { withCredentials: true }))
@@ -342,12 +310,6 @@ export class SteamService {
     return friendListFull
   }
 
-  public initializeFriendDialog = (friendId: number) => {
-    const badges = this.getUserBadges(friendId)
-
-    return forkJoin([badges])
-  }
-
   public initializeGameInfo = (gameId: string) => {
     const gameNews = this.getGameNews(gameId)
 
@@ -382,146 +344,12 @@ export class SteamService {
 
   protected calculateGameLibraryHoursPlayed = (library: IUserGamesLibraryResponse): IUserGamesLibraryResponse => {
     library.games.forEach(game => {
-      game.playtime_forever = isNaN(game.playtime_forever) ? 0 : Math.round(((game.playtime_forever / 60) + Number.EPSILON) * 100) / 100
-      game.playtime_2weeks = isNaN(game.playtime_2weeks) ? 0 : Math.round(((game.playtime_2weeks / 60) + Number.EPSILON) * 100) / 100
-      game.playtime_deck_forever = isNaN(game.playtime_deck_forever) ? 0 : Math.round(((game.playtime_deck_forever / 60) + Number.EPSILON) * 100) / 100
-      game.playtime_disconnected = isNaN(game.playtime_disconnected) ? 0 : Math.round(((game.playtime_disconnected / 60) + Number.EPSILON) * 100) / 100
-      game.playtime_linux_forever = isNaN(game.playtime_linux_forever) ? 0 : Math.round(((game.playtime_linux_forever / 60) + Number.EPSILON) * 100) / 100
-      game.playtime_mac_forever = isNaN(game.playtime_mac_forever) ? 0 : Math.round(((game.playtime_mac_forever / 60) + Number.EPSILON) * 100) / 100
-      game.playtime_windows_forever = isNaN(game.playtime_windows_forever) ? 0 : Math.round(((game.playtime_windows_forever / 60) + Number.EPSILON) * 100) / 100
+      LIBRARY_PLAY_TIME_TYPES.forEach(type => {
+        game[type] = this.utilsService.formatHourValues(game[type])
+      })
     })
 
     return library
-  }
-
-  protected calculateRecentGamesHoursPlayed = (library: IGetRecentlyPlayedGamesResponse): IGetRecentlyPlayedGamesResponse => {
-    library.games.forEach(game => {
-      game.playtime_forever = isNaN(game.playtime_forever) ? 0 : Math.round(((game.playtime_forever / 60) + Number.EPSILON) * 100) / 100
-      game.playtime_2weeks = isNaN(game.playtime_2weeks) ? 0 : Math.round(((game.playtime_2weeks / 60) + Number.EPSILON) * 100) / 100
-      game.playtime_deck_forever = isNaN(game.playtime_deck_forever) ? 0 : Math.round(((game.playtime_deck_forever / 60) + Number.EPSILON) * 100) / 100
-    })
-
-    return library
-  }
-
-  public mapGameNewsResponse = (newsResponse: INewsItemsResponse[]): INewsItems[] => {
-    if (newsResponse === undefined) {
-      const noNews: INewsItems[] = [{
-        globalId: '',
-        title: '',
-        url: '',
-        isExternalUrl: false,
-        author: '',
-        contents: '',
-        feedLabel: '',
-        date: new Date(),
-        feedName: '',
-        feedType: 0,
-        previewImg: '',
-        videoLink: ''
-      }]
-      return noNews
-    }
-    const newsItems: INewsItems[] = newsResponse.map(news => {
-      return {
-        globalId: news.gid,
-        title: news.title,
-        url: news.url,
-        isExternalUrl: news.is_external_url,
-        author: news.author,
-        contents: news.contents,
-        feedLabel: news.feedlabel,
-        date: new Date(news.date * 1000),
-        feedName: news.feedname.includes('steam') ? 'Steam' : news.feedname,
-        feedType: news.feed_type,
-        previewImg: this.parseNewsPreviewImg(news.contents),
-        videoLink: this.parseNewsVideoLink(news.contents)
-      }
-    })
-    return newsItems
-  }
-
-  public mapUserAchievements = (gameSchema: IGameSchemaResponse, userAchievements: IUserAchievementsResponse): IAchievement[] => {
-    const mappedAchievements: IAchievement[] = []
-    userAchievements.achievements.forEach(achievement => {
-      const matchingAchievement = gameSchema.availableGameStats.achievements.find(achievementSchema => achievement.apiname === achievementSchema.name)
-      if (!matchingAchievement) {
-        mappedAchievements.push({
-          name: '',
-          achieved: false,
-          displayName: '',
-          hidden: true,
-          description: '',
-          icon: '',
-          iconGray: '',
-          unlockTime: new Date()
-        })
-      }
-      else {
-        mappedAchievements.push({
-          name: matchingAchievement.name,
-          achieved: achievement.achieved === 1 ? true : false,
-          displayName: matchingAchievement.displayName,
-          hidden: matchingAchievement.hidden === 1 ? true : false,
-          description: matchingAchievement.hidden === 0 ? matchingAchievement.description : 'Description is hidden',
-          icon: matchingAchievement.icon,
-          iconGray: matchingAchievement.icongray,
-          unlockTime: new Date(achievement.unlocktime * 1000)
-        })
-      }
-    })
-    return mappedAchievements
-  }
-
-  private parseNewsPreviewImg = (content: string): string => {
-    if (content.includes('img src')) {
-      const matchSrcImg = content.match(IMG_SRC_REGEX)
-      if (matchSrcImg !== null) {
-        if (matchSrcImg[1].includes('{STEAM_CLAN_IMAGE}')) {
-          const formattedClanImgUrl = matchSrcImg[1].replace('{STEAM_CLAN_IMAGE}', STEAM_IMAGE_CLAN)
-          return formattedClanImgUrl
-        }
-        else if (matchSrcImg[1].includes('data:image')) {
-          return 'assets/steam_news_fb.png'
-        }
-        return matchSrcImg[1]
-      }
-      else {
-        return 'assets/steam_news_fb.png'
-      }
-    }
-    else if (content.includes('img')) {
-      const matchImg = content.match(IMG_REGEX)
-      if (matchImg !== null) {
-        if (matchImg[1].includes('{STEAM_CLAN_IMAGE}')) {
-          const formattedClanImgUrl = matchImg[1].replace('{STEAM_CLAN_IMAGE}', STEAM_IMAGE_CLAN)
-          return formattedClanImgUrl
-        }
-        return matchImg[1]
-      }
-      else {
-        return 'assets/steam_news_fb.png'
-      }
-    }
-    else {
-      return 'assets/steam_news_fb.png'
-    }
-  }
-
-  private parseNewsVideoLink = (content: string): SafeResourceUrl => {
-    if (content.includes('previewyoutube')) {
-      const matchSrcImg = content.match(VIDEO_ID_REGEX)
-      if (matchSrcImg !== null) {
-        const formattedVideoUrl = this.domSanitizer.bypassSecurityTrustResourceUrl(YT_WATCH_LINK + matchSrcImg[1])
-        return formattedVideoUrl
-      }
-      else {
-        return ''
-      }
-    }
-    else {
-      return ''
-    }
   }
 
   public findFriendsWhoPlayGame = (gameId: number, friendList: ISteamFriend[]): IFriendsWhoPlay[] => {
@@ -606,15 +434,6 @@ export class SteamService {
     }
   }
 
-  public isSuccessfulResponse = (response: any): boolean => {
-    if (response.status) {
-      return false
-    }
-    else {
-      return true
-    }
-  }
-
   private createNewPriceObject = (): IGamePriceOverviewResponse => {
     return {
       currency: '',
@@ -654,24 +473,11 @@ export class SteamService {
     }
   }
 
-  public mapWishlist = (wishlist: IWishlistResponseWithPrices[], library: IUserGameInfoResponse[]): IWishlist[] => {
-    const wishlistFormatted: IWishlist[] = wishlist.map(game => {
-      library.forEach((libGame, i) => {
-        if (libGame.appid !== game.appid) {
-          return
-        }
-        return i
-      })
-      return {
-        appId: game.appid,
-        priority: game.priority,
-        dateAdded: new Date(game.date_added * 1000).toISOString().slice(0, new Date(game.date_added * 1000).toISOString().indexOf('T')),
-        priceCurrent: game.priceCurrent / 100,
-        priceInitial: game.priceInitial / 100,
-        name: game.name,
-        storeUrl: `https://store.steampowered.com/app/${game.appid}`
-      }
+  public calculateRecentPlayTime = (recentGames: IUserGameInfo[]): number => {
+    let recentPlayTime = 0
+    recentGames.forEach(game => {
+      recentPlayTime += game.playtime2Weeks
     })
-    return wishlistFormatted
+    return Math.ceil(recentPlayTime * 10) / 10
   }
 }

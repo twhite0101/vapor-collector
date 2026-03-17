@@ -9,7 +9,6 @@ import { CarouselModule } from 'primeng/carousel'
 import { FriendGameLibraryColDef } from '../../../../models/ColdDefs'
 import type { IFriendDialogPassedData, IUserGameInfo } from '../../../../models/Steam'
 import { AuthService } from '../../../../services/auth/auth-service'
-import { SteamService } from '../../../../services/steam/data/steam-service'
 import { Nameplate } from '../../dashboard/profile/nameplate/nameplate'
 import { RecentGames } from '../../dashboard/profile/recent-games/recent-games'
 import { Grid } from '../grid/grid'
@@ -33,7 +32,6 @@ export class FriendDialog implements AfterViewInit {
   // Dependency Injections
   private readonly dialogRef = inject(MatDialogRef<FriendDialog>)
   private readonly data = inject<IFriendDialogPassedData>(MAT_DIALOG_DATA)
-  private readonly steamService: SteamService = inject(SteamService)
   protected readonly authService: AuthService = inject(AuthService)
 
   protected friendDetails: IFriendDialogPassedData

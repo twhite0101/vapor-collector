@@ -150,16 +150,6 @@ export class Grid implements OnChanges {
     this.filteredCount.set(this.gridApi.getDisplayedRowCount())
   }
 
-  private getFilteredRow = (): unknown[] => {
-    const filteredRows: unknown[] = []
-
-    this.gridApi.forEachNodeAfterFilter(row => {
-      filteredRows.push(row.data)
-    })
-
-    return filteredRows
-  }
-
   private resetGrid = () => {
     this.gridApi.deselectAll()
 

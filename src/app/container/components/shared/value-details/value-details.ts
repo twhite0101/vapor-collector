@@ -1,6 +1,7 @@
 import type { OnChanges, SimpleChanges } from '@angular/core'
-import { booleanAttribute, Component, Input } from '@angular/core'
+import { booleanAttribute, Component, inject, Input } from '@angular/core'
 import type { IChartData, IUser } from '../../../../models/Steam'
+import { MappingService } from '../../../../services/mapping/mapping-service'
 import { DonutChart } from '../donut-chart/donut-chart'
 
 @Component({
@@ -12,6 +13,8 @@ import { DonutChart } from '../donut-chart/donut-chart'
   styleUrl: './value-details.scss'
 })
 export class ValueDetails implements OnChanges {
+  // Dependency Injections
+  private readonly mappingService: MappingService = inject(MappingService)
   @Input({ required: true }) public user: IUser
   @Input({ required: true, transform: booleanAttribute }) public isAuthUser: boolean
 
@@ -23,7 +26,7 @@ export class ValueDetails implements OnChanges {
       switch (change[0]) {
         case 'isAuthUser':
           if (this.isAuthUser) {
-            this.gamesByVPH = this.mapMostValuableGames(this.user).sort((a, b) => a.value - b.value)
+            this.gamesByVPH = this.mappingService.mapMostValuableGames(this.user).sort((a, b) => a.value - b.value)
             this.topValueGames = this.gamesByVPH.filter((game, i) => {
               if (i < 4) {
                 return game
@@ -36,16 +39,6 @@ export class ValueDetails implements OnChanges {
           break
         default:
           break
-      }
-    })
-  }
-
-  private mapMostValuableGames = (user: IUser): IChartData[] => {
-    const nonFreeGames = user.gameLibrary.filter(game => game.prices.initial !== 0 && game.playtimeForever > 0)
-    return nonFreeGames.map(game => {
-      return {
-        label: game.name,
-        value: parseFloat((game.prices.initial / game.playtimeForever).toFixed(2))
       }
     })
   }

@@ -1,12 +1,10 @@
 import type { SafeResourceUrl } from '@angular/platform-browser'
 
-export type IGamePriceResponse = Record<string, IGamePriceResponseDetails>
-
 export interface ILoginResponse {
   response: ILoginResponseUser;
 }
 
-export interface ILoginResponseUser {
+interface ILoginResponseUser {
   provider: string;
   _json: {
     steamid: string;
@@ -78,23 +76,6 @@ export interface IUserFullResponse {
   wishlist: IWishlistResponseWithPrices[];
 }
 
-export interface IGetBadgesResponse {
-  badges: IGetBadgesResponseArray[];
-  player_xp: number;
-  player_level: number;
-  player_xp_needed_to_level_up: number;
-  player_xp_needed_current_level: number;
-}
-
-export interface IPlayLevelPercentileResponse {
-  player_level_percentile: number;
-}
-
-export interface IGetBadgesFullResponse {
-  badges: IGetBadgesResponse;
-  levelPercentile: IPlayLevelPercentileResponse;
-}
-
 export interface IGetBadgesResponseArray {
   badgeid: number;
   level: number;
@@ -103,6 +84,22 @@ export interface IGetBadgesResponseArray {
   scarcity: number;
 }
 
+export interface IGetBadgesResponse {
+  badges: IGetBadgesResponseArray[];
+  player_xp: number;
+  player_level: number;
+  player_xp_needed_to_level_up: number;
+  player_xp_needed_current_level: number;
+}
+
+export interface IGetBadgesFullResponse {
+  badges: IGetBadgesResponse;
+  levelPercentile: IPlayLevelPercentileResponse;
+}
+
+export interface IPlayLevelPercentileResponse {
+  player_level_percentile: number;
+}
 export interface IBadge {
   badgeId: number;
   level: number;
@@ -117,14 +114,6 @@ export interface IPlayerLevel {
   playerXpNeededToLevelUp: number;
   playerXpNeededCurrentLevel: number;
   levelPercentile: number;
-}
-
-export interface IStatus {
-  lg: string;
-}
-
-export interface IUserRequestResponse {
-  user: IUser;
 }
 
 export interface IUserGamesLibraryResponse {
@@ -189,36 +178,6 @@ export interface ISteamLevelIcon {
   backgroundPosition: string;
 }
 
-export interface IGetRecentlyPlayedGamesResponse {
-  total_count: number;
-  games: IGetRecentlyPlayedGamesResponseInfo[];
-}
-
-export interface IGetRecentlyPlayedGamesResponseInfo {
-  appid: number;
-  name: string;
-  playtime_2weeks: number;
-  playtime_forever: number;
-  img_icon_url: string;
-  playtime_windows_forever: number;
-  playtime_mac_forever: number;
-  playtime_linux_forever: number;
-  playtime_deck_forever: number;
-}
-
-export interface IRecentlyPlayedGame {
-  appId: number;
-  name: string;
-  playtime2Weeks: number;
-  playtimeForever: number;
-  imgIconUrl: string;
-  playtimeWindowsForever: number;
-  playtimeMacForever: number;
-  playtimeLinuxForever: number;
-  playtimeDeckForever: number;
-  dateLastPlayed: Date;
-}
-
 export interface IFriendListResponseFriend {
   steamid: string;
   relationship: string;
@@ -255,7 +214,7 @@ export interface IFriendListFullResponse {
   gameLibraries: IFriendGameResponse[];
 }
 
-export interface IAvatars {
+interface IAvatars {
   avatar: string;
   avatarMedium: string;
   avatarFull: string;
@@ -335,7 +294,7 @@ export interface INewsItems {
   videoLink: SafeResourceUrl;
 }
 
-export interface IBaseDialogPassedData {
+interface IBaseDialogPassedData {
   user: IUser;
 }
 
@@ -362,23 +321,13 @@ export interface IGameSchemaResponse {
   availableGameStats: IAchievementSchemaResponseFull;
 }
 
-export interface IAchievementSchemaResponseFull {
+interface IAchievementSchemaResponseFull {
   achievements: IAchievementSchemaResponse[];
 }
 
-export interface IAchievementSchemaResponse {
+interface IAchievementSchemaResponse {
   name: string;
   defaultvalue: number;
-  displayName: string;
-  hidden: number;
-  description: string;
-  icon: string;
-  icongray: string;
-}
-
-export interface IAchievementSchema {
-  name: string;
-  defaultValue: number;
   displayName: string;
   hidden: number;
   description: string;
@@ -392,7 +341,7 @@ export interface IUserAchievementsResponse {
   achievements: IUserAchievementsInfoResponse[];
 }
 
-export interface IUserAchievementsInfoResponse {
+interface IUserAchievementsInfoResponse {
   apiname: string;
   achieved: number;
   unlocktime: number;
@@ -409,6 +358,10 @@ export interface IAchievement {
   unlockTime: Date;
 }
 
+// Leaving Friend Achievement interfaces in for now, as I'd like
+// to add it back in the future but currently all response are
+// returning null so there is an issue with all of the authorized
+// user's friends accounts showing as private within just this response
 export interface IFriendAchievementSchemaResponse {
   schemas: IGameSchemaResponse[];
   achievementResponses: IUserAchievementsResponse[];
@@ -417,15 +370,6 @@ export interface IFriendAchievementSchemaResponse {
 export interface ILibraryAchievements {
   appId: number;
   achievements: IAchievement[];
-}
-
-export interface HttpError {
-  code: string;
-  config: unknown;
-  message: string;
-  name:  string;
-  stack: string;
-  status: number;
 }
 
 export interface IFriendDialogPassedData extends IBaseDialogPassedData {
@@ -440,7 +384,7 @@ export interface IGamePriceResponseDetails {
   data: IGamePriceDataResponse;
 }
 
-export interface IGamePriceDataResponse {
+interface IGamePriceDataResponse {
   price_overview: IGamePriceOverviewResponse;
 }
 
