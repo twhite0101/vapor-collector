@@ -3,7 +3,7 @@ import type { WritableSignal } from '@angular/core'
 import { inject, Injectable, signal } from '@angular/core'
 import type { Observable } from 'rxjs'
 import { firstValueFrom, forkJoin, map } from 'rxjs'
-import type { IAccountValueDetails, IFriendGameFullResponse, IFriendGameResponse, IFriendListFullResponse, IFriendListResponseFriend, IFriendsWhoPlay, IGameNameResponse, IGamePrice, IGamePriceOverviewResponse, IGamePriceResponseDetails, IGamePriceResponseFormat, IGameSchemaResponse, IGetBadgesFullResponse, IGetBadgesResponse, IGetGameNewsResponse, IPlayerLevel, IPlayLevelPercentileResponse, ISteamFriend, IUserAchievementsResponse, IUserAdditionalDetailsResponse, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse, IWishlistResponse, IWishlistResponseWithPrices } from '../../../models/Steam'
+import type { IAccountValueDetails, IFriendGameFullResponse, IFriendGameResponse, IFriendListFullResponse, IFriendListResponseFriend, IFriendsWhoPlay, IGameNameResponse, IGamePrice, IGamePriceOverviewResponse, IGamePriceResponseDetails, IGamePriceResponseFormat, IGameSchemaResponse, IGetBadgesFullResponse, IGetBadgesResponse, IGetGameNewsResponse, IPlayerLevel, IPlayLevelPercentileResponse, IProfileBackground, IProfileBackgroundResponse, ISteamFriend, IUserAchievementsResponse, IUserAdditionalDetailsResponse, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse, IWishlistResponse, IWishlistResponseWithPrices } from '../../../models/Steam'
 import { UtilsService } from '../../utils/utils-service'
 
 const LIBRARY_PLAY_TIME_TYPES = ['playtime_forever', 'playtime_2weeks', 'playtime_deck_forever', 'playtime_disconnected', 'playtime_linux_forever', 'playtime_mac_forever', 'playtime_windows_forever'] as const
@@ -108,6 +108,11 @@ export class SteamService {
 
   public getWishlist = async (steamId: string) => {
     const response = firstValueFrom(this.http.get<IWishlistResponse[]>(this.apiUrl + `/user/getWishlist?steamId=${steamId}`, { withCredentials: true }))
+    return response
+  }
+
+  public getProfileBackground = async () => {
+    const response = firstValueFrom(this.http.get<IProfileBackgroundResponse>(this.apiUrl + '/user/getProfileBackground', { withCredentials: true }))
     return response
   }
 
@@ -489,6 +494,19 @@ export class SteamService {
       playerXpNeededToLevelUp: 0,
       playerXpNeededCurrentLevel: 0,
       levelPercentile: 0
+    }
+  }
+
+  public createProfileBackground = (): IProfileBackground => {
+    return {
+      communityItemId: '',
+      imageURL: '',
+      name: '',
+      title: '',
+      description: '',
+      appId: 0,
+      type: 0,
+      class: 0
     }
   }
 

@@ -85,10 +85,13 @@ export class AuthService {
 
     const wishlist = await this.steamService.initializeWishlist(user.response._json.steamid)
 
+    const background = await this.steamService.getProfileBackground()
+
     const userFull: IUserFullResponse = {
       user: user.response,
       additionalDetails: userAdditionalDetails,
-      wishlist: wishlist
+      wishlist: wishlist,
+      background: background
     }
     return userFull
   }

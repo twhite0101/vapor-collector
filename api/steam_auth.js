@@ -425,6 +425,24 @@ app.get('/game/getGameName', ensureAuthenticated, async (req, res) => {
   }
 })
 
+app.get('/user/getProfileBackground', ensureAuthenticated, async (req, res) => {
+  const token = req.cookies.access;
+  const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_KEY)
+  if (!decoded) {
+    res.statusCode(401).json('Unauthorized user');
+  }
+  const user = decoded.user
+  axios
+    .get(`https://api.steampowered.com/IPlayerService/GetProfileBackground/v1/?key=${process.env.STEAM_API_KEY}&steamid=${user.id}`)
+    .then(response => {
+      res.send(response.data.response.profile_background)
+    })
+    .catch(err => {
+      console.error(err)
+      res.send(err)
+    })
+})
+
 // MIDDLEWARE
 function ensureAuthenticated(req, res, next) {
     if (req.cookies && req.cookies.access) { return next(); }

@@ -10,6 +10,7 @@ const YT_WATCH_LINK = 'https://www.youtube.com/embed/'
 const VIDEO_ID_REGEX = /\[previewyoutube=(.{11});full\]\[\/previewyoutube\]/
 const IMG_SRC_REGEX = /img src=["'](.*?)["']/
 const IMG_REGEX = /\[img\](.*?)\[\/img\]/
+const BACKGROUND_URL = 'https://shared.fastly.steamstatic.com/community_assets/images/'
 
 @Injectable({
   providedIn: 'root'
@@ -59,7 +60,17 @@ export class MappingService {
       gameCount: library.game_count,
       currentGameId: userFull.additionalDetails[0].gameid !== undefined ? userFull.additionalDetails[0].gameid: '',
       gameServerIp: userFull.additionalDetails[0].gameserverip !== undefined ? userFull.additionalDetails[0].gameserverip : '',
-      currentGameName: userFull.additionalDetails[0].gameextrainfo !== undefined ? userFull.additionalDetails[0].gameextrainfo : ''
+      currentGameName: userFull.additionalDetails[0].gameextrainfo !== undefined ? userFull.additionalDetails[0].gameextrainfo : '',
+      profileBackground: {
+        communityItemId: userFull.background.communityitemid,
+        imageURL: BACKGROUND_URL + userFull.background.image_large,
+        name: userFull.background.name,
+        title: userFull.background.item_title,
+        description: userFull.background.item_description,
+        appId: userFull.background.appid,
+        type: userFull.background.item_type,
+        class: userFull.background.item_class
+      }
     }
 
     return returnedUser
@@ -189,7 +200,8 @@ export class MappingService {
           currentGameId: '',
           gameServerIp: '',
           currentGameName: '',
-          gameCount: 0
+          gameCount: 0,
+          profileBackground: this.steamService.createProfileBackground()
         }
       }
       else {
@@ -222,7 +234,8 @@ export class MappingService {
           gameServerIp: matchingDetails?.gameserverip !== undefined ? matchingDetails?.gameserverip : '',
           currentGameName: matchingDetails?.gameextrainfo !== undefined ? matchingDetails?.gameextrainfo : '',
           gameLibrary: this.findFriendGameLibrary(Number(response.steamid), responses.gameLibraries),
-          gameCount: responses.gameLibraries[i].libraryResponse.game_count
+          gameCount: responses.gameLibraries[i].libraryResponse.game_count,
+          profileBackground: this.steamService.createProfileBackground()
         }
       }
     })

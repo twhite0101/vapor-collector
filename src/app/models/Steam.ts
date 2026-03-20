@@ -70,12 +70,14 @@ export interface IUser {
   currentGameId?: string;
   gameServerIp?: string;
   currentGameName?: string;
+  profileBackground: IProfileBackground;
 }
 
 export interface IUserFullResponse {
   user: ILoginResponseUser;
   additionalDetails: IUserAdditionalDetailsResponse[];
   wishlist: IWishlistResponseWithPrices[];
+  background: IProfileBackgroundResponse;
 }
 
 export interface IGetBadgesResponseArray {
@@ -457,4 +459,26 @@ export interface IGameNameResponse {
 
 export interface IWishlistDialogPassedData extends IBaseDialogPassedData {
   style: string;
+}
+
+export interface IProfileBackgroundResponse {
+  communityitemid: string;
+  image_large: string;
+  name: string;
+  item_title: string;
+  item_description: string;
+  appid: number;
+  item_type: number;
+  item_class: number;
+}
+
+export interface IProfileBackground {
+  communityItemId: string;
+  imageURL: string;
+  name: string;
+  title: string;
+  description: string;
+  appId: number;
+  type: number;
+  class: number;
 }
