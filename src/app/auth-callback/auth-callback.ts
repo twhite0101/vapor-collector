@@ -2,7 +2,7 @@ import type { OnInit } from '@angular/core'
 import { Component, computed, inject } from '@angular/core'
 import { toSignal } from '@angular/core/rxjs-interop'
 import { ActivatedRoute, Router } from '@angular/router'
-import { AuthService } from '../services/auth/auth-service'
+import { UserService } from '../services/user/user-service'
 
 @Component({
   selector: 'app-auth-callback',
@@ -13,7 +13,7 @@ import { AuthService } from '../services/auth/auth-service'
 export class AuthCallback implements OnInit {
   // Dependency Injections
   private readonly router: Router = inject(Router)
-  private readonly authService: AuthService = inject(AuthService)
+  private readonly userService: UserService = inject(UserService)
   private activatedRoute: ActivatedRoute = inject(ActivatedRoute)
 
   private dataReturn = toSignal(this.activatedRoute.data)
@@ -22,14 +22,14 @@ export class AuthCallback implements OnInit {
   public ngOnInit (): void {
     const lg = this.activatedRoute.snapshot.queryParamMap.get('lg')
     if (lg !== null) {
-      this.authService.setLoggedInStatus(lg)
-      if (this.authService.getLoggedInStatus()) {
-        this.authService.initializeUser()
+      this.userService.setLoggedInStatus(lg)
+      if (this.userService.getLoggedInStatus()) {
+        this.userService.initializeUser()
       }
       else {
-        this.authService.setUser(null)
-        this.authService.setHasLibrary(false)
-        this.authService.setHasBadges(false)
+        this.userService.setUser(null)
+        this.userService.setHasLibrary(false)
+        this.userService.setHasBadges(false)
         this.router.navigate(['/home/login'])
       }
     }
@@ -38,8 +38,8 @@ export class AuthCallback implements OnInit {
         this.router.navigate(['/home/login'])
       }
       else {
-        this.authService.setLoggedInStatus('true')
-        this.authService.initializeUser()
+        this.userService.setLoggedInStatus('true')
+        this.userService.initializeUser()
       }
     }
   }

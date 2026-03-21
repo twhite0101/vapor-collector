@@ -13,8 +13,6 @@ import { MatExpansionModule } from '@angular/material/expansion'
 import { MatFormFieldModule } from '@angular/material/form-field'
 import { MatInputModule } from '@angular/material/input'
 import type { ISteamFriend, IUser } from '../../../../../../models/Steam'
-import { AuthService } from '../../../../../../services/auth/auth-service'
-import { MappingService } from '../../../../../../services/mapping/mapping-service'
 import { StateService } from '../../../../../../services/state/state-service'
 import { SteamService } from '../../../../../../services/steam/data/steam-service'
 import { FriendDialog } from '../../../../shared/friend-dialog/friend-dialog'
@@ -40,9 +38,7 @@ export class FriendList implements OnInit {
   private readonly fb: NonNullableFormBuilder = inject(NonNullableFormBuilder)
   private readonly state: StateService = inject(StateService)
   private readonly dialog: MatDialog = inject(MatDialog)
-  protected readonly authService: AuthService = inject(AuthService)
   private readonly steamService: SteamService = inject(SteamService)
-  private readonly mappingService: MappingService = inject(MappingService)
 
   @Input({ required: true }) public user: IUser
 

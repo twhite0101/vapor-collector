@@ -1,8 +1,8 @@
 import type { OnInit } from '@angular/core'
 import { Component, inject } from '@angular/core'
 import type { IUser, IUserGameInfo } from '../../../models/Steam'
-import { AuthService } from '../../../services/auth/auth-service'
 import { SteamService } from '../../../services/steam/data/steam-service'
+import { UserService } from '../../../services/user/user-service'
 import { ValueDetails } from '../shared/value-details/value-details'
 import { Nameplate } from './profile/nameplate/nameplate'
 import { RecentGames } from './profile/recent-games/recent-games'
@@ -20,7 +20,7 @@ import { Sidebar } from './profile/sidebar/sidebar'
   styleUrl: './dashboard.scss'
 })
 export class Dashboard implements OnInit {
-  protected readonly authService: AuthService = inject(AuthService)
+  protected readonly userService: UserService = inject(UserService)
   protected readonly steamService: SteamService = inject(SteamService)
 
   protected user: IUser
@@ -28,8 +28,8 @@ export class Dashboard implements OnInit {
   protected recentPlayTime: number
 
   public ngOnInit (): void {
-    if (this.authService.hasUser) {
-      this.user = this.authService.user as IUser
+    if (this.userService.hasUser) {
+      this.user = this.userService.user as IUser
       this.recentlyPlayedGames = this.user.gameLibrary.slice(0, this.user.gameCount >= 20 ? 20 : this.user.gameCount)
       this.recentPlayTime = this.steamService.calculateRecentPlayTime(this.recentlyPlayedGames)
     }

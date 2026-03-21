@@ -5,9 +5,9 @@
   "license": "ISC",
   "author": "",
   "type": "commonjs",
-  "main": "steam_auth.js",
+  "main": "steam_api.js",
   "scripts": {
-    "devStart": "concurrently \"nodemon steam_auth.js\" \"nodemon scraper.js\"",
+    "devStart": "concurrently \"nodemon steam_api.js\" \"nodemon scraper.js\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {

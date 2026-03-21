@@ -14,7 +14,7 @@ import { SteamService } from '../steam/data/steam-service'
 @Injectable({
   providedIn: 'root'
 })
-export class AuthService {
+export class UserService {
   // Dependency Injections
   private readonly http: HttpClient = inject(HttpClient)
   private readonly steamService: SteamService = inject(SteamService)

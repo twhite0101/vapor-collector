@@ -4,8 +4,8 @@ import { Component, inject } from '@angular/core'
 import { MatButtonModule } from '@angular/material/button'
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog'
 import type { IUser } from '../../../../models/Steam'
-import { AuthService } from '../../../../services/auth/auth-service'
 import { StateService } from '../../../../services/state/state-service'
+import { UserService } from '../../../../services/user/user-service'
 import { WishlistDialog } from '../wishlist-dialog/wishlist-dialog'
 
 @Component({
@@ -19,7 +19,7 @@ import { WishlistDialog } from '../wishlist-dialog/wishlist-dialog'
 })
 export class Header implements OnInit {
   // Dependency Injections
-  protected readonly authService: AuthService = inject(AuthService)
+  protected readonly userService: UserService = inject(UserService)
   private readonly state: StateService = inject(StateService)
   private readonly dialog: MatDialog = inject(MatDialog)
 
@@ -27,18 +27,18 @@ export class Header implements OnInit {
   protected name: string
 
   public ngOnInit (): void {
-    if (this.authService.hasUser) {
-      this.user = this.authService.user
+    if (this.userService.hasUser) {
+      this.user = this.userService.user
     }
     this.state.setHeaderStatus(true)
   }
 
   protected loginClicked = () => {
-    this.authService.login()
+    this.userService.login()
   }
 
   protected logOutClicked = () => {
-    this.authService.logout()
+    this.userService.logout()
   }
 
   protected openWishlistDialog = () => {

@@ -8,7 +8,6 @@ import type { ColDef, SizeColumnsToContentStrategy } from 'ag-grid-community'
 import { CarouselModule } from 'primeng/carousel'
 import { FriendGameLibraryColDef } from '../../../../models/ColdDefs'
 import type { IFriendDialogPassedData, IUserGameInfo } from '../../../../models/Steam'
-import { AuthService } from '../../../../services/auth/auth-service'
 import { MappingService } from '../../../../services/mapping/mapping-service'
 import { SteamService } from '../../../../services/steam/data/steam-service'
 import { Nameplate } from '../../dashboard/profile/nameplate/nameplate'
@@ -34,8 +33,7 @@ export class FriendDialog implements AfterViewInit {
   // Dependency Injections
   private readonly dialogRef = inject(MatDialogRef<FriendDialog>)
   private readonly data = inject<IFriendDialogPassedData>(MAT_DIALOG_DATA)
-  protected readonly authService: AuthService = inject(AuthService)
-  protected readonly steamService: SteamService = inject(SteamService)
+  private readonly steamService: SteamService = inject(SteamService)
   private readonly mappingService: MappingService = inject(MappingService)
 
   protected friendDetails: IFriendDialogPassedData

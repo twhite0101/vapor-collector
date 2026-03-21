@@ -8,7 +8,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "devStart": "nodemon steam_auth.js",
+    "devStart": "nodemon steam_api.js",
     "startFull": "concurrently \"npm run start\" \"cd api && npm run devStart\"",
     "lint": "ng lint"
   },
