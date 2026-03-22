@@ -12,9 +12,28 @@ const passport = require('passport');
 const SteamStrategy = require('passport-steam').Strategy;
 const User = require('./db/User');
 const StoreItem = require('./db/StoreItem');
+const { streamArray } = require('stream-json/streamers/stream-array.js');
+const fs = require('fs');
 require('dotenv').config();
 
 let database;
+
+const readStream = fs.createReadStream('storeData.json', { encoding: 'utf8' });
+
+const storeData = [];
+async function streamStoreData() {
+  await new Promise((resolve, reject) => {
+  readStream
+    .pipe(streamArray.withParserAsStream())
+    .on('data', (item) => {
+      storeData.push(item);
+    })
+    .on('end', resolve)
+    .on('error', reject);
+  })
+}
+
+streamStoreData()
 
 const app = express();
 const server = require('http').createServer(app);
@@ -409,7 +428,7 @@ app.get('/user/getWishlist', ensureAuthenticated, (req, res) => {
     })
 })
 
-app.get('/game/getGameName', ensureAuthenticated, async (req, res) => {
+app.get('/game/getGameNameLocal', ensureAuthenticated, async (req, res) => {
   const token = req.cookies.access;
   const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_KEY)
   if (!decoded) {
@@ -422,6 +441,25 @@ app.get('/game/getGameName', ensureAuthenticated, async (req, res) => {
   }
   catch (err) {
     console.error(err)
+  }
+})
+
+app.get('/game/getGameName', ensureAuthenticated, async (req, res) => {
+  const token = req.cookies.access;
+  const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_KEY)
+  if (!decoded) {
+    res.statusCode(401).json('Unauthorized user');
+  }
+  const appId = Number(req.query.appId)
+  if (!appId) {
+    res.statusCode(401).json('No appId query param provided');
+  }
+  try {
+    const result = storeData.find(item => item.value.appid === appId)
+    res.json(result)
+  }
+  catch (error) {
+    console.error(error)
   }
 })
 

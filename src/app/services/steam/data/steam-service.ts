@@ -3,7 +3,7 @@ import type { WritableSignal } from '@angular/core'
 import { inject, Injectable, signal } from '@angular/core'
 import type { Observable } from 'rxjs'
 import { firstValueFrom, forkJoin, map } from 'rxjs'
-import type { IAccountValueDetails, IFriendGameFullResponse, IFriendGameResponse, IFriendListFullResponse, IFriendListResponseFriend, IFriendsWhoPlay, IGameNameResponse, IGamePrice, IGamePriceOverviewResponse, IGamePriceResponseDetails, IGamePriceResponseFormat, IGameSchemaResponse, IGetBadgesFullResponse, IGetBadgesResponse, IGetGameNewsResponse, IPlayerLevel, IPlayLevelPercentileResponse, IProfileBackground, IProfileBackgroundResponse, ISteamFriend, IUserAchievementsResponse, IUserAdditionalDetailsResponse, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse, IWishlistResponse, IWishlistResponseWithPrices } from '../../../models/Steam'
+import type { IAccountValueDetails, IFriendGameFullResponse, IFriendGameResponse, IFriendListFullResponse, IFriendListResponseFriend, IFriendsWhoPlay, IGameName, IGamePrice, IGamePriceOverviewResponse, IGamePriceResponseDetails, IGamePriceResponseFormat, IGameSchemaResponse, IGetBadgesFullResponse, IGetBadgesResponse, IGetGameNewsResponse, IPlayerLevel, IPlayLevelPercentileResponse, IProfileBackground, IProfileBackgroundResponse, ISteamFriend, IUserAchievementsResponse, IUserAdditionalDetailsResponse, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse, IWishlistResponse, IWishlistResponseWithPrices } from '../../../models/Steam'
 import { UtilsService } from '../../utils/utils-service'
 
 const LIBRARY_PLAY_TIME_TYPES = ['playtime_forever', 'playtime_2weeks', 'playtime_deck_forever', 'playtime_disconnected', 'playtime_linux_forever', 'playtime_mac_forever', 'playtime_windows_forever'] as const
@@ -129,9 +129,10 @@ export class SteamService {
       gamePrices = await this.getGamePrices(appIds.join(','))
     }
 
-    const gameNames$: Observable<IGameNameResponse>[] = appIds.map(id => this.http.get<IGameNameResponse>(this.apiUrl + `/game/getGameName?appId=${id}`, { withCredentials: true }))
+    const gameNames$: Observable<IGameName>[] = appIds.map(id => this.http.get<IGameName>(this.apiUrl + `/game/getGameName?appId=${id}`, { withCredentials: true }))
 
     const gameNamesResponse = await firstValueFrom(forkJoin(gameNames$))
+
     const wishListWithPrices: IWishlistResponseWithPrices[] = wishlist.map(game => {
       const matchingIdIndex = appIds.indexOf(game.appid)
       if (gamePrices[matchingIdIndex].success === false) {

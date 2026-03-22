@@ -482,3 +482,8 @@ export interface IProfileBackground {
   type: number;
   class: number;
 }
+
+export interface IGameName {
+  appId: number;
+  name: string;
+}

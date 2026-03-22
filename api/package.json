@@ -29,6 +29,7 @@
     "mongodb": "^7.0.0",
     "mongoose": "^9.1.2",
     "passport": "^0.7.0",
-    "passport-steam": "^1.0.18"
+    "passport-steam": "^1.0.18",
+    "stream-json": "^2.0.0"
   }
 }

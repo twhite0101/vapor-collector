@@ -1,5 +1,6 @@
 const axios = require('axios')
 const StoreItem = require('./db/StoreItem')
+const fs = require('fs')
 require('dotenv').config()
 
 const getStoreItemsAndConsolidate = async () => {
@@ -23,6 +24,18 @@ const getStoreItemsAndConsolidate = async () => {
       moreToReturn = response.data.response.have_more_results
     }
     console.log(`All Steam Apps Returned. Number of Requests Needed: ${numOfReq}. Total Apps Returned: ${storedStoreItems.length}`)
+
+    const itemsToJSON = JSON.stringify(storedStoreItems, null, 2)
+    const writeStream = fs.createWriteStream('storeData.json')
+
+    const overWatermark = writeStream.write(itemsToJSON)
+
+    if (!overWatermark) {
+      await new Promise((resolve) => writeStream.once('drain', resolve))
+    }
+
+    writeStream.end()
+
     return storedStoreItems
   }
   catch (err) {
