@@ -70,14 +70,14 @@ export interface IUser {
   currentGameId?: string;
   gameServerIp?: string;
   currentGameName?: string;
-  profileBackground: IProfileBackground;
+  profileItems: IProfileItems;
 }
 
 export interface IUserFullResponse {
   user: ILoginResponseUser;
   additionalDetails: IUserAdditionalDetailsResponse[];
   wishlist: IWishlistResponseWithPrices[];
-  background: IProfileBackgroundResponse;
+  profileItems: IProfileItemsResponse;
 }
 
 export interface IGetBadgesResponseArray {
@@ -216,6 +216,7 @@ export interface IFriendListFullResponse {
   friendList: IFriendListResponseFriend[];
   details: IUserAdditionalDetailsResponse[];
   gameLibraries: IFriendGameResponse[];
+  profileItems: IProfileItemsResponse[];
 }
 
 interface IAvatars {
@@ -461,26 +462,101 @@ export interface IWishlistDialogPassedData extends IBaseDialogPassedData {
   style: string;
 }
 
-export interface IProfileBackgroundResponse {
+interface IProfileItemBaseResponse {
   communityitemid: string;
   image_large: string;
   name: string;
-  item_title: string;
   item_description: string;
   appid: number;
   item_type: number;
   item_class: number;
 }
 
-export interface IProfileBackground {
+interface IProfileItem {
   communityItemId: string;
-  imageURL: string;
+  imageLargeURL: string;
   name: string;
-  title: string;
   description: string;
   appId: number;
   type: number;
   class: number;
+}
+
+interface IProfileItemTitleResponse extends IProfileItemBaseResponse {
+  item_title: string;
+}
+
+interface IProfileItemTitle extends IProfileItem {
+  title: string;
+}
+
+interface IProfileBackgroundResponse extends IProfileItemBaseResponse {
+  movie_webm: string;
+  movie_mp4: string;
+  movie_webm_small: string;
+  movie_mp4_small: string;
+  equipped_flags: number;
+}
+
+export interface IProfileBackground extends IProfileItem {
+  movieWebmURL: string;
+  movieMP4URL: string;
+  movieWebmSmallURL: string;
+  movieMP4SmallURL: string;
+  equipped: boolean;
+}
+
+// Not being formatted as its not applicable to app
+interface IMiniProfileBackgroundResponse extends IProfileItemBaseResponse {
+  movie_webm: string;
+  movie_mp4: string;
+}
+
+interface IProfileAvatarResponse extends IProfileItemBaseResponse {
+  image_small: string;
+  image_large: string;
+}
+
+export interface IProfileAvatar extends IProfileItem {
+  imageSmallURL: string;
+}
+
+interface IProfileModifierResponse extends IProfileItemTitleResponse {
+  profile_colors: IProfileStyleResponse | IProfileStyleResponse[];
+  steam_deck_keyboard_skin: ISteamDeckKeyboardSkinResponse;
+}
+
+export interface IProfileModifier extends IProfileItemTitle {
+  profileColors: IProfileStyle | IProfileStyle[];
+}
+
+export interface IProfileStyleResponse {
+  style_name: string;
+  color: string;
+}
+
+export interface IProfileStyle {
+  styleName: string;
+  color: string;
+}
+
+// Not being formatted as its not applicable to app
+interface ISteamDeckKeyboardSkinResponse extends IProfileItemTitleResponse, IProfileAvatarResponse {}
+
+export interface IProfileItemsResponse {
+  profile_background: IProfileBackgroundResponse;
+  mini_profile_background: IMiniProfileBackgroundResponse;
+  avatar_frame: IProfileAvatarResponse;
+  animated_avatar: IProfileAvatarResponse;
+  profile_modifier: IProfileModifierResponse;
+  steam_deck_keyboard_skin: ISteamDeckKeyboardSkinResponse;
+}
+
+export interface IProfileItems {
+  background: IProfileBackground;
+  avatarFrame: IProfileAvatar;
+  animatedAvatar: IProfileAvatar;
+  profileModifier: IProfileModifier;
 }
 
 export interface IGameName {

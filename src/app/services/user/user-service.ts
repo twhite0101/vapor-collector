@@ -85,13 +85,13 @@ export class UserService {
 
     const wishlist = await this.steamService.initializeWishlist(user.response._json.steamid)
 
-    const background = await this.steamService.getProfileBackground()
+    const profileItems = await this.steamService.getProfileItems()
 
     const userFull: IUserFullResponse = {
       user: user.response,
       additionalDetails: userAdditionalDetails,
       wishlist: wishlist,
-      background: background
+      profileItems: profileItems
     }
     return userFull
   }

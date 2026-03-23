@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core'
 import type { SafeResourceUrl } from '@angular/platform-browser'
 import { DomSanitizer } from '@angular/platform-browser'
-import type { IAccountValueDetails, IAchievement, IBadge, IChartData, IFriendGameResponse, IFriendListFullResponse, IGameSchemaResponse, IGetBadgesFullResponse, IGetBadgesResponseArray, INewsItems, INewsItemsResponse, ISteamFriend, IUser, IUserAchievementsResponse, IUserFullResponse, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse, IWishlist, IWishlistResponseWithPrices } from '../../models/Steam'
+import type { IAccountValueDetails, IAchievement, IBadge, IChartData, IFriendGameResponse, IFriendListFullResponse, IGameSchemaResponse, IGetBadgesFullResponse, IGetBadgesResponseArray, INewsItems, INewsItemsResponse, IProfileItems, IProfileItemsResponse, IProfileStyle, IProfileStyleResponse, ISteamFriend, IUser, IUserAchievementsResponse, IUserFullResponse, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse, IWishlist, IWishlistResponseWithPrices } from '../../models/Steam'
 import { SteamService } from '../steam/data/steam-service'
 import { UtilsService } from '../utils/utils-service'
 
@@ -10,7 +10,7 @@ const YT_WATCH_LINK = 'https://www.youtube.com/embed/'
 const VIDEO_ID_REGEX = /\[previewyoutube=(.{11});full\]\[\/previewyoutube\]/
 const IMG_SRC_REGEX = /img src=["'](.*?)["']/
 const IMG_REGEX = /\[img\](.*?)\[\/img\]/
-const BACKGROUND_URL = 'https://shared.fastly.steamstatic.com/community_assets/images/'
+const PROFILE_ITEM_URL = 'https://shared.fastly.steamstatic.com/community_assets/images/'
 
 @Injectable({
   providedIn: 'root'
@@ -61,16 +61,7 @@ export class MappingService {
       currentGameId: userFull.additionalDetails[0].gameid !== undefined ? userFull.additionalDetails[0].gameid: '',
       gameServerIp: userFull.additionalDetails[0].gameserverip !== undefined ? userFull.additionalDetails[0].gameserverip : '',
       currentGameName: userFull.additionalDetails[0].gameextrainfo !== undefined ? userFull.additionalDetails[0].gameextrainfo : '',
-      profileBackground: {
-        communityItemId: userFull.background.communityitemid,
-        imageURL: BACKGROUND_URL + userFull.background.image_large,
-        name: userFull.background.name,
-        title: userFull.background.item_title,
-        description: userFull.background.item_description,
-        appId: userFull.background.appid,
-        type: userFull.background.item_type,
-        class: userFull.background.item_class
-      }
+      profileItems: this.mapProfileItems(userFull.profileItems)
     }
 
     return returnedUser
@@ -201,7 +192,7 @@ export class MappingService {
           gameServerIp: '',
           currentGameName: '',
           gameCount: 0,
-          profileBackground: this.steamService.createProfileBackground()
+          profileItems: this.steamService.createProfileItems()
         }
       }
       else {
@@ -235,7 +226,7 @@ export class MappingService {
           currentGameName: matchingDetails?.gameextrainfo !== undefined ? matchingDetails?.gameextrainfo : '',
           gameLibrary: this.findFriendGameLibrary(Number(response.steamid), responses.gameLibraries),
           gameCount: responses.gameLibraries[i].libraryResponse.game_count,
-          profileBackground: this.steamService.createProfileBackground()
+          profileItems: responses.profileItems[i] === null ? this.steamService.createProfileItems() : this.mapProfileItems(responses.profileItems[i])
         }
       }
     })
@@ -518,5 +509,81 @@ export class MappingService {
       }
     })
     return wishlistFormatted
+  }
+
+  private mapProfileItems = (response: IProfileItemsResponse): IProfileItems => {
+    const items: IProfileItems = {
+      background: Object.entries(response.profile_background).length === 0 ? this.steamService.createBackgroundItem() : {
+        communityItemId: response.profile_background.communityitemid,
+        imageLargeURL: PROFILE_ITEM_URL + response.profile_background.image_large,
+        name: response.profile_background.name,
+        description: response.profile_background.item_description,
+        appId: response.profile_background.appid,
+        type: response.profile_background.item_type,
+        class: response.profile_background.item_class,
+        movieWebmURL: PROFILE_ITEM_URL + response.profile_background.movie_webm,
+        movieMP4URL: PROFILE_ITEM_URL + response.profile_background.movie_mp4,
+        movieWebmSmallURL: PROFILE_ITEM_URL + response.profile_background.movie_webm_small,
+        movieMP4SmallURL: PROFILE_ITEM_URL + response.profile_background.movie_mp4_small,
+        equipped: response.profile_background.equipped_flags !== undefined ? response.profile_background.equipped_flags === 1 ? true : false : false
+      },
+      avatarFrame: Object.entries(response.avatar_frame).length === 0 ? this.steamService.createAvatarItem() : {
+        communityItemId: response.avatar_frame.communityitemid,
+        name: response.avatar_frame.name,
+        description: response.avatar_frame.item_description,
+        appId: response.avatar_frame.appid,
+        type: response.avatar_frame.item_type,
+        class: response.avatar_frame.item_class,
+        imageSmallURL: PROFILE_ITEM_URL + response.avatar_frame.image_small,
+        imageLargeURL: PROFILE_ITEM_URL + response.avatar_frame.image_large
+      },
+      animatedAvatar: Object.entries(response.animated_avatar).length === 0 ? this.steamService.createAvatarItem() : {
+        communityItemId: response.animated_avatar.communityitemid,
+        name: response.animated_avatar.name,
+        description: response.animated_avatar.item_description,
+        appId: response.animated_avatar.appid,
+        type: response.animated_avatar.item_type,
+        class: response.animated_avatar.item_class,
+        imageSmallURL: PROFILE_ITEM_URL + response.animated_avatar.image_small,
+        imageLargeURL: PROFILE_ITEM_URL + response.animated_avatar.image_large
+      },
+      profileModifier: Object.entries(response.profile_modifier).length === 0 ? this.steamService.createModifierItem() : {
+        communityItemId: response.profile_modifier.communityitemid,
+        imageLargeURL: PROFILE_ITEM_URL + response.profile_modifier.image_large,
+        name: response.profile_modifier.name,
+        description: response.profile_modifier.item_description,
+        appId: response.profile_modifier.appid,
+        type: response.profile_modifier.item_type,
+        class: response.profile_modifier.item_class,
+        title: response.profile_modifier.item_title,
+        profileColors: this.mapProfileColors(response.profile_modifier.profile_colors)
+      }
+    }
+
+    return items
+  }
+
+  private mapProfileColors = (response: IProfileStyleResponse | IProfileStyleResponse[]): IProfileStyle | IProfileStyle[] => {
+    if (response === null || response === undefined) {
+      return this.steamService.createProfileColors()
+    }
+
+    if (Array.isArray(response)) {
+      return response.map(profileColor => {
+        return {
+          styleName: profileColor.style_name,
+          color: profileColor.color
+        }
+      })
+    }
+
+    if (Object.entries(response).length > 0) {
+      return {
+        styleName: response.style_name,
+        color: response.color
+      }
+    }
+
+    return this.steamService.createProfileColors()
   }
 }

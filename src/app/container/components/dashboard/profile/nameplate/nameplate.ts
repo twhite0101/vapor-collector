@@ -38,7 +38,7 @@ export class Nameplate implements OnInit {
   public ngOnInit (): void {
     this._playerLevel.set(this.user.playerLevel as IPlayerLevel)
     this.avatars = [
-      this.user.avatars.avatarFull,
+      this.user.profileItems.animatedAvatar.imageSmallURL !== '' ? this.user.profileItems.animatedAvatar.imageSmallURL : this.user.avatars.avatarFull,
       this.user.avatars.avatar,
       this.user.avatars.avatarMedium
     ]

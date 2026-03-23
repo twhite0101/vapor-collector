@@ -463,17 +463,17 @@ app.get('/game/getGameName', ensureAuthenticated, async (req, res) => {
   }
 })
 
-app.get('/user/getProfileBackground', ensureAuthenticated, async (req, res) => {
+app.get('/user/getProfileItems', ensureAuthenticated, async (req, res) => {
   const token = req.cookies.access;
   const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_KEY)
   if (!decoded) {
     res.statusCode(401).json('Unauthorized user');
   }
-  const user = decoded.user
+  const steamId = req.query.steamId !== undefined ? req.query.steamId : decoded.user.id
   axios
-    .get(`https://api.steampowered.com/IPlayerService/GetProfileBackground/v1/?key=${process.env.STEAM_API_KEY}&steamid=${user.id}`)
+    .get(`https://api.steampowered.com/IPlayerService/GetProfileItemsEquipped/v1/?key=${process.env.STEAM_API_KEY}&steamid=${steamId}`)
     .then(response => {
-      res.send(response.data.response.profile_background)
+      res.send(response.data.response)
     })
     .catch(err => {
       console.error(err)

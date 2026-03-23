@@ -3,7 +3,7 @@ import type { WritableSignal } from '@angular/core'
 import { inject, Injectable, signal } from '@angular/core'
 import type { Observable } from 'rxjs'
 import { firstValueFrom, forkJoin, map } from 'rxjs'
-import type { IAccountValueDetails, IFriendGameFullResponse, IFriendGameResponse, IFriendListFullResponse, IFriendListResponseFriend, IFriendsWhoPlay, IGameName, IGamePrice, IGamePriceOverviewResponse, IGamePriceResponseDetails, IGamePriceResponseFormat, IGameSchemaResponse, IGetBadgesFullResponse, IGetBadgesResponse, IGetGameNewsResponse, IPlayerLevel, IPlayLevelPercentileResponse, IProfileBackground, IProfileBackgroundResponse, ISteamFriend, IUserAchievementsResponse, IUserAdditionalDetailsResponse, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse, IWishlistResponse, IWishlistResponseWithPrices } from '../../../models/Steam'
+import type { IAccountValueDetails, IFriendGameFullResponse, IFriendGameResponse, IFriendListFullResponse, IFriendListResponseFriend, IFriendsWhoPlay, IGameName, IGamePrice, IGamePriceOverviewResponse, IGamePriceResponseDetails, IGamePriceResponseFormat, IGameSchemaResponse, IGetBadgesFullResponse, IGetBadgesResponse, IGetGameNewsResponse, IPlayerLevel, IPlayLevelPercentileResponse, IProfileAvatar, IProfileBackground, IProfileItems, IProfileItemsResponse, IProfileModifier, IProfileStyle, ISteamFriend, IUserAchievementsResponse, IUserAdditionalDetailsResponse, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse, IWishlistResponse, IWishlistResponseWithPrices } from '../../../models/Steam'
 import { UtilsService } from '../../utils/utils-service'
 
 const LIBRARY_PLAY_TIME_TYPES = ['playtime_forever', 'playtime_2weeks', 'playtime_deck_forever', 'playtime_disconnected', 'playtime_linux_forever', 'playtime_mac_forever', 'playtime_windows_forever'] as const
@@ -111,8 +111,8 @@ export class SteamService {
     return response
   }
 
-  public getProfileBackground = async () => {
-    const response = firstValueFrom(this.http.get<IProfileBackgroundResponse>(this.apiUrl + '/user/getProfileBackground', { withCredentials: true }))
+  public getProfileItems = async () => {
+    const response = firstValueFrom(this.http.get<IProfileItemsResponse>(this.apiUrl + '/user/getProfileItems', { withCredentials: true }))
     return response
   }
 
@@ -292,7 +292,7 @@ export class SteamService {
         })
       ))
 
-    friendListGamesResponse.forEach((friend, i) => {
+    friendListGamesResponse.forEach(friend => {
       if (!friend.libraryResponse.games) {
         return
       }
@@ -316,11 +316,16 @@ export class SteamService {
       })
     })
 
+    const friendListProfileItems$: Observable<IProfileItemsResponse>[] = steamIds.map(id => this.http.get<IProfileItemsResponse>(this.apiUrl + `/user/getProfileItems?steamId=${id}`, { withCredentials: true }))
+
+    const friendListProfileItemsResponse = await firstValueFrom(forkJoin(friendListProfileItems$))
+
     const friendListDetails = await this.getFriendListDetails(steamIds)
     const friendListFull: IFriendListFullResponse = {
       friendList: friendList,
       details: friendListDetails,
-      gameLibraries: friendListGamesResponse
+      gameLibraries: friendListGamesResponse,
+      profileItems: friendListProfileItemsResponse
     }
     return friendListFull
   }
@@ -498,16 +503,63 @@ export class SteamService {
     }
   }
 
-  public createProfileBackground = (): IProfileBackground => {
+  public createProfileItems = (): IProfileItems => {
+    return {
+      background: this.createBackgroundItem(),
+      avatarFrame: this.createAvatarItem(),
+      animatedAvatar: this.createAvatarItem(),
+      profileModifier: this.createModifierItem()
+    }
+  }
+
+  public createBackgroundItem = (): IProfileBackground => {
     return {
       communityItemId: '',
-      imageURL: '',
+      imageLargeURL: '',
       name: '',
-      title: '',
       description: '',
       appId: 0,
       type: 0,
-      class: 0
+      class: 0,
+      movieWebmURL: '',
+      movieMP4URL: '',
+      movieWebmSmallURL: '',
+      movieMP4SmallURL: '',
+      equipped: false
+    }
+  }
+
+  public createAvatarItem = (): IProfileAvatar => {
+    return {
+      communityItemId: '',
+      name: '',
+      description: '',
+      appId: 0,
+      type: 0,
+      class: 0,
+      imageSmallURL: '',
+      imageLargeURL: ''
+    }
+  }
+
+  public createModifierItem = (): IProfileModifier => {
+    return {
+      communityItemId: '',
+      imageLargeURL: '',
+      name: '',
+      description: '',
+      appId: 0,
+      type: 0,
+      class: 0,
+      title: '',
+      profileColors: []
+    }
+  }
+
+  public createProfileColors = (): IProfileStyle => {
+    return {
+      styleName: '',
+      color: ''
     }
   }
 

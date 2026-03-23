@@ -23,7 +23,16 @@
             <mat-card-content class="friend-card-content">
               <div class="friend-btn-cont">
                 <button class="friend-btn" type="button" (click)="openFriendDialog(friend)">
-                  <img class="friend-avi" alt="Steam user avatar" height="32" width="32" [ngSrc]="friend.avatars.avatar">
+                  <div class="avatar-cont">
+                    <div class="avatar-full-cont">
+                      <img alt="Steam user avatar" priority fill [ngSrc]="friend.profileItems.animatedAvatar.imageSmallURL !== '' ? friend.profileItems.animatedAvatar.imageSmallURL : friend.avatars.avatar">
+                    </div>
+                    @if (friend.profileItems.avatarFrame.imageLargeURL !== '') {
+                    <div class="avatar-frame-cont">
+                      <img alt="Steam user avatar frame" priority fill [ngSrc]="friend.profileItems.avatarFrame.imageLargeURL">
+                    </div>
+                    }
+                  </div>
                 </button>
               </div>
               <div class="friend-details">

@@ -1,6 +1,15 @@
 <div class="nameplate-cont">
   <div class="nameplate-av-name-cont">
-    <img class="steam-avi-full" alt="Steam user avatar" height="184" width="184" priority [ngSrc]="avatars[0]">
+    <div class="avatar-cont">
+      <div class="avatar-full-cont">
+        <img alt="Steam user avatar" priority fill [ngSrc]="avatars[0]">
+      </div>
+      @if (user.profileItems.avatarFrame.imageLargeURL !== '') {
+      <div class="avatar-frame-cont">
+        <img alt="Steam user avatar frame" priority fill [ngSrc]="user.profileItems.avatarFrame.imageLargeURL">
+      </div>
+      }
+    </div>
     <div class="name-details-cont">
       <div class="name-cont">
         <h1 class="display-name">{{ user.displayName }}</h1>
