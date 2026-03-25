@@ -7,7 +7,7 @@ const cookieParser = require('cookie-parser');
 const axios = require('axios');
 const cors = require('cors');
 const cron = require('cron');
-const scrapeSteamStoreAndSave = require('./scraper');
+const scraper = require('./scraper');
 const passport = require('passport');
 const SteamStrategy = require('passport-steam').Strategy;
 const User = require('./db/User');
@@ -53,12 +53,16 @@ app.use(session({
 }));
 
 async function main() {
+  if (process.env.NODE_ENV === 'development') {
     await mongoose.connect(process.env.LOCAL_DATABASE_URL);
     console.log("Database connection done.");
+  }
 }
 
 main().then(() => {
-  database = mongoose.connection.db;
+  if (process.env.NODE_ENV === 'development') {
+    database = mongoose.connection.db;
+  }
 
   server.listen(3000, () => {
       console.log('Backend listening on port 3000');
@@ -69,9 +73,14 @@ main().then(() => {
 });
 
 const job = new cron.CronJob('0 0 * * *', async () => {
-  console.log('Running daily store scraping...')
-  await scrapeSteamStoreAndSave()
-    .then(newItemsNum => console.log(`Store Items DB has finished updating. New records added today: ${newItemsNum}`))
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Running daily store scraping...')
+    await scrapeSteamStoreAndSave()
+      .then(newItemsNum => console.log(`Store Items DB has finished updating. New records added today: ${newItemsNum}`))
+  }
+  else {
+    await scraper.scrapeAndSave()
+  }
 })
 
 job.start();
@@ -89,34 +98,42 @@ passport.use(new SteamStrategy({
         realm: 'http://localhost:3000',
         apiKey: process.env.STEAM_API_KEY
     },
-function (identifier, profile, done) {
-    User.findOne({ id: profile.id })
-      .then((user, err) => {
-        if (err) {
-          return done(err);
-        }
+  function (identifier, profile, done) {
+    if (process.env.NODE_ENV === 'development') {
+      User.findOne({ id: profile.id })
+        .then((user, err) => {
+          if (err) {
+            return done(err);
+          }
 
-        if (user) {
-          console.log('User found in DB');
-          User.findOneAndUpdate(user, profile)
-            .then((user, err) => {
-                if (err) {
-                  console.error(err)
-                }
-                else {
-                  console.log('User updated');
-                  return done(null, user)
-                }
-              })
-        }
-        else {
-          let newUser = new User(profile);
-          newUser.save()
-          console.log('New User recorded to DB');
-          return done(null, newUser);
-        }
-      })
+          if (user) {
+            console.log('User found in DB');
+            User.findOneAndUpdate(user, profile)
+              .then((user, err) => {
+                  if (err) {
+                    console.error(err)
+                  }
+                  else {
+                    console.log('User updated');
+                    return done(null, user)
+                  }
+                })
+          }
+          else {
+            let newUser = new User(profile);
+            newUser.save()
+            console.log('New User recorded to DB');
+            return done(null, newUser);
+          }
+        })
     }
+    else {
+      process.nextTick(function () {
+        profile.identifier = identifier;
+        return done(null, profile);
+      });
+    }
+  }
 ));
 
 app.use(passport.initialize());
