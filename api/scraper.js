@@ -48,21 +48,21 @@ const scrapeSteamStoreAndSave = async () => {
   await getStoreItemsAndConsolidate()
     .then(storeItems => {
       storeItems.forEach(item => {
-        StoreItem.findOne({ appid: item.appid })
-          .then(async (itemFound, err) => {
-            if (err) {
-              console.error(err)
-            }
+          StoreItem.findOne({ appid: item.appid })
+            .then(async (itemFound, err) => {
+              if (err) {
+                console.error(err)
+              }
 
-            if (!itemFound) {
-              await StoreItem.insertOne(item)
-              console.log('New Store Item saved to DB')
-              newRecordsAdded += 1
-            }
-          })
-      })
+              if (!itemFound) {
+                await StoreItem.insertOne(item)
+                console.log('New Store Item saved to DB')
+                newRecordsAdded += 1
+              }
+            })
+        })
       return newRecordsAdded
     })
 }
 
-module.exports = scrapeSteamStoreAndSave
+module.exports = { scrape:getStoreItemsAndConsolidate, scrapeAndSave: scrapeSteamStoreAndSave }
