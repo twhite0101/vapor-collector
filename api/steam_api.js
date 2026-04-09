@@ -26,7 +26,7 @@ async function streamStoreData() {
   readStream
     .pipe(streamArray.withParserAsStream())
     .on('data', (item) => {
-      storeData.push(item);
+      storeData.push(item.value);
     })
     .on('end', resolve)
     .on('error', reject);
@@ -461,19 +461,37 @@ app.get('/game/getGameNameLocal', ensureAuthenticated, async (req, res) => {
   }
 })
 
-app.get('/game/getGameName', ensureAuthenticated, async (req, res) => {
+app.get('/game/getStoreDetails', ensureAuthenticated, async (req, res) => {
   const token = req.cookies.access;
   const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_KEY)
   if (!decoded) {
     res.statusCode(401).json('Unauthorized user');
   }
-  const appId = Number(req.query.appId)
-  if (!appId) {
-    res.statusCode(401).json('No appId query param provided');
+  const appIds = req.query.appIds.split(',').map(Number)
+  if (!appIds) {
+    res.statusCode(401).json('No appIds query param provided');
   }
   try {
-    const result = storeData.find(item => item.value.appid === appId)
-    res.json(result)
+    const results = appIds.map(id => {
+      const storeItem = storeData.find(item => item.appId === id)
+      if (storeItem) {
+        return storeItem
+      } else {
+        return {
+          "appId": 0,
+          "name": "",
+          "lastModified": 0,
+          "priceChangeNumber": 0,
+          "currency": "",
+          "initial": 0,
+          "final": 0,
+          "discountPercent": 0,
+          "initialFormatted": "",
+          "finalFormatted": ""
+        }
+      }
+    })
+    res.json(results)
   }
   catch (error) {
     console.error(error)
