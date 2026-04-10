@@ -3,7 +3,7 @@ import type { WritableSignal } from '@angular/core'
 import { inject, Injectable, signal } from '@angular/core'
 import type { Observable } from 'rxjs'
 import { firstValueFrom, forkJoin, map } from 'rxjs'
-import type { IAccountValueDetails, IFriendGameFullResponse, IFriendGameResponse, IFriendListFullResponse, IFriendListResponseFriend, IFriendsWhoPlay, IGameName, IGamePrice, IGamePriceOverviewResponse, IGamePriceResponseDetails, IGamePriceResponseFormat, IGameSchemaResponse, IGetBadgesFullResponse, IGetBadgesResponse, IGetGameNewsResponse, IPlayerLevel, IPlayLevelPercentileResponse, IProfileAvatar, IProfileBackground, IProfileItems, IProfileItemsResponse, IProfileModifier, IProfileStyle, ISteamFriend, IUserAchievementsResponse, IUserAdditionalDetailsResponse, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse, IWishlistResponse, IWishlistResponseWithPrices } from '../../../models/Steam'
+import type { IAccountValueDetails, IFriendGameFullResponse, IFriendGameResponse, IFriendListFullResponse, IFriendListResponseFriend, IFriendsWhoPlay, IGamePrice, IGamePriceOverviewResponse, IGamePriceResponseFormat, IGameSchemaResponse, IGetBadgesFullResponse, IGetBadgesResponse, IGetGameNewsResponse, IPlayerLevel, IPlayLevelPercentileResponse, IProfileAvatar, IProfileBackground, IProfileItems, IProfileItemsResponse, IProfileModifier, IProfileStyle, ISteamFriend, IStoreDetail, IUserAchievementsResponse, IUserAdditionalDetailsResponse, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse, IWishlist, IWishlistResponse } from '../../../models/Steam'
 import { UtilsService } from '../../utils/utils-service'
 
 const LIBRARY_PLAY_TIME_TYPES = ['playtime_forever', 'playtime_2weeks', 'playtime_deck_forever', 'playtime_disconnected', 'playtime_linux_forever', 'playtime_mac_forever', 'playtime_windows_forever'] as const
@@ -82,28 +82,9 @@ export class SteamService {
     return response
   }
 
-  public getGamePrices = async (gameIds: string) => {
-    const response = firstValueFrom(this.http.get<IGamePriceResponseDetails[]>(this.apiUrl + `/game/getGamePrices?appId=${gameIds}`, { withCredentials: true }))
+  public getStoreDetails = async (gameIds: string) => {
+    const response = firstValueFrom(this.http.get<IStoreDetail[]>(this.apiUrl + `/game/getStoreDetails?appIds=${gameIds}`, { withCredentials: true }))
     return response
-  }
-
-  private getMultipleGamePrices = async (appIdArrays: number[][]) => {
-    const gamePrices$: Observable<IGamePriceResponseDetails[]>[] = appIdArrays.map(chunk => this.http.get<IGamePriceResponseDetails[]>(this.apiUrl + `/game/getGamePrices?appId=${chunk.join(',')}`, { withCredentials: true }))
-
-    const gamePricesResponse = await firstValueFrom(forkJoin(gamePrices$)
-      .pipe(
-        map(result => {
-          return result.map(chunkObj => {
-            return Object.entries(chunkObj).map(([key, value]) => {
-              return value
-            })
-          })
-        })
-      )).then(response => {
-      return response.flat()
-    })
-
-    return gamePricesResponse
   }
 
   public getWishlist = async (steamId: string) => {
@@ -118,77 +99,43 @@ export class SteamService {
 
   public initializeWishlist = async (steamId: string) => {
     const wishlist = await this.getWishlist(steamId)
-    let gamePrices: IGamePriceResponseDetails[] = []
     const appIds = wishlist.map(game => game.appid)
-    if (appIds.length >= 300) {
-      const multipleReqArrays: number[][] = this.utilsService.separateArrayIntoChunks(appIds, 300)
-
-      gamePrices = await this.getMultipleGamePrices(multipleReqArrays)
-    }
-    else {
-      gamePrices = await this.getGamePrices(appIds.join(','))
-    }
-
-    const gameNames$: Observable<IGameName>[] = appIds.map(id => this.http.get<IGameName>(this.apiUrl + `/game/getGameName?appId=${id}`, { withCredentials: true }))
-
-    const gameNamesResponse = await firstValueFrom(forkJoin(gameNames$))
-
-    const wishListWithPrices: IWishlistResponseWithPrices[] = wishlist.map(game => {
-      const matchingIdIndex = appIds.indexOf(game.appid)
-      if (gamePrices[matchingIdIndex].success === false) {
-        const gameWithPrice: IWishlistResponseWithPrices = {
-          appid: game.appid,
-          priority: game.priority,
-          date_added: game.date_added,
-          priceCurrent: 0,
-          priceInitial: 0,
-          name: gameNamesResponse[matchingIdIndex] !== null ? gameNamesResponse[matchingIdIndex].name : ''
-        }
-        return gameWithPrice
-      }
-      else {
-        const gameWithPrice: IWishlistResponseWithPrices = {
-          appid: game.appid,
-          priority: game.priority,
-          date_added: game.date_added,
-          priceCurrent: gamePrices[matchingIdIndex].data.price_overview !== undefined ? gamePrices[matchingIdIndex].data.price_overview.final : 0,
-          priceInitial: gamePrices[matchingIdIndex].data.price_overview !== undefined ? gamePrices[matchingIdIndex].data.price_overview.initial : 0,
-          name: gameNamesResponse[matchingIdIndex] !== null ? gameNamesResponse[matchingIdIndex].name : ''
-        }
-        return gameWithPrice
+    const storeDetails = await this.getStoreDetails(appIds.join(','))
+    const wishlistResponse: IWishlist[] = wishlist.map((item, i) => {
+      return {
+        appId: storeDetails[i].appId,
+        name: storeDetails[i].name,
+        priceCurrent: storeDetails[i].final,
+        priceInitial: storeDetails[i].initial,
+        priority: item.priority,
+        dateAdded: new Date(item.date_added * 1000).toISOString().slice(0, new Date(item.date_added * 1000).toISOString().indexOf('T')),
+        storeUrl: `https://store.steampowered.com/app/${storeDetails[i].appId}`
       }
     })
-    const wishListFormatter = wishListWithPrices.filter(item => item.name !== '')
-    return wishListFormatter
+
+    return wishlistResponse
   }
 
   public initializeGameLibrary = async () => {
     const gameLibrary = await this.getOwnedGames()
-
-    let gamePrices: IGamePriceResponseDetails[] = []
-    const appIds = gameLibrary.games.map(game => {
-      return game.appid
-    })
-    if (appIds.length >= 300) {
-      const multipleReqArrays: number[][] = this.utilsService.separateArrayIntoChunks(appIds, 300)
-
-      gamePrices = await this.getMultipleGamePrices(multipleReqArrays)
-    }
-    else {
-      gamePrices = await firstValueFrom(this.http.get<IGamePriceResponseDetails[]>(this.apiUrl + `/game/getGamePrices?appId=${appIds.join(',')}`, { withCredentials: true }))
-    }
+    const appIds = gameLibrary.games.map(game => game.appid)
+    const storeDetails = await this.getStoreDetails(appIds.join(','))
 
     gameLibrary.games.forEach(game => {
-      appIds.forEach((id, i) => {
-        if (game.appid === id) {
-          if (gamePrices[i].success === false) {
-            game.prices = this.createNewPriceObject()
-          }
-          else {
-            game.prices = gamePrices[i].data.price_overview !== undefined ? gamePrices[i].data.price_overview : this.createNewPriceObject()
-          }
+      const matchingStoreDetail = storeDetails.find(detail => detail?.appId === game.appid)
+      if (matchingStoreDetail) {
+        game.prices = {
+          currency: matchingStoreDetail.currency,
+          initial: matchingStoreDetail.initial,
+          final: matchingStoreDetail.final,
+          discount_percent: matchingStoreDetail.discountPercent,
+          initial_formatted: matchingStoreDetail.initialFormatted,
+          final_formatted: matchingStoreDetail.finalFormatted
         }
-      })
+      }
+      else {
+        game.prices = this.createNewPriceObject()
+      }
     })
 
     return gameLibrary
@@ -264,29 +211,27 @@ export class SteamService {
       friend.index = i
     })
 
-    const friendListGamesPrices$: Observable<IGamePriceResponseDetails[]>[] = friendListResponseSplit.map(friend => this.http.get<IGamePriceResponseDetails[]>(this.apiUrl + `/game/getGamePrices?appId=${friend.appIds}`, { withCredentials: true }))
+    const friendListGamesPrices$: Observable<IStoreDetail[]>[] = friendListResponseSplit.map(friend => this.http.get<IStoreDetail[]>(this.apiUrl + `/game/getStoreDetails?appIds=${friend.appIds}`, { withCredentials: true }))
 
     const gamePrices = await firstValueFrom(forkJoin(friendListGamesPrices$)
       .pipe(
         map(result => {
           return result.map(user => {
             const appIds = Object.keys(user)
-            return Object.values(user).map((game: IGamePriceResponseDetails, i) => {
+            return Object.values(user).map((game: IStoreDetail, i) => {
               const appId = appIds[i]
-              if (game.success === true) {
-                const formattedResponse: IGamePriceResponseFormat = {
-                  appId: Number(appId),
-                  price_overview: Array.isArray(game.data) ? this.createNewPriceObject() : game.data.price_overview
+              const formattedResponse: IGamePriceResponseFormat = {
+                appId: Number(appId),
+                price_overview: {
+                  currency: game.currency,
+                  initial: game.initial,
+                  final: game.final,
+                  discount_percent: game.discountPercent,
+                  initial_formatted: game.initialFormatted,
+                  final_formatted: game.finalFormatted
                 }
-                return formattedResponse
               }
-              else {
-                const formattedResponse: IGamePriceResponseFormat = {
-                  appId: Number(appId),
-                  price_overview: this.createNewPriceObject()
-                }
-                return formattedResponse
-              }
+              return formattedResponse
             })
           })
         })

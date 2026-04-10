@@ -76,7 +76,7 @@ export interface IUser {
 export interface IUserFullResponse {
   user: ILoginResponseUser;
   additionalDetails: IUserAdditionalDetailsResponse[];
-  wishlist: IWishlistResponseWithPrices[];
+  wishlist: IWishlist[];
   profileItems: IProfileItemsResponse;
 }
 
@@ -364,6 +364,19 @@ export interface IFriendDialogPassedData extends IBaseDialogPassedData {
 export interface IGamePriceResponseDetails {
   success: boolean;
   data: IGamePriceDataResponse;
+}
+
+export interface IStoreDetail {
+  appId: number;
+  name: string;
+  lastModified: number;
+  priceChangeNumber: number;
+  currency: string;
+  initial: number;
+  final: number;
+  discountPercent: number;
+  initialFormatted: string;
+  finalFormatted: string;
 }
 
 interface IGamePriceDataResponse {

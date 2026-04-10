@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core'
 import type { SafeResourceUrl } from '@angular/platform-browser'
 import { DomSanitizer } from '@angular/platform-browser'
-import type { IAccountValueDetails, IAchievement, IBadge, IChartData, IFriendGameResponse, IFriendListFullResponse, IGameSchemaResponse, IGetBadgesFullResponse, IGetBadgesResponseArray, INewsItems, INewsItemsResponse, IProfileItems, IProfileItemsResponse, IProfileStyle, IProfileStyleResponse, ISteamFriend, IUser, IUserAchievementsResponse, IUserFullResponse, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse, IWishlist, IWishlistResponseWithPrices } from '../../models/Steam'
+import type { IAccountValueDetails, IAchievement, IBadge, IChartData, IFriendGameResponse, IFriendListFullResponse, IGameSchemaResponse, IGetBadgesFullResponse, IGetBadgesResponseArray, INewsItems, INewsItemsResponse, IProfileItems, IProfileItemsResponse, IProfileStyle, IProfileStyleResponse, ISteamFriend, IUser, IUserAchievementsResponse, IUserFullResponse, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse } from '../../models/Steam'
 import { SteamService } from '../steam/data/steam-service'
 import { UtilsService } from '../utils/utils-service'
 
@@ -56,7 +56,7 @@ export class MappingService {
       },
       friendList: this.mapFriendListResponse(friendList),
       gameLibrary: this.sortGamesByRecentlyPlayed(this.mapGameLibraryResponse(library.games, true)),
-      wishlist: this.mapWishlist(userFull.wishlist, library.games),
+      wishlist: userFull.wishlist,
       gameCount: library.game_count,
       currentGameId: userFull.additionalDetails[0].gameid !== undefined ? userFull.additionalDetails[0].gameid: '',
       gameServerIp: userFull.additionalDetails[0].gameserverip !== undefined ? userFull.additionalDetails[0].gameserverip : '',
@@ -488,27 +488,6 @@ export class MappingService {
         value: parseFloat((game.prices.initial / game.playtimeForever).toFixed(2))
       }
     })
-  }
-
-  public mapWishlist = (wishlist: IWishlistResponseWithPrices[], library: IUserGameInfoResponse[]): IWishlist[] => {
-    const wishlistFormatted: IWishlist[] = wishlist.map(game => {
-      library.forEach((libGame, i) => {
-        if (libGame.appid !== game.appid) {
-          return
-        }
-        return i
-      })
-      return {
-        appId: game.appid,
-        priority: game.priority,
-        dateAdded: new Date(game.date_added * 1000).toISOString().slice(0, new Date(game.date_added * 1000).toISOString().indexOf('T')),
-        priceCurrent: game.priceCurrent / 100,
-        priceInitial: game.priceInitial / 100,
-        name: game.name,
-        storeUrl: `https://store.steampowered.com/app/${game.appid}`
-      }
-    })
-    return wishlistFormatted
   }
 
   private mapProfileItems = (response: IProfileItemsResponse): IProfileItems => {
