@@ -1,8 +1,10 @@
 <div class="page-cont" [style.background-image]="`url(${user.profileItems.background.imageLargeURL})`">
-  <div class="profile-cont">
-    <app-nameplate class="nameplate" [user]="user" />
-    <app-recent-games class="recent-games" [user]="user" [recentlyPlayedGames]="recentlyPlayedGames" [recentPlayTime]="recentPlayTime" />
-    <app-value-details isAuthUser="true" [user]="user"/>
+  <div class="dashboard-cont">
+    <div class="profile-cont">
+      <app-nameplate class="nameplate" [user]="user" />
+      <app-recent-games class="recent-games" [user]="user" [recentlyPlayedGames]="recentlyPlayedGames" [recentPlayTime]="recentPlayTime" />
+      <app-value-details isAuthUser="true" [user]="user"/>
+    </div>
+    <app-sidebar class="sidebar" [user]="user" />
   </div>
-  <app-sidebar class="sidebar" [user]="user" />
 </div>
