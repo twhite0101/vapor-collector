@@ -12,23 +12,23 @@
     </div>
     <div class="name-details-cont">
       <div class="name-cont">
-        <h1 class="display-name">{{ user.displayName }}</h1>
+        <h1 class="display-name title-text">{{ user.displayName }}</h1>
         <div [ngClass]="`fi fi-${countryCode}`"></div>
       </div>
-      <p class="last-login">Last Login: {{ user.lastLogoff | date: 'mediumDate' }}</p>
+      <p class="last-login title-text">Last Login: {{ user.lastLogoff | date: 'mediumDate' }}</p>
     </div>
   </div>
   <div class="nameplate-details-cont">
     <div class="level-cont">
       <div class="level-details-cont">
-        <h3>Level</h3>
+        <h3 class="title-text">Level</h3>
         <app-steam-level [level]="playerLevel.playerLevel" [size]="64" />
       </div>
-      <h4>Steam Level World Percentile: {{ levelPercentile }}%</h4>
+      <h4 class="title-text">Steam Level World Percentile: {{ levelPercentile }}%</h4>
     </div>
     <div class="created-cont">
       <img height="60" width="60" [ngSrc]="`https://community.fastly.steamstatic.com/public/images/badges/02_years/steamyears${user.profileAgeYears}_80.png`" [alt]="`Steam Profile Age Badge for ${user.displayName}`">
-      <h4>Account Created: {{ user.timeCreated | date: 'mediumDate' }}</h4>
+      <h4 class="title-text">Account Created: {{ user.timeCreated | date: 'mediumDate' }}</h4>
     </div>
   </div>
 </div>
