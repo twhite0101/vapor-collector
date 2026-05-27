@@ -143,13 +143,14 @@ mat-card {
 }
 
 .recent-games-cont {
-  .p-carousel {
-    width: 75vw;
-  }
   .p-carousel-item {
-    border: 1px solid black;
-    border-radius: 5px;
+    margin: 0px;
     padding: 0.5rem;
+    background-color: rgba(11, 11, 16, 0.75);
+    border: 1px solid #292b42;
+    h3 {
+      margin: 0px;
+    }
   }
   .p-carousel-content h4, p {
     margin: 0px;
