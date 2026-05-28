@@ -82,6 +82,21 @@ mat-card {
   border-radius: 0px !important;
 }
 
+.cdk-virtual-scroll-viewport mat-card {
+  background-color: #182327;
+  .mat-mdc-card-content {
+    color: white;
+  }
+}
+
+.mat-expansion-panel {
+  @include mat.expansion-overrides((
+    container-shape: 0px,
+    container-background-color: rgba(11, 11, 16, 0.3),
+    header-description-color: white
+  ));
+}
+
 .mat-expansion-panel-body {
   padding: 0px !important;
 }
@@ -96,6 +111,16 @@ mat-card {
   max-height: 35px;
 }
 
+.search-field
+.mat-mdc-text-field-wrapper {
+  max-height: 35px;
+}
+
+.search-field
+mat-label {
+  color: white;
+}
+
 .games-input-field
 .mdc-text-field--outlined .mat-mdc-form-field-infix {
   padding-top: 7px;
@@ -103,6 +128,21 @@ mat-card {
   padding-left: 5px;
   padding-right: 5px;
   font-size: 75%;
+  input {
+    color: white !important;
+  }
+}
+
+.search-field
+.mdc-text-field--outlined .mat-mdc-form-field-infix {
+  padding-top: 7px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  font-size: 75%;
+  input {
+    color: white !important;
+  }
 }
 
 .games-input-field
@@ -110,6 +150,14 @@ mat-card {
 .mat-mdc-form-field-flex
 .mat-mdc-floating-label {
   top: calc(var(--mat-form-field-container-height, 25px) / 2);
+  font-size: 75%;
+}
+
+.search-field
+.mat-mdc-text-field-wrapper
+.mat-mdc-form-field-flex
+.mat-mdc-floating-label {
+  top: calc(var(--mat-form-field-container-height, 25px) / 2.25);
   font-size: 75%;
 }
 
@@ -134,11 +182,17 @@ mat-card {
     width: 100%;
     .mat-mdc-form-field-flex{
       align-items: center;
-      height: 100% !important;
     }
     .search-input {
       font-size: smaller !important;
+      color: white !important;
     }
+  }
+}
+
+app-friends-list {
+  .mat-mdc-card-outlined {
+    border-color: black;
   }
 }
 

@@ -4,8 +4,9 @@
       <mat-panel-description class="friend-list-header-desc">Friends: {{ friendListLength }}</mat-panel-description>
     </mat-expansion-panel-header>
     <div class="friend-list-search">
-      <mat-form-field class="search-field" subscriptSizing="dynamic">
-        <input class="search-input" type="text" placeholder="Search..." aria-label="Search friends..." matInput [formControl]="filterFriendListControl" [matAutocomplete]="auto">
+      <mat-form-field class="search-field" appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Search Friends</mat-label>
+        <input class="search-input" type="text" matInput [formControl]="filterFriendListControl" [matAutocomplete]="auto">
         <mat-autocomplete #auto="matAutocomplete">
           @for (friend of filteredFriends; track friend.displayName) {
             <mat-option [value]="friend">{{ friend.displayName }}</mat-option>
@@ -38,7 +39,7 @@
               <div class="friend-details">
                 <h5 class="friend-name">{{ friend.displayName }}</h5>
                 @if (friend.currentGameName) {
-                  <div class="friend-online">{{ friend.currentGameName }}</div>
+                  <div class="friend-online friend-in-game">{{ friend.currentGameName }}</div>
                 }
                 @else {
                   <div class="friend-online">Online</div>
