@@ -2,13 +2,19 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-top: 10px;
+  padding-top: 10px;
+  max-height: 100vh;
 }
 
 .sidebar-user-status {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   width: 15vw;
   height: 5vh;
+  padding-left: 10px;
+  margin-bottom: 10px;
 }
 
 .ingame-header {
@@ -36,4 +42,9 @@
   color: #50b2c4;
   margin-top: 5px;
   margin-bottom: 5px;
+}
+
+.friend-list,
+.games {
+  margin-bottom: 10px;
 }

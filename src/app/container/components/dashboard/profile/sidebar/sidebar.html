@@ -1,11 +1,11 @@
-<div class="sidebar-cont">
+<div class="sidebar-cont gradient-background">
   <div class="sidebar-user-status">
     @if (showCurrentGame) {
       <h3 class="ingame-header">Currently In-Game</h3>
       <h4 class="ingame-details">{{ currentGame }}</h4>
     }
     @else {
-      <h3 [ngClass]="statusClass">Currently {{ user.status }}</h3>
+      <h2 [ngClass]="statusClass">Currently {{ user.status }}</h2>
     }
   </div>
   <app-game-library class="games" [user]="user" />
