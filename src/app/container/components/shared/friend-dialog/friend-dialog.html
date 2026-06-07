@@ -17,7 +17,7 @@
       </mat-tab>
       <mat-tab class="recent-games-tab" label="Recent Games">
         <div class="recent-games-cont">
-          <app-recent-games class="recent-games" isFriend="true" [user]="friendDetails.user" [recentlyPlayedGames]="friendDetails.recentlyPlayedGames" [recentPlayTime]="friendDetails.recentPlayTime" />
+          <app-recent-games class="recent-games" isFriend="true" [user]="friendDetails.user" [recentlyPlayedGames]="friendDetails.recentlyPlayedGames" [recentPlayTime]="friendDetails.recentPlayTime" [dialogDisplayOptions]="recentGamesDisplayOptions" />
         </div>
       </mat-tab>
       <mat-tab class="library-tab" label="Game Library">

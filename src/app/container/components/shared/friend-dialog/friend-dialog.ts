@@ -7,6 +7,7 @@ import { MatTabsModule } from '@angular/material/tabs'
 import type { ColDef, SizeColumnsToContentStrategy } from 'ag-grid-community'
 import { CarouselModule } from 'primeng/carousel'
 import { FriendGameLibraryColDef } from '../../../../models/ColdDefs'
+import type { IDialogCarouselDisplayOptions } from '../../../../models/Dialog'
 import type { IFriendDialogPassedData, IUserGameInfo } from '../../../../models/Steam'
 import { MappingService } from '../../../../services/mapping/mapping-service'
 import { SteamService } from '../../../../services/steam/data/steam-service'
@@ -50,6 +51,12 @@ export class FriendDialog implements AfterViewInit {
         maxWidth: 183
       }
     ]
+  }
+
+  // Recent Games Display Options
+  protected recentGamesDisplayOptions: IDialogCarouselDisplayOptions = {
+    numVisible: 1,
+    numScroll: 1
   }
 
   protected get loading () {

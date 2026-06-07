@@ -1,11 +1,12 @@
 import { DatePipe, NgOptimizedImage } from '@angular/common'
-import type { OnDestroy, OnInit } from '@angular/core'
+import type { OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core'
 import { booleanAttribute, Component, inject, Input } from '@angular/core'
 import { MatCardModule } from '@angular/material/card'
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog'
 import type { CarouselResponsiveOptions } from 'primeng/carousel'
 import { CarouselModule } from 'primeng/carousel'
 import { ImageFallback } from '../../../../../directives/image-fallback/image-fallback'
+import type { IDialogCarouselDisplayOptions } from '../../../../../models/Dialog'
 import type { IUser, IUserGameInfo } from '../../../../../models/Steam'
 import { StateService } from '../../../../../services/state/state-service'
 import { GameDialog } from '../../../shared/game-dialog/game-dialog'
@@ -22,7 +23,7 @@ import { GameDialog } from '../../../shared/game-dialog/game-dialog'
   templateUrl: './recent-games.html',
   styleUrl: './recent-games.scss'
 })
-export class RecentGames implements OnInit, OnDestroy {
+export class RecentGames implements OnInit, OnDestroy, OnChanges {
   //Dependency Injections
   private readonly state: StateService = inject(StateService)
   private readonly dialog: MatDialog = inject(MatDialog)
@@ -31,6 +32,7 @@ export class RecentGames implements OnInit, OnDestroy {
   @Input({ required: true }) public user: IUser
   @Input({ required: true }) public recentPlayTime: number
   @Input({ transform: booleanAttribute }) public isFriend = false
+  @Input() public dialogDisplayOptions: IDialogCarouselDisplayOptions
 
   protected responsiveOptions: CarouselResponsiveOptions[] = [
     {
@@ -58,6 +60,14 @@ export class RecentGames implements OnInit, OnDestroy {
   public ngOnInit (): void {
     this.library = this.user.gameLibrary
     this.state.setRecentGamesStatus(true)
+  }
+
+  public ngOnChanges (changes: SimpleChanges): void {
+    if (changes['dialogDisplayOptions']?.currentValue) {
+      this.responsiveOptions.length = 0
+      this.numVisible = this.dialogDisplayOptions.numVisible
+      this.numScroll = this.dialogDisplayOptions.numScroll
+    }
   }
 
   public ngOnDestroy (): void {
