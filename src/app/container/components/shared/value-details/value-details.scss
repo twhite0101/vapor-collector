@@ -1,12 +1,19 @@
 .account-details-cont {
   display: flex;
   flex-direction: column;
-  border: 5px solid black;
+}
+
+.account-header-cont {
+  padding: 0px 10px 0px 10px;
 }
 
 .account-title-header {
-  text-align: center;
-  margin: 5px;
+  margin: 0px;
+}
+
+.header-title-sub {
+  width: 75%;
+  height: 75%;
 }
 
 .account-header-total-value-cont {
@@ -14,6 +21,7 @@
   flex-direction: row;
   justify-content: center;
   align-items: center;
+  white-space: nowrap;
 }
 
 .details-header-titles-cont {
@@ -24,10 +32,6 @@
 }
 
 .header-title-cont {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
   width: calc(100vw - ((2/3) * 100vw));
 }
 
@@ -95,6 +99,4 @@
 
 .chart-cont {
   display: block;
-  height: 200px;
-  width: 100%;
 }

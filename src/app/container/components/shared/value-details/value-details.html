@@ -1,43 +1,51 @@
-<div class="account-details-cont">
-  <h3 class="account-title-header">Account Value Details</h3>
-  <div class="account-header-total-value-cont">
-    <h4 class="total-value-title">Total Library Value: </h4>
-    <div>{{ user.accountValues?.totalEstLibraryValueFormatted }}</div>
+<div class="account-details-cont gradient-background">
+  <div class="account-header-cont toolbar-gradient toolbar-row">
+    <h3 class="account-title-header title-text">Account Value Details</h3>
+    <div class="account-header-total-value-cont">
+      <h3 class="total-value-title title-text">Total Library Value: </h3>
+      <h3 class="title-text">{{ user.accountValues?.totalEstLibraryValueFormatted }}</h3>
+    </div>
   </div>
-  <div class="details-header-titles-cont">
-    <div class="header-title-cont">
-      <h4 class="additional-value-title">Value Breakdown</h4>
+  <div class="details-header-titles-cont toolbar-gradient">
+    <div class="header-title-cont toolbar-single">
+      <div class="toolbar-single-color header-title-sub">
+        <h4 class="additional-value-title title-text">Value Breakdown</h4>
+      </div>
     </div>
     @if (isAuthUser) {
-    <div class="header-title-cont chart-header-cont">
-      <h4 class="total-value-title">Games with Greatest Value</h4>
-    </div>
+      <div class="header-title-cont toolbar-single">
+        <div class="toolbar-single-color header-title-sub">
+          <h4 class="total-value-title title-text">Games with Greatest Value</h4>
+        </div>
+      </div>
     }
-    <div class="header-title-cont">
-      <h4 class="additional-value-title">Ranking Against Friends</h4>
-    </div>
+      <div class="header-title-cont toolbar-single">
+        <div class="toolbar-single-color header-title-sub">
+          <h4 class="additional-value-title title-text">Ranking Against Friends</h4>
+        </div>
+      </div>
   </div>
   <div class="additional-value-cont">
     <div class="totals-cont">
       <div class="add-value">
-        <div class="detail-title">Current Library Value (Est.): </div>
-        <div>{{ user.accountValues?.currentEstLibraryValueFormatted }}</div>
+        <div class="detail-title title-text">Current Library Value (Est.): </div>
+        <div class="title-text">{{ user.accountValues?.currentEstLibraryValueFormatted }}</div>
       </div>
       <div class="add-value">
-        <div class="detail-title">Average Cost Per Game (Total): </div>
-        <div>{{ user.accountValues?.averageCostPerGameTotalFormatted }}</div>
+        <div class="detail-title title-text">Average Cost Per Game (Total): </div>
+        <div class="title-text">{{ user.accountValues?.averageCostPerGameTotalFormatted }}</div>
       </div>
       <div class="add-value">
-        <div class="detail-title">Average Cost Per Game (Current): </div>
-        <div>{{ user.accountValues?.averageCostPerGameCurrentFormatted }}</div>
+        <div class="detail-title title-text">Average Cost Per Game (Current): </div>
+        <div class="title-text">{{ user.accountValues?.averageCostPerGameCurrentFormatted }}</div>
       </div>
       <div class="add-value">
-        <div class="detail-title">Average Value Per Hour (Total): </div>
-        <div>{{ user.accountValues?.averageValuePerHourTotalFormatted }}</div>
+        <div class="detail-title title-text">Average Value Per Hour (Total): </div>
+        <div class="title-text">{{ user.accountValues?.averageValuePerHourTotalFormatted }}</div>
       </div>
       <div class="add-value">
-        <div class="detail-title">Average Value Per Hour (Current): </div>
-        <div>{{ user.accountValues?.averageValuePerHourCurrentFormatted }}</div>
+        <div class="detail-title title-text">Average Value Per Hour (Current): </div>
+        <div class="title-text">{{ user.accountValues?.averageValuePerHourCurrentFormatted }}</div>
       </div>
     </div>
     @if (isAuthUser) {
@@ -47,28 +55,28 @@
     }
     <div class="ranking-cont">
       <div class="add-value">
-        <div>Total Library Value (Est.) Rank: </div>
-        <div>{{ `${user.accountValues?.totalEstLibraryFriendRank}/${steamService.friendListLength}` }}</div>
+        <div class="title-text">Total Library Value (Est.) Rank: </div>
+        <div class="title-text">{{ `${user.accountValues?.totalEstLibraryFriendRank}/${steamService.friendListLength}` }}</div>
       </div>
       <div class="add-value">
-        <div class="detail-title">Current Library Value (Est.) Rank: </div>
-        <div>{{ `${user.accountValues?.currentEstLibraryFriendRank}/${steamService.friendListLength}` }}</div>
+        <div class="detail-title title-text">Current Library Value (Est.) Rank: </div>
+        <div class="title-text">{{ `${user.accountValues?.currentEstLibraryFriendRank}/${steamService.friendListLength}` }}</div>
       </div>
       <div class="add-value">
-        <div class="detail-title">Average Cost Per Game (Total) Rank: </div>
-        <div>{{ `${user.accountValues?.averageCPGTotalFriendRank}/${steamService.friendListLength}` }}</div>
+        <div class="detail-title title-text">Average Cost Per Game (Total) Rank: </div>
+        <div class="title-text">{{ `${user.accountValues?.averageCPGTotalFriendRank}/${steamService.friendListLength}` }}</div>
       </div>
       <div class="add-value">
-        <div class="detail-title">Average Cost Per Game (Current) Rank: </div>
-        <div>{{ `${user.accountValues?.averageCPGCurrentFriendRank}/${steamService.friendListLength}` }}</div>
+        <div class="detail-title title-text">Average Cost Per Game (Current) Rank: </div>
+        <div class="title-text">{{ `${user.accountValues?.averageCPGCurrentFriendRank}/${steamService.friendListLength}` }}</div>
       </div>
       <div class="add-value">
-        <div class="detail-title">Average Value Per Hour (Total) Rank: </div>
-        <div>{{ `${user.accountValues?.averageVPHTotalFriendRank}/${steamService.friendListLength}` }}</div>
+        <div class="detail-title title-text">Average Value Per Hour (Total) Rank: </div>
+        <div class="title-text">{{ `${user.accountValues?.averageVPHTotalFriendRank}/${steamService.friendListLength}` }}</div>
       </div>
       <div class="add-value">
-        <div class="detail-title">Average Value Per Hour (Current) Rank: </div>
-        <div>{{ `${user.accountValues?.averageVPHCurrentFriendRank}/${steamService.friendListLength}` }}</div>
+        <div class="detail-title title-text">Average Value Per Hour (Current) Rank: </div>
+        <div class="title-text">{{ `${user.accountValues?.averageVPHCurrentFriendRank}/${steamService.friendListLength}` }}</div>
       </div>
     </div>
   </div>
