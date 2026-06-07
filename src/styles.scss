@@ -292,6 +292,26 @@ app-game-library {
 }
 
 .game-dialog {
+  .mdc-tab.mat-mdc-tab {
+    background-color: #182327;
+    border: 1px solid #292b42;
+    .mdc-tab__text-label {
+      color: white;
+    }
+  }
+  .mat-mdc-tab.mdc-tab--active {
+    border: 2px solid white;
+  }
+  .mdc-tab--active:focus {
+    .mdc-tab__text-label {
+      color: grey !important;
+    }
+  }
+  .mdc-tab--active:hover {
+    .mdc-tab__text-label {
+      color: grey !important;
+    }
+  }
   .p-carousel-content h4, h5, h6 {
     margin: 0px 5px 0px 5px;
   }
