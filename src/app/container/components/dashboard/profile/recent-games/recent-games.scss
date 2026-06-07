@@ -1,4 +1,28 @@
-.recent-games-cont {
+:host-context(app-friend-dialog) .game-cont {
+  height: 20vh;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+:host-context(app-dashboard) .game-cont {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+:host-context(app-friend-dialog) .recent-games-cont {
+  height: 38vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: auto;
+}
+
+:host-context(app-dashboard) .recent-games-cont {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -6,7 +30,10 @@
   margin: auto;
 }
 
-.header-cont {
+:host-context(app-friend-dialog) .header-cont {
+  position: absolute;
+  top: 0px;
+  left: 0px;
   padding: 0px 10px 0px 10px;
   margin-bottom: 10px;
   h3 {
@@ -14,17 +41,33 @@
   }
 }
 
-.recent-game-carousel {
+:host-context(app-dashboard) .header-cont {
+  padding: 0px 10px 0px 10px;
+  margin-bottom: 10px;
+  h3 {
+    margin: 0px;
+  }
+}
+
+:host-context(app-friend-dialog) .recent-game-carousel {
+  display: flex;
+  flex-direction: column;
+  max-width: 60%;
+}
+
+:host-context(app-dashboard) .recent-game-carousel {
   display: flex;
   flex-direction: column;
   max-width: 100%;
 }
 
-.game-cont {
-  display: flex;
-  flex-direction: row;
+:host-context(app-friend-dialog) .p-carousel-item {
+  width: 100% !important;
+}
+
+:host-context(app-friend-dialog) .game-details {
   align-items: center;
-  gap: 10px;
+  width: 100%;
 }
 
 .game-details {

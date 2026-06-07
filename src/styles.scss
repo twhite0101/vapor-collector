@@ -252,12 +252,32 @@ app-game-library {
 }
 
 .friend-dialog{
-  width: 920px;
-  height: 900px;
+  width: 85.2vw;
+  height: 67.54vh;
   padding: 0px !important;
   max-width: 920px !important;
   .mat-mdc-dialog-container {
     padding: 0px !important;
+    .mdc-tab.mat-mdc-tab {
+      background-color: #182327;
+      border: 1px solid #292b42;
+      .mdc-tab__text-label {
+        color: white;
+      }
+    }
+    .mat-mdc-tab.mdc-tab--active {
+      border: 2px solid white;
+    }
+    .mdc-tab--active:focus {
+      .mdc-tab__text-label {
+        color: grey !important;
+      }
+    }
+    .mdc-tab--active:hover {
+      .mdc-tab__text-label {
+        color: grey !important;
+      }
+    }
   }
 }
 

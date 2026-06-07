@@ -6,7 +6,7 @@
 }
 @else {
   <div class="friend-dialog-cont">
-    <div class="header-cont">
+    <div class="header-cont" [style.background-image]="`url(${friendDetails.friendUser.profileItems.background.imageLargeURL})`">
       <app-nameplate [user]="friendDetails.friendUser"/>
     </div>
     <mat-tab-group class="friend-dialog-tabs" mat-stretch-tabs="true" (selectedTabChange)="onTabChange($event)">
@@ -22,8 +22,13 @@
       </mat-tab>
       <mat-tab class="library-tab" label="Game Library">
         @if (isLibraryActive) {
-          <div class="grid-container">
+          <div class="grid-container gradient-background">
             <app-grid class="ag-grid" parentGridType="Games" [parentData]="friendDetails.friend.gameLibrary" [parentColDefs]="libraryColDefs" [autoSizeStrat]="friendLibrarySizeStrat" />
+          </div>
+        }
+        @else {
+          <div class="private-library gradient-background">
+            <p>{{ friendDetails.friendUser.displayName }}'s library is private</p>
           </div>
         }
       </mat-tab>
