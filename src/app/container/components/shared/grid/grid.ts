@@ -4,7 +4,7 @@ import { Component, computed, Input, signal } from '@angular/core'
 import { MatInput } from '@angular/material/input'
 import { AgGridAngular } from 'ag-grid-angular'
 import type { ColDef, GetRowIdFunc, GetRowIdParams, GridApi, GridReadyEvent, RowSelectionOptions, SizeColumnsToContentStrategy, SizeColumnsToFitGridStrategy, SizeColumnsToFitProvidedWidthStrategy } from 'ag-grid-community'
-import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community'
+import { AllCommunityModule, colorSchemeDarkBlue, ModuleRegistry, themeQuartz } from 'ag-grid-community'
 
 @Component({
   selector: 'app-grid',
@@ -47,11 +47,13 @@ export class Grid implements OnChanges {
   protected myColDefs: ColDef[] = []
   protected myDefaultColDef: ColDef = this.defaultColDef
   protected myGridType = ''
-  protected mySizeStrat: SizeColumnsToFitGridStrategy | SizeColumnsToFitProvidedWidthStrategy | SizeColumnsToContentStrategy
+  protected mySizeStrat: SizeColumnsToFitGridStrategy | SizeColumnsToFitProvidedWidthStrategy | SizeColumnsToContentStrategy = this.autoSizeStrat
   private _myGridStyle: WritableSignal<string> = signal('')
   protected isNoRowsHidden = true
 
   protected isStatusBarActive = true
+
+  protected theme = themeQuartz.withPart(colorSchemeDarkBlue)
 
   protected get myGridStyle () {
     return this._myGridStyle()
@@ -144,6 +146,7 @@ export class Grid implements OnChanges {
 
   protected onGridReady = (params: GridReadyEvent) => {
     this.gridApi = params.api
+    this.gridApi.redrawRows()
   }
 
   protected onFilterChanged = () => {
