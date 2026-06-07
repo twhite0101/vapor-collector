@@ -2,8 +2,8 @@ import { NgClass } from '@angular/common'
 import type { OnInit, WritableSignal } from '@angular/core'
 import { Component, Input, signal } from '@angular/core'
 import type { IUser } from '../../../../../models/Steam'
-import { GameLibrary } from '../../../shared/game-library/game-library'
 import { FriendList } from './friend-list/friend-list'
+import { GameLibrary } from './game-library/game-library'
 
 @Component({
   selector: 'app-sidebar',
