@@ -1,12 +1,9 @@
 .wishlist-container {
   display: flex;
   flex-direction: column;
+  height: 100%;
 }
 
 .wishlist-title {
   text-align: center;
-}
-
-.grid-container {
-  height: 55vh;
 }
