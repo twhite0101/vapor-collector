@@ -3,6 +3,7 @@ import type { OnInit } from '@angular/core'
 import { Component, inject } from '@angular/core'
 import { MatButtonModule } from '@angular/material/button'
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog'
+import { ImageFallback } from '../../../../directives/image-fallback/image-fallback'
 import type { IUser } from '../../../../models/Steam'
 import { StateService } from '../../../../services/state/state-service'
 import { UserService } from '../../../../services/user/user-service'
@@ -12,7 +13,8 @@ import { WishlistDialog } from '../wishlist-dialog/wishlist-dialog'
   selector: 'app-header',
   imports: [
     MatButtonModule,
-    NgOptimizedImage
+    NgOptimizedImage,
+    ImageFallback
   ],
   templateUrl: './header.html',
   styleUrl: './header.scss'
@@ -25,10 +27,12 @@ export class Header implements OnInit {
 
   protected user: IUser | null
   protected name: string
+  protected avatar: string | undefined = ''
 
   public ngOnInit (): void {
     if (this.userService.hasUser) {
       this.user = this.userService.user
+      this.avatar = this.user?.profileItems.animatedAvatar.imageSmallURL !== '' ? this.user?.profileItems.animatedAvatar.imageSmallURL : this.user.avatars.avatarFull
     }
     this.state.setHeaderStatus(true)
   }

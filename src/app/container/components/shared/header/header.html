@@ -2,9 +2,12 @@
   @if (this.userService.hasUser) {
     <div class="user-details">
       <div class="user-info">
-          <div>Welcome, {{ user?.displayName }}</div>
+        <div class="avatar-small-cont">
+          <img alt="Steam user avatar" priority fill appImageFallback="assets/no_avatar.jpg" [ngSrc]="avatar !== undefined ? avatar : 'assets/no_avatar.jpg'">
+        </div>
+        <div class="title-text user-text">Welcome, {{ user?.displayName }}</div>
       </div>
-      <div>
+      <div class="wishlist-btn">
         <button type="button" (click)="openWishlistDialog()">Wishlist</button>
       </div>
       <div>

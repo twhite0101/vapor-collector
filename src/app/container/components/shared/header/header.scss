@@ -17,8 +17,8 @@
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  height: 40px;
-  border: 5px solid black;
+  height: 5vh;
+  background-color: rgb(29, 29, 32);
 }
 
 .user-details {
@@ -28,5 +28,27 @@
   align-items: center;
   width: 100%;
   padding-left: 10px;
+  padding-right: 10px;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.avatar-small-cont {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  max-width: 32px;
+  max-height: 32px;
+}
+
+.user-text {
+  padding-left: 10px;
+}
+
+.wishlist-btn {
   padding-right: 10px;
 }
