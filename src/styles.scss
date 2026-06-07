@@ -116,6 +116,11 @@ mat-card {
   max-height: 35px;
 }
 
+.games-input-field
+mat-label {
+  color: white;
+}
+
 .search-field
 mat-label {
   color: white;
@@ -190,9 +195,34 @@ mat-label {
   }
 }
 
-app-friends-list {
+app-friends-list,
+app-game-library {
   .mat-mdc-card-outlined {
     border-color: black;
+  }
+}
+
+@media screen and (max-width: 1300px) {
+  .mat-expansion-panel,
+  .mat-expansion-panel-body {
+    width: 1px;
+    .cdk-virtual-scroll-viewport,
+    .cdk-virtual-scroll-content-wrapper {
+      width: 175px;
+      .mat-mdc-card {
+        width: 95%;
+        .mat-mdc-card-content {
+          .details-cont {
+            h6 {
+              font-size: 0.5em;
+            }
+            small {
+              font-size: 0.3em;
+            }
+          }
+        }
+      }
+    }
   }
 }
 

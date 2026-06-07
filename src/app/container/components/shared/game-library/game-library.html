@@ -19,10 +19,13 @@
                   </button>
                 </div>
                 <div class="details-cont">
-                  <h6 class="details-header">Hours Played</h6>
-                  <small class="details-text">Total: {{ game.playtimeForever }}</small>
-                  <small class="details-text">Two Weeks: {{ game.playtime2Weeks }}</small>
-                  <small class="details-text">Steam Deck: {{ game.playtimeDeckForever }}</small>
+                  <h5 class="details-text details-name">{{ game.name }}</h5>
+                  <div class="details-hours-cont">
+                    <h6 class="details-text">Hours Played</h6>
+                    <small class="details-text">Total: {{ game.playtimeForever }}</small>
+                    <small class="details-text">Two Weeks: {{ game.playtime2Weeks }}</small>
+                    <small class="details-text">Steam Deck: {{ game.playtimeDeckForever }}</small>
+                  </div>
                 </div>
               </mat-card-content>
             </mat-card>
