@@ -1,59 +1,74 @@
 # VaporCollector
+![App Logo](https://i.imgur.com/uElJKEe.png)
+
+### Concept
+
+VaporCollector is a small Angular-based application centered around presenting various amounts of Steam user details and data, including game library, friend list, wishlists, value-weighted metrics, and more, with an approachable and simple GUI!
+
+The inception of this small application centers around wanting to have a personal environment to build familiarity around the incoming feature sets of each new version of Angular as they drop.
+
+### Features
+
+Some features include:
+
+- Track details of user's game library, such as detailed game hour tracking across various Steam-supported platforms, achievement breakdown, up-to-date aggregation of news for games in library, and more!
+- Follow and interact with user's Friend List by seeing friend's libraries, gameplay details, history, statuses and more!
+- Examine detailed value-weighted breakdowns of the user's game library, including "best-value" game tracking, leaderboard rankings against friends, and more!
+
+...and more!
+
+### Steam Store Scraper
+
+Provided within the backend of the project is a small scraper that I developed to utilize the Steam Store API to gather up to date game pricing and other related data. Due to request restrictions associated with the Steam Store API:
+
+- The scraper is currently set to run once a day, post-midnight, to limit the time required to run within these restrictions
+- There is a five minute cool down when the request limit is met before the scraper continues into the next set of data
+- This a specific to Steam, as it is their API with their data, and as a small side-project that isn't meant to be a paid product, utilizing other third=party paid options didn't seem to be the most logic approach
+
+### Angular CLI Note
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.4.
 
-## Development server
-
-To start a local development server, run:
-
+## Installation
+Ensure NPM@11.7.0 is installed
 ```bash
-ng serve
+nvm install --lts
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
 ```bash
-ng generate component component-name
+nvm use 11.7.0
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
 ```bash
-ng generate --help
+npm install -g npm@11.7.0
+```
+
+Confirm version was correctly installed
+```bash
+npm -v
+```
+
+Then, install the package dependencies
+```bash
+npm ci
 ```
 
 ## Building
 
-To build the project run:
+Before attempting to build project, ensure that environment file (.env) within the 'api' directory was created with the following variables:
+- STEAM_API_KEY (int)
+- NODE_ENV='developmentLocal'
+- SECRET_SESSION_KEY (string)
+- ACCESS_TOKEN_KEY (Base64-encoded)
+- ACCESS_KEY_EXP (string, ex. '1m')
+- REFRESH_TOKEN_SECRET (Base64-encoded)
+- REFRESH_TOKEN_EXP (string, ex. '2m')
+- LOCAL_CLIENT_PORT (int)
 
+
+Then, run the following npm command to build and start the full stack of the application
 ```bash
-ng build
+npm run startFull
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Application can be access through your browser via: http://localhost:LOCAL_CLIENT_PORT/
