@@ -46,6 +46,7 @@ export class UserService {
     this._hasLibrary.set(false)
     this._hasUser.set(false)
     this.state.userLoggedOut()
+    this.setLoggedInStatus('false')
     window.location.href = this.apiUrl + '/logout'
   }
 

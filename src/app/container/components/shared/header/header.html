@@ -7,17 +7,17 @@
         </div>
         <div class="title-text user-text">Welcome, {{ user?.displayName }}</div>
       </div>
-      <div class="wishlist-btn">
-        <button type="button" (click)="openWishlistDialog()">Wishlist</button>
-      </div>
-      <div>
-        <button type="button" (click)="logOutClicked()">Logout</button>
-      </div>
+      <button type="button" class="header-btn" (click)="openWishlistDialog()" >
+        <img alt="mock wishlist button" ngSrc="assets/wishlist_btn.png" width="144" height="28" priority />
+      </button>
+      <button type="button" class="header-btn" (click)="logOutClicked()" >
+        <img alt="mock logout button" ngSrc="assets/logout_btn.png" width="144" height="28" priority />
+      </button>
     </div>
   }
   @if (!this.userService.hasUser) {
     <div class="login-btn-cont">
-      <button type="button" class="login-btn" (click)="loginClicked()" >
+      <button type="button" class="header-btn" (click)="loginClicked()" >
         <img alt="Steam login button" ngSrc="assets/steam_login.png" width="180" height="35" priority />
       </button>
     </div>
