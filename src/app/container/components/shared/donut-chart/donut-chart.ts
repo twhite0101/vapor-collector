@@ -1,9 +1,9 @@
 import type { AfterViewInit, OnChanges, SimpleChanges } from '@angular/core'
 import { Component, Input } from '@angular/core'
-import { RandomColor } from 'angular-randomcolor'
 import type { ChartConfiguration } from 'chart.js'
 import { Chart, registerables } from 'chart.js'
 import type { IChartData } from '../../../../models/Steam'
+import { getRandomColor } from '../../../../shared/random-color'
 
 Chart.register(...registerables)
 
@@ -24,7 +24,7 @@ export class DonutChart implements OnChanges, AfterViewInit {
       datasets: [
         {
           data: [],
-          backgroundColor: RandomColor.generateColor()
+          backgroundColor: getRandomColor()
         }
       ]
     },
@@ -61,7 +61,7 @@ export class DonutChart implements OnChanges, AfterViewInit {
           {
             data: this.parentData.map(data => data.value),
             backgroundColor: this.parentData.map(() => {
-              return RandomColor.generateColor()
+              return getRandomColor()
             })
           }
         ]

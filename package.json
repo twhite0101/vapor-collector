@@ -38,7 +38,6 @@
     "@primeuix/themes": "^2.0.3",
     "ag-grid-angular": "^35.1.0",
     "ag-grid-community": "^35.1.0",
-    "angular-randomcolor": "^1.0.3",
     "chart.js": "^4.5.1",
     "concurrently": "^9.2.1",
     "flag-icons": "^7.5.0",
