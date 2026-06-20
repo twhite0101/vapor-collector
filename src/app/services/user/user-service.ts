@@ -5,6 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { Router } from '@angular/router'
 import type { Observable } from 'rxjs'
 import { firstValueFrom, forkJoin } from 'rxjs'
+import { environment } from '../../../environments/environment.development'
 import type { IFriendListFullResponse, IGetBadgesFullResponse, ILoginResponse, ISteamFriend, IUser, IUserAdditionalDetailsResponse, IUserFullResponse, IUserGamesLibraryResponse } from '../../models/Steam'
 import { LoadingService } from '../loading/loading-service'
 import { MappingService } from '../mapping/mapping-service'
@@ -34,7 +35,7 @@ export class UserService {
 
   private _hasLibrary: WritableSignal<boolean> = signal(false)
 
-  private apiUrl = 'http://localhost:3000'
+  private apiUrl = environment.apiUrl
 
   public login = () => {
     window.location.href = this.apiUrl + '/auth/steam'
