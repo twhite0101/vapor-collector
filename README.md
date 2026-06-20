@@ -17,6 +17,14 @@ Some features include:
 
 ...and more!
 
+### To-do
+
+Current list of fixes, improvements, and/or potential features:
+- Refactor steam-level styling to decrease size, lower limits and provide better optimization
+- Refactor AgGrid approach to help decrease overall bundle size, lower size limits and provide better optimization
+- Reexamine AuthCallback component to potentially improve client-side authorization process due to process of interacting with Steam API
+- Reexamine approach to calculating user financial data to provide gretter accuracy in data provided and account for non-visible user data (private accounts)
+
 ### Steam Store Scraper
 
 Provided within the backend of the project is a small scraper that I developed to utilize the Steam Store API to gather up to date game pricing and other related data. Due to request restrictions associated with the Steam Store API:
