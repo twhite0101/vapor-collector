@@ -42,7 +42,7 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 
 app.use(cors({
-    origin: [`http://localhost:${process.env.LOCAL_CLIENT_PORT}`],
+    origin: [`https://github.io`],
     credentials: true
 }));
 
@@ -90,8 +90,8 @@ passport.deserializeUser(function(obj, done) {
 });
 
 passport.use(new SteamStrategy({
-        returnURL: 'http://localhost:3000/auth/steam/return',
-        realm: 'http://localhost:3000',
+        returnURL: process.env.PROD_API_URL + 'auth/steam/return' || 'http://localhost:3000/auth/steam/return',
+        realm: process.env.PROD_API_URL || 'http://localhost:3000',
         apiKey: process.env.STEAM_API_KEY
     },
   function (identifier, profile, done) {
@@ -137,11 +137,11 @@ app.use(passport.session());
 
 // AUTH
 app.get('/auth/steam',
-    passport.authenticate('steam', { failureRedirect: 'http://localhost:4200/' }));
+    passport.authenticate('steam', { failureRedirect: process.env.PROD_URL || 'http://localhost:4200/' }));
 
 app.get('/auth/steam/return',
   async (req, res, next) => {
-    passport.authenticate('steam', { failureRedirect: 'http://localhost:4200/' }, function async (err, user, info) {
+    passport.authenticate('steam', { failureRedirect: process.env.PROD_URL || 'http://localhost:4200/' }, function async (err, user, info) {
       const payload = {
         user: user
       };
@@ -149,7 +149,7 @@ app.get('/auth/steam/return',
       const options = { expiresIn: 2 * 60 * 60 * 1000 };
       const accessToken = jwt.sign(payload, secretKey, options);
       res.cookie('access', accessToken, { maxAge: 2 * 60 * 60 * 1000, httpOnly: true });
-      res.redirect('http://localhost:4200/?lg=true');
+      res.redirect(process.env.PROD_URL + '?lg=true' ||'http://localhost:4200/?lg=true');
     })(req, res, next)
   });
 
@@ -167,7 +167,7 @@ app.get('/logout', function(req, res){
     if (err) { return next(err); }
     res.clearCookie('access')
     res.clearCookie('refresh')
-    res.redirect('http://localhost:4200/?lg=false');
+    res.redirect(process.env.PROD_URL + '?lg=false' || 'http://localhost:4200/?lg=false');
   });
 });
 
