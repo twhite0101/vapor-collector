@@ -30,6 +30,7 @@
     "mongoose": "^9.1.2",
     "passport": "^0.7.0",
     "passport-steam": "^1.0.18",
-    "stream-json": "^2.0.0"
+    "stream-json": "^2.0.0",
+    "wrangler": "^4.103.0"
   }
 }

@@ -1,0 +1,12 @@
+{
+  "name": "steam-api",
+  "main": "./entry.js",
+  "compatibility_date": "2026-06-21",
+  "compatibility_flags": [
+    "nodejs_compat",
+    "enable_nodejs_http_server_modules"
+  ],
+  "vars": {
+    "NODE_ENV": "production"
+  }
+}

@@ -63,10 +63,6 @@ main().then(() => {
   if (process.env.NODE_ENV === 'development') {
     database = mongoose.connection.db;
   }
-
-  server.listen(3000, () => {
-      console.log('Backend listening on port 3000');
-  });
 }).catch((error) => {
   console.log(error);
   process.exit(1);
@@ -521,3 +517,5 @@ function ensureAuthenticated(req, res, next) {
     if (req.cookies && req.cookies.access) { return next(); }
     res.redirect('/');
 };
+
+module.exports = app

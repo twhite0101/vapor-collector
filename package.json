@@ -10,7 +10,9 @@
     "test": "ng test",
     "devStart": "nodemon steam_api.js",
     "startFull": "concurrently \"npm run start\" \"cd api && npm run devStart\"",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "deploy": "npm run build && wrangler deploy",
+    "preview": "npm run build && wrangler dev"
   },
   "prettier": {
     "printWidth": 100,
