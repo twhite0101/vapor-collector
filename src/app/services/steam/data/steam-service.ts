@@ -3,7 +3,7 @@ import type { WritableSignal } from '@angular/core'
 import { inject, Injectable, signal } from '@angular/core'
 import type { Observable } from 'rxjs'
 import { firstValueFrom, forkJoin, map } from 'rxjs'
-import { environment } from '../../../../environments/environment.development'
+import { environment } from '../../../../environments/environment'
 import type { IAccountValueDetails, IFriendGameFullResponse, IFriendGameResponse, IFriendListFullResponse, IFriendListResponseFriend, IFriendsWhoPlay, IGamePrice, IGamePriceOverviewResponse, IGamePriceResponseFormat, IGameSchemaResponse, IGetBadgesFullResponse, IGetBadgesResponse, IGetGameNewsResponse, IPlayerLevel, IPlayLevelPercentileResponse, IProfileAvatar, IProfileBackground, IProfileItems, IProfileItemsResponse, IProfileModifier, IProfileStyle, ISteamFriend, IStoreDetail, IUserAchievementsResponse, IUserAdditionalDetailsResponse, IUserGameInfo, IUserGameInfoResponse, IUserGamesLibraryResponse, IWishlist, IWishlistResponse } from '../../../models/Steam'
 import { UtilsService } from '../../utils/utils-service'
 
