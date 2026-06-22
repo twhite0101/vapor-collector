@@ -68,19 +68,6 @@ main().then(() => {
   process.exit(1);
 });
 
-const job = new cron.CronJob('0 0 * * *', async () => {
-  if (process.env.NODE_ENV === 'development') {
-    console.log('Running daily store scraping...')
-    await scrapeSteamStoreAndSave()
-      .then(newItemsNum => console.log(`Store Items DB has finished updating. New records added today: ${newItemsNum}`))
-  }
-  else {
-    await scraper.scrapeAndSave()
-  }
-})
-
-job.start();
-
 passport.serializeUser(function(user, done) {
     done(null, user);
 });
@@ -510,6 +497,23 @@ app.get('/user/getProfileItems', ensureAuthenticated, async (req, res) => {
       console.error(err)
       res.send(err)
     })
+})
+
+app.get('/scraper/runScraper', ensureAuthenticated, async (req, res) => {
+  const token = req.cookies.access;
+  const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_KEY)
+  if (!decoded) {
+    res.statusCode(401).json('Unauthorized user');
+  }
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Running daily store scraping...')
+    await scrapeSteamStoreAndSave()
+      .then(newItemsNum => console.log(`Store Items DB has finished updating. New records added today: ${newItemsNum}`))
+  }
+  else {
+    await scraper.scrapeAndSave()
+  }
+  res.statusCode(204)
 })
 
 // MIDDLEWARE
