@@ -71,12 +71,12 @@ export class UserService {
   }
 
   public retrieveUser = async (): Promise<ILoginResponse> => {
-    const response = await firstValueFrom(this.http.get<ILoginResponse>(this.apiUrl + '/auth/user', { withCredentials: true }))
+    const response = await firstValueFrom(this.http.get<ILoginResponse>(this.apiUrl + '/auth/user'))
     return response
   }
 
   public getUserAdditionalDetails = async (id: string) => {
-    const response = await firstValueFrom(this.http.get<IUserAdditionalDetailsResponse[]>(this.apiUrl + `/user/getAdditionalUserDetails?steamIds=${id}`, { withCredentials: true }))
+    const response = await firstValueFrom(this.http.get<IUserAdditionalDetailsResponse[]>(this.apiUrl + `/user/getAdditionalUserDetails?steamIds=${id}`))
     return response
   }
 
@@ -182,6 +182,6 @@ export class UserService {
   }
 
   public isTokenValid = (): Observable<boolean> => {
-    return this.http.get<boolean>(this.apiUrl + '/auth/token-valid', { withCredentials: true })
+    return this.http.get<boolean>(this.apiUrl + '/auth/token-valid')
   }
 }
