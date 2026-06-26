@@ -26,7 +26,7 @@ export class SteamService {
   }
 
   public getOwnedGames = async () => {
-    const response = await firstValueFrom(this.http.get<IUserGamesLibraryResponse>(this.apiUrl + '/user/getGameLibrary'))
+    const response = await firstValueFrom(this.http.get<IUserGamesLibraryResponse>(`${this.apiUrl}/user/getGameLibrary`))
     const library = this.calculateGameLibraryHoursPlayed(response)
     return library
   }
@@ -34,9 +34,9 @@ export class SteamService {
   public getUserBadges = async (steamId?: string) => {
     const endpoint = steamId !== undefined ? `/user/getUserBadges?steamId=${steamId}` : '/user/getUserBadges'
 
-    const badgesDetails = await firstValueFrom(this.http.get<IGetBadgesResponse>(this.apiUrl + endpoint))
+    const badgesDetails = await firstValueFrom(this.http.get<IGetBadgesResponse>(`${this.apiUrl}${endpoint}`))
 
-    const levelPercentile = await firstValueFrom(this.http.get<IPlayLevelPercentileResponse>(this.apiUrl + `/user/levelPercent?level=${badgesDetails.player_level}`))
+    const levelPercentile = await firstValueFrom(this.http.get<IPlayLevelPercentileResponse>(`${this.apiUrl}/user/levelPercent?level=${badgesDetails.player_level}`))
 
     const badges: IGetBadgesFullResponse = {
       badges: badgesDetails,
@@ -47,54 +47,54 @@ export class SteamService {
   }
 
   public getFriendList = async () => {
-    const response = await firstValueFrom(this.http.get<IFriendListResponseFriend[]>(this.apiUrl + '/user/getFriendList'))
+    const response = await firstValueFrom(this.http.get<IFriendListResponseFriend[]>(`${this.apiUrl}/user/getFriendList`))
     return response
   }
 
   public getFriendListDetails = async (ids: string[]) => {
     const steamIdsParams = ids.join('%2C')
-    const response = await firstValueFrom(this.http.get<IUserAdditionalDetailsResponse[]>(this.apiUrl + `/user/getAdditionalUserDetails?steamIds=${steamIdsParams}`))
+    const response = await firstValueFrom(this.http.get<IUserAdditionalDetailsResponse[]>(`${this.apiUrl}/user/getAdditionalUserDetails?steamIds=${steamIdsParams}`))
     return response
   }
 
   public getGameNews = async (gameId: string) => {
-    const response = firstValueFrom(this.http.get<IGetGameNewsResponse>(this.apiUrl + `/game/getNewsForGame?appId=${gameId}`))
+    const response = firstValueFrom(this.http.get<IGetGameNewsResponse>(`${this.apiUrl}/game/getNewsForGame?appId=${gameId}`))
     return response
   }
 
   public getConcurrentPlayers = async (gameId: string) => {
-    const response = firstValueFrom(this.http.get<number>(this.apiUrl + `/game/getConcurrentPlayers?appId=${gameId}`))
+    const response = firstValueFrom(this.http.get<number>(`${this.apiUrl}/game/getConcurrentPlayers?appId=${gameId}`))
     return response
   }
 
   public getUserStatsForGame = async (gameId: string) => {
-    const response = firstValueFrom(this.http.get(this.apiUrl + `/game/getUserStatsForGame?appId=${gameId}`))
+    const response = firstValueFrom(this.http.get(`${this.apiUrl}/game/getUserStatsForGame?appId=${gameId}`))
     return response
   }
 
   public getSchemaForGame = async (gameId: string) => {
-    const response = firstValueFrom(this.http.get<IGameSchemaResponse>(this.apiUrl + `/game/getSchemaForGame?appId=${gameId}`))
+    const response = firstValueFrom(this.http.get<IGameSchemaResponse>(`${this.apiUrl}/game/getSchemaForGame?appId=${gameId}`))
     return response
   }
 
   public getUserAchievements = async (gameId: string, steamId?: number) => {
     const endpoint = steamId !== undefined ? `/game/getUserAchievements?steamId=${steamId}&?appId=${gameId}` : `/game/getUserAchievements?appId=${gameId}`
-    const response = firstValueFrom(this.http.get<IUserAchievementsResponse>(this.apiUrl + endpoint))
+    const response = firstValueFrom(this.http.get<IUserAchievementsResponse>(`${this.apiUrl}${endpoint}`))
     return response
   }
 
   public getStoreDetails = async (gameIds: string) => {
-    const response = firstValueFrom(this.http.get<IStoreDetail[]>(this.apiUrl + `/game/getStoreDetails?appIds=${gameIds}`))
+    const response = firstValueFrom(this.http.get<IStoreDetail[]>(`${this.apiUrl}/game/getStoreDetails?appIds=${gameIds}`))
     return response
   }
 
   public getWishlist = async (steamId: string) => {
-    const response = firstValueFrom(this.http.get<IWishlistResponse[]>(this.apiUrl + `/user/getWishlist?steamId=${steamId}`))
+    const response = firstValueFrom(this.http.get<IWishlistResponse[]>(`${this.apiUrl}/user/getWishlist?steamId=${steamId}`))
     return response
   }
 
   public getProfileItems = async () => {
-    const response = firstValueFrom(this.http.get<IProfileItemsResponse>(this.apiUrl + '/user/getProfileItems'))
+    const response = firstValueFrom(this.http.get<IProfileItemsResponse>(`${this.apiUrl}/user/getProfileItems`))
     return response
   }
 
@@ -151,7 +151,7 @@ export class SteamService {
       return friend.steamid
     })
 
-    const friendListGames$: Observable<IUserGamesLibraryResponse>[] = steamIds.map(id => this.http.get<IUserGamesLibraryResponse>(this.apiUrl + `/user/getGameLibrary?steamId=${id}`))
+    const friendListGames$: Observable<IUserGamesLibraryResponse>[] = steamIds.map(id => this.http.get<IUserGamesLibraryResponse>(`${this.apiUrl}/user/getGameLibrary?steamId=${id}`))
 
     const friendListGamesResponse = await firstValueFrom(forkJoin(friendListGames$)
       .pipe(
@@ -212,7 +212,7 @@ export class SteamService {
       friend.index = i
     })
 
-    const friendListGamesPrices$: Observable<IStoreDetail[]>[] = friendListResponseSplit.map(friend => this.http.get<IStoreDetail[]>(this.apiUrl + `/game/getStoreDetails?appIds=${friend.appIds}`))
+    const friendListGamesPrices$: Observable<IStoreDetail[]>[] = friendListResponseSplit.map(friend => this.http.get<IStoreDetail[]>(`${this.apiUrl}/game/getStoreDetails?appIds=${friend.appIds}`))
 
     const gamePrices = await firstValueFrom(forkJoin(friendListGamesPrices$)
       .pipe(
@@ -262,7 +262,7 @@ export class SteamService {
       })
     })
 
-    const friendListProfileItems$: Observable<IProfileItemsResponse>[] = steamIds.map(id => this.http.get<IProfileItemsResponse>(this.apiUrl + `/user/getProfileItems?steamId=${id}`))
+    const friendListProfileItems$: Observable<IProfileItemsResponse>[] = steamIds.map(id => this.http.get<IProfileItemsResponse>(`${this.apiUrl}/user/getProfileItems?steamId=${id}`))
 
     const friendListProfileItemsResponse = await firstValueFrom(forkJoin(friendListProfileItems$))
 
@@ -289,13 +289,13 @@ export class SteamService {
   }
 
   private getMultipleSchemas = (gameIds:number[]) => {
-    const friendGameSchema$: Observable<IGameSchemaResponse>[] = gameIds.map(id => this.http.get<IGameSchemaResponse>(this.apiUrl + `/game/getSchemaForGame?appId=${id}`))
+    const friendGameSchema$: Observable<IGameSchemaResponse>[] = gameIds.map(id => this.http.get<IGameSchemaResponse>(`${this.apiUrl}/game/getSchemaForGame?appId=${id}`))
 
     return forkJoin(friendGameSchema$)
   }
 
   private getFriendLibraryAchievements = (gameIds:number[], steamId: string) => {
-    const friendGamesAchievements$: Observable<IUserAchievementsResponse>[] = gameIds.map(id => this.http.get<IUserAchievementsResponse>(this.apiUrl + `/game/getUserAchievements?steamId=${steamId}&?appId=${id}`))
+    const friendGamesAchievements$: Observable<IUserAchievementsResponse>[] = gameIds.map(id => this.http.get<IUserAchievementsResponse>(`${this.apiUrl}/game/getUserAchievements?steamId=${steamId}&?appId=${id}`))
 
     return forkJoin(friendGamesAchievements$)
   }
